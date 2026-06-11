@@ -4,50 +4,44 @@ import {
   Users,
   Building2,
   ClipboardCheck,
-  MapPin,
-  TrendingUp,
-  Settings,
   Search,
   Bell,
   User,
   Target,
-  Sparkles,
   FileText,
-  Megaphone,
+  Compass,
+  Brain,
+  Flag,
+  BellDot,
+  Sparkles,
 } from 'lucide-react';
 
 const navigationGroups = [
   {
-    label: 'OPERAÇÃO',
+    label: 'INDICADORES',
     items: [
       { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-      { name: 'Representantes', href: '/representatives', icon: Users },
-      { name: 'Territórios', href: '/territories', icon: MapPin },
-      { name: 'Clientes', href: '/clients', icon: Building2 },
-      { name: 'Auditoria', href: '/field-audit', icon: ClipboardCheck },
-    ],
-  },
-  {
-    label: 'PERFORMANCE',
-    items: [
       { name: 'Cobertura', href: '/coverage', icon: Target },
-      { name: 'Metas', href: '/goals', icon: TrendingUp },
+      { name: 'Insights comerciais', href: '/intelligence', icon: Sparkles },
     ],
   },
   {
-    label: 'INTELIGÊNCIA',
+    label: 'OPERAÇÃO',
     items: [
-      { name: 'Motor de IA', href: '/ai-engine', icon: Sparkles },
-      { name: 'Insights', href: '/intelligence', icon: TrendingUp },
+      { name: 'Representantes', href: '/representatives', icon: Users },
+      { name: 'Clientes', href: '/clients', icon: Building2 },
+      { name: 'Radar de Atenção', href: '/field-audit', icon: ClipboardCheck },
     ],
   },
   {
-    label: 'ADMINISTRAÇÃO',
+    label: 'GERENCIADOR',
     items: [
       { name: 'Usuários', href: '/administration', icon: Users },
+      { name: 'Parâmetros de IA', href: '/ai-engine', icon: Brain },
       { name: 'Formulários', href: '/form-builder', icon: FileText },
-      { name: 'Campanhas', href: '/campaigns', icon: Megaphone },
-      { name: 'Configurações', href: '/settings', icon: Settings },
+      { name: 'Metas', href: '/goals', icon: Flag },
+      { name: 'Alertas', href: '/settings', icon: BellDot },
+      { name: 'Direcionamento', href: '/steering', icon: Compass },
     ],
   },
 ];

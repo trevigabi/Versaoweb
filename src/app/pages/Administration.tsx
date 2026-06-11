@@ -2,18 +2,17 @@ import { PageHeader } from '../components/PageHeader';
 import { Users, Shield, FileText, Zap, Trophy, Megaphone, Plus } from 'lucide-react';
 
 const userRoles = [
-  { name: 'Admin', count: 3, color: 'bg-danger' },
+  { name: 'Administrador', count: 3, color: 'bg-purple-500' },
   { name: 'Gestor', count: 8, color: 'bg-primary' },
-  { name: 'Regional', count: 12, color: 'bg-ai-accent' },
-  { name: 'Supervisor', count: 24, color: 'bg-success' },
   { name: 'Analista', count: 15, color: 'bg-warning' },
+  { name: 'Representante', count: 24, color: 'bg-success' },
 ];
 
 const users = [
   {
     name: 'Ana Costa',
     email: 'ana.costa@paceroute.com',
-    role: 'Admin',
+    role: 'Administrador',
     region: 'Nacional',
     status: 'Ativo',
   },
@@ -27,14 +26,14 @@ const users = [
   {
     name: 'Carla Santos',
     email: 'carla.santos@paceroute.com',
-    role: 'Regional',
+    role: 'Analista',
     region: 'Sul',
     status: 'Ativo',
   },
   {
     name: 'Diego Oliveira',
     email: 'diego.oliveira@paceroute.com',
-    role: 'Supervisor',
+    role: 'Representante',
     region: 'Nordeste',
     status: 'Ativo',
   },
@@ -72,7 +71,7 @@ export function Administration() {
       />
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {userRoles.map((role) => (
           <div key={role.name} className="bg-card border border-border rounded-lg p-5">
             <div className="flex items-center gap-3 mb-2">
@@ -229,11 +228,10 @@ export function Administration() {
 
 function RoleBadge({ role }: { role: string }) {
   const colors: Record<string, string> = {
-    Admin: 'bg-danger-light text-danger-foreground',
+    Administrador: 'bg-purple-100 text-purple-700',
     Gestor: 'bg-primary/10 text-primary',
-    Regional: 'bg-ai-accent-light text-ai-accent',
-    Supervisor: 'bg-success-light text-success-foreground',
-    Analista: 'bg-warning-light text-warning-foreground',
+    Analista: 'bg-amber-100 text-amber-700',
+    Representante: 'bg-success/15 text-success',
   };
 
   return (

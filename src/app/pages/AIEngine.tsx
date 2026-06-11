@@ -1,216 +1,168 @@
-import { PageHeader } from '../components/PageHeader';
-import { Sparkles, Info, Zap } from 'lucide-react';
 import { useState } from 'react';
+import { PageHeader } from '../components/PageHeader';
+import { RotateCcw, Save } from 'lucide-react';
 
-const priorityFactors = [
-  {
-    id: 'purchase_timing',
-    label: 'Momento de Recompra',
-    description: 'Prioriza clientes próximos da janela ideal de recompra',
-    businessImpact: 'Aumenta taxa de conversão em 23%',
-    defaultValue: 85,
-  },
-  {
-    id: 'revenue_potential',
-    label: 'Potencial de Receita',
-    description: 'Clientes com maior ticket médio histórico',
-    businessImpact: 'Foca em clientes de alto valor',
-    defaultValue: 80,
-  },
-  {
-    id: 'churn_risk',
-    label: 'Risco de Perda',
-    description: 'Clientes com sinais de afastamento ou redução de compras',
-    businessImpact: 'Recuperação proativa de carteira',
-    defaultValue: 75,
-  },
-  {
-    id: 'growth_opportunity',
-    label: 'Oportunidade de Crescimento',
-    description: 'Clientes com padrão de compra abaixo do potencial',
-    businessImpact: 'Expande receita por cliente',
-    defaultValue: 70,
-  },
-  {
-    id: 'strategic_category',
-    label: 'Categoria Estratégica',
-    description: 'Produtos ou linhas prioritárias definidas pela empresa',
-    businessImpact: 'Alinha execução com estratégia',
-    defaultValue: 65,
-  },
-  {
-    id: 'geographic_efficiency',
-    label: 'Eficiência Geográfica',
-    description: 'Proximidade e otimização de rota',
-    businessImpact: 'Reduz tempo de deslocamento em 18%',
-    defaultValue: 60,
-  },
+type Weight = 'Alta' | 'Média' | 'Baixa';
+
+const propensityVariables: { label: string; defaultWeight: Weight }[] = [
+  { label: 'RFM — recência, frequência e valor', defaultWeight: 'Alta' },
+  { label: 'Sazonalidade histórica', defaultWeight: 'Alta' },
+  { label: 'Mix gap — linhas não compradas', defaultWeight: 'Média' },
+  { label: 'Contexto financeiro — limite e inadimplência', defaultWeight: 'Alta' },
+  { label: 'Benchmark regional — clientes similares', defaultWeight: 'Média' },
 ];
 
-const churnIndicators = [
-  {
-    id: 'no_purchase',
-    label: 'Sem compra há mais de 60 dias',
-    weight: 90,
-    enabled: true,
-  },
-  {
-    id: 'declining_frequency',
-    label: 'Redução de frequência de compra',
-    weight: 75,
-    enabled: true,
-  },
-  {
-    id: 'ticket_reduction',
-    label: 'Queda de ticket médio',
-    weight: 70,
-    enabled: true,
-  },
-  {
-    id: 'payment_delay',
-    label: 'Atraso recorrente no pagamento',
-    weight: 60,
-    enabled: false,
-  },
+const inactivityDefaults = [
+  { label: 'Janela de inatividade (dias)', value: 180 },
+  { label: 'Alerta Atenção — dias antes', value: 30 },
+  { label: 'Alerta Risco — dias antes', value: 15 },
+  { label: 'Alerta Crítico — dias antes', value: 5 },
 ];
+
+const featuresDefault = [
+  { id: 'briefing', label: 'Briefing pré-visita', active: true },
+  { id: 'nba', label: 'Next best action', active: true },
+  { id: 'anomaly', label: 'Detecção de anomalias', active: true },
+  { id: 'vision', label: 'Visão computacional', active: false },
+];
+
+function Toggle({ active, onChange }: { active: boolean; onChange: () => void }) {
+  return (
+    <button
+      onClick={onChange}
+      className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${
+        active ? 'bg-primary' : 'bg-secondary'
+      }`}
+    >
+      <span
+        className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${
+          active ? 'translate-x-4' : 'translate-x-0'
+        }`}
+      />
+    </button>
+  );
+}
 
 export function AIEngine() {
-  const [priorities, setPriorities] = useState<Record<string, number>>(
-    priorityFactors.reduce((acc, f) => ({ ...acc, [f.id]: f.defaultValue }), {})
+  const [weights, setWeights] = useState<Weight[]>(
+    propensityVariables.map((v) => v.defaultWeight)
   );
+  const [inactivity, setInactivity] = useState(inactivityDefaults.map((d) => d.value));
+  const [features, setFeatures] = useState(featuresDefault.map((f) => f.active));
 
-  const handlePriorityChange = (id: string, value: number) => {
-    setPriorities({ ...priorities, [id]: value });
+  const handleReset = () => {
+    setWeights(propensityVariables.map((v) => v.defaultWeight));
+    setInactivity(inactivityDefaults.map((d) => d.value));
+    setFeatures(featuresDefault.map((f) => f.active));
   };
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-8 space-y-6">
       <PageHeader
-        title="Motor de Inteligência"
-        description="Configure como a IA prioriza visitas e identifica oportunidades"
+        title="Parâmetros de IA"
+        description="Configure os modelos e regras que orientam as sugestões do sistema"
+        actions={
+          <>
+            <button
+              onClick={handleReset}
+              className="flex items-center gap-2 px-3 py-2 text-sm border border-border rounded-lg hover:bg-secondary transition-colors text-foreground"
+            >
+              <RotateCcw className="w-4 h-4" strokeWidth={1.5} />
+              Restaurar padrões
+            </button>
+            <button className="flex items-center gap-2 px-3 py-2 text-sm bg-primary text-primary-foreground rounded-lg hover:bg-primary-hover transition-colors">
+              <Save className="w-4 h-4" strokeWidth={1.5} />
+              Salvar configurações
+            </button>
+          </>
+        }
       />
 
-      {/* Info Banner */}
-      <div className="bg-ai-accent-light border border-ai-accent/30 rounded-lg p-6">
-        <div className="flex gap-4">
-          <div className="flex-shrink-0">
-            <div className="w-12 h-12 rounded-lg bg-ai-accent flex items-center justify-center">
-              <Sparkles className="w-6 h-6 text-ai-foreground" strokeWidth={1.5} />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Left card — Propensity Score */}
+        <div className="bg-card border border-border rounded-lg overflow-hidden">
+          <div className="px-6 py-4 border-b border-border">
+            <h3 className="text-sm font-semibold text-foreground">Propensity Score: pesos por variável</h3>
+          </div>
+          <div className="divide-y divide-border">
+            {/* Table header */}
+            <div className="grid grid-cols-[1fr_auto] px-6 py-2 bg-secondary/50">
+              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Variável</span>
+              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider w-24 text-center">Peso</span>
+            </div>
+            {propensityVariables.map((variable, i) => (
+              <div key={variable.label} className="grid grid-cols-[1fr_auto] items-center px-6 py-3 gap-4">
+                <span className="text-sm text-foreground">{variable.label}</span>
+                <select
+                  value={weights[i]}
+                  onChange={(e) => {
+                    const next = [...weights];
+                    next[i] = e.target.value as Weight;
+                    setWeights(next);
+                  }}
+                  className="w-24 text-sm border border-border rounded-lg px-2 py-1.5 bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  <option value="Alta">Alta</option>
+                  <option value="Média">Média</option>
+                  <option value="Baixa">Baixa</option>
+                </select>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Right card — Inactivity rules + Active features */}
+        <div className="space-y-6">
+          {/* Inactivity rules */}
+          <div className="bg-card border border-border rounded-lg overflow-hidden">
+            <div className="px-6 py-4 border-b border-border">
+              <h3 className="text-sm font-semibold text-foreground">Regras de inatividade</h3>
+            </div>
+            <div className="divide-y divide-border">
+              {inactivityDefaults.map((rule, i) => (
+                <div key={rule.label} className="flex items-center justify-between px-6 py-3 gap-4">
+                  <span className="text-sm text-foreground">{rule.label}</span>
+                  <input
+                    type="number"
+                    value={inactivity[i]}
+                    onChange={(e) => {
+                      const next = [...inactivity];
+                      next[i] = Number(e.target.value);
+                      setInactivity(next);
+                    }}
+                    className="w-20 text-sm text-right border border-border rounded-lg px-2 py-1.5 bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+              ))}
             </div>
           </div>
-          <div>
-            <h3 className="font-semibold text-foreground mb-2">
-              Como Funciona a Priorização Inteligente
-            </h3>
-            <p className="text-sm text-muted-foreground mb-3">
-              O sistema analisa múltiplos fatores para sugerir a sequência ideal de visitas.
-              Ajuste os pesos abaixo para alinhar a IA com a estratégia comercial da sua empresa.
-            </p>
-            <div className="flex items-center gap-2 text-sm text-primary">
-              <Zap className="w-4 h-4" strokeWidth={1.5} />
-              <span>Alterações são aplicadas em tempo real no app móvel</span>
+
+          {/* Active features */}
+          <div className="bg-card border border-border rounded-lg overflow-hidden">
+            <div className="px-6 py-4 border-b border-border">
+              <h3 className="text-sm font-semibold text-foreground">Funcionalidades ativas</h3>
+            </div>
+            <div className="divide-y divide-border">
+              {featuresDefault.map((feature, i) => (
+                <div key={feature.id} className="flex items-center justify-between px-6 py-3">
+                  <span className="text-sm text-foreground">{feature.label}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">
+                      {features[i] ? 'Ativo' : 'Inativo'}
+                    </span>
+                    <Toggle
+                      active={features[i]}
+                      onChange={() => {
+                        const next = [...features];
+                        next[i] = !next[i];
+                        setFeatures(next);
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Priority Configuration */}
-      <div className="bg-card border border-border rounded-lg p-6">
-        <h3 className="font-semibold text-foreground mb-6">
-          Fatores de Priorização de Visitas
-        </h3>
-        <div className="space-y-8">
-          {priorityFactors.map((factor) => (
-            <div key={factor.id}>
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-medium text-foreground">{factor.label}</span>
-                    <button
-                      className="text-muted-foreground hover:text-foreground"
-                      title={factor.businessImpact}
-                    >
-                      <Info className="w-4 h-4" strokeWidth={1.5} />
-                    </button>
-                  </div>
-                  <div className="text-sm text-muted-foreground mb-1">
-                    {factor.description}
-                  </div>
-                  <div className="text-xs text-success">{factor.businessImpact}</div>
-                </div>
-                <div className="ml-6 flex flex-col items-end gap-1">
-                  <span className="text-3xl font-semibold text-foreground tabular-nums">
-                    {priorities[factor.id]}
-                  </span>
-                  <span className="text-xs text-muted-foreground">prioridade</span>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={priorities[factor.id]}
-                  onChange={(e) => handlePriorityChange(factor.id, parseInt(e.target.value))}
-                  className="w-full"
-                />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Não priorizar</span>
-                  <span>Prioridade máxima</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Churn Detection */}
-      <div className="bg-card border border-border rounded-lg p-6">
-        <h3 className="font-semibold text-foreground mb-4">
-          Indicadores de Risco de Perda (Churn)
-        </h3>
-        <p className="text-sm text-muted-foreground mb-6">
-          Configure quais comportamentos indicam risco de perda do cliente
-        </p>
-        <div className="space-y-4">
-          {churnIndicators.map((indicator) => (
-            <div
-              key={indicator.id}
-              className="flex items-center justify-between py-4 border-b border-border last:border-0"
-            >
-              <div className="flex items-center gap-4 flex-1">
-                <input
-                  type="checkbox"
-                  defaultChecked={indicator.enabled}
-                  className="w-5 h-5 rounded border-border"
-                />
-                <div>
-                  <div className="font-medium text-foreground">{indicator.label}</div>
-                  <div className="text-sm text-muted-foreground">
-                    Peso: {indicator.weight}/100
-                  </div>
-                </div>
-              </div>
-              <button className="text-sm text-primary hover:text-primary-hover">
-                Configurar
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Actions */}
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-muted-foreground">
-          Última atualização: Hoje às 14:32
-        </div>
-        <div className="flex gap-3">
-          <button className="px-5 py-2.5 border border-border rounded-lg font-medium hover:bg-secondary transition-colors">
-            Restaurar Padrões
-          </button>
-          <button className="px-5 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary-hover transition-colors">
-            Salvar Configurações
-          </button>
         </div>
       </div>
     </div>
