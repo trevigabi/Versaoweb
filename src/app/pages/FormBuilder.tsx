@@ -1,222 +1,241 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router';
 import { PageHeader } from '../components/PageHeader';
-import { Plus, GripVertical, Type, CheckSquare, Camera, ListChecks } from 'lucide-react';
+import { Search, Plus, FileText, Copy, Trash2, ChevronRight } from 'lucide-react';
 
-const forms = [
+type FormStatus = 'Ativo' | 'Rascunho';
+
+interface Form {
+  id: string;
+  name: string;
+  description: string;
+  status: FormStatus;
+  fields: number;
+  required: number;
+  responses: number | null;
+  updatedAt: string;
+}
+
+const FORMS: Form[] = [
   {
     id: '1',
-    name: 'Visita Padrão',
+    name: 'Visita padrão',
+    description: 'Formulário padrão para visitas rotineiras',
+    status: 'Ativo',
     fields: 8,
-    mandatory: 3,
-    lastUpdated: '2 dias atrás',
-    status: 'active',
+    required: 3,
+    responses: 142,
+    updatedAt: '2 dias atrás',
   },
   {
     id: '2',
     name: 'Auditoria de PDV',
+    description: 'Checklist completo para auditoria de ponto de venda',
+    status: 'Ativo',
     fields: 12,
-    mandatory: 6,
-    lastUpdated: '1 semana atrás',
-    status: 'active',
+    required: 6,
+    responses: 89,
+    updatedAt: '1 semana atrás',
   },
   {
     id: '3',
     name: 'Prospecção',
+    description: 'Formulário para visitas a novos clientes',
+    status: 'Rascunho',
     fields: 6,
-    mandatory: 4,
-    lastUpdated: '3 dias atrás',
-    status: 'draft',
+    required: 4,
+    responses: null,
+    updatedAt: '3 dias atrás',
   },
 ];
 
-const fieldTypes = [
-  { icon: Type, label: 'Texto', type: 'text' },
-  { icon: CheckSquare, label: 'Múltipla Escolha', type: 'choice' },
-  { icon: ListChecks, label: 'Checklist', type: 'checklist' },
-  { icon: Camera, label: 'Foto', type: 'photo' },
-];
+const STATUS_STYLES: Record<FormStatus, React.CSSProperties> = {
+  Ativo:    { backgroundColor: '#EAF3DE', color: '#3B6D11' },
+  Rascunho: { backgroundColor: '#FAEEDA', color: '#854F0B' },
+};
+
+type Filter = 'Todos' | 'Ativos' | 'Rascunhos';
+const FILTERS: Filter[] = ['Todos', 'Ativos', 'Rascunhos'];
 
 export function FormBuilder() {
+  const navigate = useNavigate();
+  const [search, setSearch] = useState('');
+  const [activeFilter, setActiveFilter] = useState<Filter>('Todos');
+
+  const filtered = FORMS.filter((f) => {
+    const matchesSearch = f.name.toLowerCase().includes(search.toLowerCase());
+    const matchesFilter =
+      activeFilter === 'Todos' ||
+      (activeFilter === 'Ativos' && f.status === 'Ativo') ||
+      (activeFilter === 'Rascunhos' && f.status === 'Rascunho');
+    return matchesSearch && matchesFilter;
+  });
+
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-8 space-y-6">
       <PageHeader
-        title="Formulários de Visita"
-        description="Configure questionários personalizados para cada tipo de visita"
+        title="Formulários de visita"
+        description="Gerencie os questionários preenchidos pelos representantes durante as visitas"
         actions={
-          <button className="px-4 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary-hover transition-colors flex items-center gap-2">
+          <button
+            onClick={() => navigate('/form-builder/novo')}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary-hover transition-colors"
+          >
             <Plus className="w-4 h-4" strokeWidth={1.5} />
-            Novo Formulário
+            Novo formulário
           </button>
         }
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Form List */}
-        <div className="lg:col-span-1">
-          <h3 className="font-semibold text-foreground mb-4">Formulários</h3>
-          <div className="space-y-3">
-            {forms.map((form, index) => (
+      {/* Toolbar */}
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <div className="relative w-64 flex-shrink-0">
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none"
+              strokeWidth={1.5}
+            />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar formulário..."
+              className="w-full pl-9 pr-3 py-2 text-sm border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            />
+          </div>
+          <div className="flex items-center gap-1">
+            {FILTERS.map((f) => (
               <button
-                key={form.id}
-                className={`w-full text-left p-4 rounded-lg border transition-colors ${
-                  index === 0
-                    ? 'bg-primary/5 border-primary'
-                    : 'bg-card border-border hover:bg-secondary'
+                key={f}
+                onClick={() => setActiveFilter(f)}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                  activeFilter === f
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-secondary text-muted-foreground hover:text-foreground'
                 }`}
               >
-                <div className="flex items-start justify-between mb-2">
-                  <div className="font-medium text-foreground">{form.name}</div>
-                  <StatusBadge status={form.status} />
-                </div>
-                <div className="text-sm text-muted-foreground space-y-1">
-                  <div>{form.fields} campos • {form.mandatory} obrigatórios</div>
-                  <div>{form.lastUpdated}</div>
-                </div>
+                {f}
               </button>
             ))}
           </div>
         </div>
+        <span className="text-sm text-muted-foreground flex-shrink-0">
+          {filtered.length} {filtered.length === 1 ? 'formulário' : 'formulários'}
+        </span>
+      </div>
 
-        {/* Form Builder */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="bg-card border border-border rounded-lg p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="font-semibold text-foreground">Visita Padrão</h3>
-              <div className="flex gap-2">
-                <button className="px-3 py-1.5 text-sm border border-border rounded-lg hover:bg-secondary transition-colors">
-                  Preview
-                </button>
-                <button className="px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded-lg hover:bg-primary-hover transition-colors">
-                  Publicar
-                </button>
-              </div>
-            </div>
-
-            {/* Fields */}
-            <div className="space-y-3 mb-6">
-              <FormField
-                label="Observações da Visita"
-                type="Texto longo"
-                required={true}
-              />
-              <FormField
-                label="Cliente estava aberto?"
-                type="Sim/Não"
-                required={true}
-              />
-              <FormField
-                label="Nível de Estoque"
-                type="Múltipla escolha"
-                required={false}
-              />
-              <FormField
-                label="Foto da Fachada"
-                type="Foto"
-                required={true}
-              />
-            </div>
-
-            {/* Add Field */}
-            <div className="border-t border-border pt-6">
-              <div className="text-sm font-medium text-foreground mb-3">
-                Adicionar Campo
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                {fieldTypes.map((field) => {
-                  const Icon = field.icon;
-                  return (
-                    <button
-                      key={field.type}
-                      className="flex items-center gap-3 p-3 border border-border rounded-lg hover:bg-secondary transition-colors text-left"
+      {/* Table */}
+      <div className="bg-card border border-border rounded-lg overflow-hidden">
+        <table className="w-full">
+          <thead className="bg-secondary border-b border-border">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Formulário
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Status
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Campos
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Respostas
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Atualizado
+              </th>
+              <th className="px-6 py-3 w-28" />
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {filtered.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="px-6 py-14 text-center text-sm text-muted-foreground">
+                  Nenhum formulário encontrado.
+                </td>
+              </tr>
+            ) : (
+              filtered.map((form) => (
+                <tr
+                  key={form.id}
+                  onClick={() => navigate(`/form-builder/${form.id}`)}
+                  className="group hover:bg-secondary/50 transition-colors cursor-pointer"
+                >
+                  {/* Formulário */}
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
+                        <FileText className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium text-foreground">{form.name}</div>
+                        <div className="text-xs text-muted-foreground mt-0.5">{form.description}</div>
+                      </div>
+                    </div>
+                  </td>
+                  {/* Status */}
+                  <td className="px-6 py-4">
+                    <span
+                      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                      style={STATUS_STYLES[form.status]}
                     >
-                      <Icon className="w-5 h-5 text-primary" strokeWidth={1.5} />
-                      <span className="text-sm font-medium text-foreground">
-                        {field.label}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* Settings */}
-          <div className="bg-card border border-border rounded-lg p-6">
-            <h4 className="font-medium text-foreground mb-4">Configurações</h4>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between py-3 border-b border-border">
-                <div>
-                  <div className="text-sm font-medium text-foreground">
-                    Obrigar foto da fachada
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    Representante não pode finalizar sem foto
-                  </div>
-                </div>
-                <input type="checkbox" defaultChecked className="w-5 h-5" />
-              </div>
-              <div className="flex items-center justify-between py-3 border-b border-border">
-                <div>
-                  <div className="text-sm font-medium text-foreground">
-                    Permitir visita offline
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    Dados sincronizam quando conectar
-                  </div>
-                </div>
-                <input type="checkbox" defaultChecked className="w-5 h-5" />
-              </div>
-            </div>
-          </div>
-        </div>
+                      {form.status}
+                    </span>
+                  </td>
+                  {/* Campos */}
+                  <td className="px-6 py-4">
+                    <div className="text-sm text-foreground">{form.fields} campos</div>
+                    <div className="text-xs text-muted-foreground mt-0.5">{form.required} obrigatórios</div>
+                  </td>
+                  {/* Respostas */}
+                  <td className="px-6 py-4 text-sm text-foreground">
+                    {form.responses !== null ? form.responses : '—'}
+                  </td>
+                  {/* Atualizado */}
+                  <td className="px-6 py-4 text-sm text-muted-foreground">{form.updatedAt}</td>
+                  {/* Ações */}
+                  <td className="px-6 py-4">
+                    <div
+                      className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <RowActionButton icon={Copy} label="Duplicar" />
+                      <RowActionButton icon={Trash2} label="Excluir" danger />
+                      <ChevronRight
+                        className="w-4 h-4 text-muted-foreground ml-1 flex-shrink-0"
+                        strokeWidth={1.5}
+                      />
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );
 }
 
-function FormField({
+function RowActionButton({
+  icon: Icon,
   label,
-  type,
-  required,
+  danger = false,
 }: {
+  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
   label: string;
-  type: string;
-  required: boolean;
+  danger?: boolean;
 }) {
   return (
-    <div className="flex items-center gap-3 p-4 bg-secondary rounded-lg group hover:bg-accent transition-colors">
-      <GripVertical
-        className="w-5 h-5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity cursor-move"
-        strokeWidth={1.5}
-      />
-      <div className="flex-1">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-foreground">{label}</span>
-          {required && (
-            <span className="px-1.5 py-0.5 text-xs bg-danger-light text-danger-foreground rounded">
-              Obrigatório
-            </span>
-          )}
-        </div>
-        <div className="text-xs text-muted-foreground mt-1">{type}</div>
-      </div>
-      <button className="text-sm text-muted-foreground hover:text-foreground">
-        Editar
-      </button>
-    </div>
-  );
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const config = {
-    active: { bg: 'bg-success-light', text: 'text-success-foreground', label: 'Ativo' },
-    draft: { bg: 'bg-warning-light', text: 'text-warning-foreground', label: 'Rascunho' },
-  }[status] || { bg: 'bg-secondary', text: 'text-foreground', label: 'Inativo' };
-
-  return (
-    <span
-      className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${config.bg} ${config.text}`}
+    <button
+      title={label}
+      className={`w-7 h-7 flex items-center justify-center rounded-md transition-colors ${
+        danger
+          ? 'text-muted-foreground hover:bg-[#FCEBEB] hover:text-[#A32D2D]'
+          : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+      }`}
     >
-      {config.label}
-    </span>
+      <Icon className="w-3.5 h-3.5" strokeWidth={1.5} />
+    </button>
   );
 }

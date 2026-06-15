@@ -22,6 +22,7 @@ const navigationGroups = [
     items: [
       { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
       { name: 'Cobertura', href: '/coverage', icon: Target },
+      { name: 'Metas', href: '/goals', icon: Flag },
       { name: 'Insights comerciais', href: '/intelligence', icon: Sparkles },
     ],
   },
@@ -37,9 +38,8 @@ const navigationGroups = [
     label: 'GERENCIADOR',
     items: [
       { name: 'Usuários', href: '/administration', icon: Users },
-      { name: 'Parâmetros de IA', href: '/ai-engine', icon: Brain },
+      { name: 'Inteligência', href: '/ai-engine', icon: Brain },
       { name: 'Formulários', href: '/form-builder', icon: FileText },
-      { name: 'Metas', href: '/goals', icon: Flag },
       { name: 'Alertas', href: '/settings', icon: BellDot },
       { name: 'Direcionamento', href: '/steering', icon: Compass },
     ],

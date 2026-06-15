@@ -1,277 +1,211 @@
+import { useState } from 'react';
 import { PageHeader } from '../components/PageHeader';
-import { Users, Shield, FileText, Zap, Trophy, Megaphone, Plus } from 'lucide-react';
+import { Search, Plus, Pencil, Shield, Ban, CheckCircle2 } from 'lucide-react';
 
-const userRoles = [
-  { name: 'Administrador', count: 3, color: 'bg-purple-500' },
-  { name: 'Gestor', count: 8, color: 'bg-primary' },
-  { name: 'Analista', count: 15, color: 'bg-warning' },
-  { name: 'Representante', count: 24, color: 'bg-success' },
+type Role = 'Administrador' | 'Gestor' | 'Analista';
+type Status = 'Ativo' | 'Inativo';
+
+interface User {
+  name: string;
+  email: string;
+  role: Role;
+  region: string;
+  lastAccess: string;
+  status: Status;
+}
+
+const USERS: User[] = [
+  { name: 'Ana Costa', email: 'ana.costa@paceroute.com', role: 'Administrador', region: 'Nacional', lastAccess: 'Hoje, 09:41', status: 'Ativo' },
+  { name: 'Bruno Silva', email: 'bruno.silva@paceroute.com', role: 'Gestor', region: 'São Paulo', lastAccess: 'Ontem, 17:22', status: 'Ativo' },
+  { name: 'Carla Santos', email: 'carla.santos@paceroute.com', role: 'Analista', region: 'Sul', lastAccess: '3 dias atrás', status: 'Ativo' },
+  { name: 'Diego Oliveira', email: 'diego.oliveira@paceroute.com', role: 'Gestor', region: 'Nordeste', lastAccess: '1 semana atrás', status: 'Inativo' },
 ];
 
-const users = [
-  {
-    name: 'Ana Costa',
-    email: 'ana.costa@paceroute.com',
-    role: 'Administrador',
-    region: 'Nacional',
-    status: 'Ativo',
-  },
-  {
-    name: 'Bruno Silva',
-    email: 'bruno.silva@paceroute.com',
-    role: 'Gestor',
-    region: 'São Paulo',
-    status: 'Ativo',
-  },
-  {
-    name: 'Carla Santos',
-    email: 'carla.santos@paceroute.com',
-    role: 'Analista',
-    region: 'Sul',
-    status: 'Ativo',
-  },
-  {
-    name: 'Diego Oliveira',
-    email: 'diego.oliveira@paceroute.com',
-    role: 'Representante',
-    region: 'Nordeste',
-    status: 'Ativo',
-  },
-];
+const ROLE_STYLES: Record<Role, string> = {
+  Administrador: 'bg-secondary text-muted-foreground',
+  Gestor: 'bg-secondary text-muted-foreground',
+  Analista: 'bg-secondary text-muted-foreground',
+};
 
-const aiRules = [
-  {
-    trigger: 'Cliente sem visita há 45 dias',
-    action: 'Alerta de recuperação',
-    status: 'Ativo',
-  },
-  {
-    trigger: 'Recompra atrasada em mais de 7 dias',
-    action: 'Priorização na rota',
-    status: 'Ativo',
-  },
-  {
-    trigger: 'Score de saúde abaixo de 60',
-    action: 'Notificação ao gestor',
-    status: 'Ativo',
-  },
-  {
-    trigger: 'Cliente premium sem visita há 15 dias',
-    action: 'Alerta crítico',
-    status: 'Ativo',
-  },
-];
+const FILTER_OPTIONS: Array<Role | 'Todos'> = ['Todos', 'Administrador', 'Gestor', 'Analista'];
+
+function getInitials(name: string) {
+  const parts = name.trim().split(' ');
+  return parts.length === 1
+    ? parts[0].slice(0, 2).toUpperCase()
+    : (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
 
 export function Administration() {
+  const [search, setSearch] = useState('');
+  const [activeFilter, setActiveFilter] = useState<Role | 'Todos'>('Todos');
+
+  const filtered = USERS.filter((u) => {
+    const q = search.toLowerCase();
+    const matchesSearch = u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q);
+    const matchesRole = activeFilter === 'Todos' || u.role === activeFilter;
+    return matchesSearch && matchesRole;
+  });
+
   return (
     <div className="p-8 space-y-6">
       <PageHeader
-        title="Administração"
-        description="Gestão técnica e configurações do sistema"
+        title="Usuários"
+        description="Gerencie acessos e permissões do portal gerencial"
+        actions={
+          <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary-hover transition-colors">
+            <Plus className="w-4 h-4" strokeWidth={1.5} />
+            Novo usuário
+          </button>
+        }
       />
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {userRoles.map((role) => (
-          <div key={role.name} className="bg-card border border-border rounded-lg p-5">
-            <div className="flex items-center gap-3 mb-2">
-              <div className={`w-3 h-3 rounded-full ${role.color}`}></div>
-              <div className="text-sm text-muted-foreground">{role.name}</div>
-            </div>
-            <div className="text-2xl font-semibold text-foreground">{role.count}</div>
+      {/* Toolbar */}
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <div className="relative w-72 flex-shrink-0">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" strokeWidth={1.5} />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar por nome ou e-mail..."
+              className="w-full pl-9 pr-3 py-2 text-sm border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            />
           </div>
-        ))}
-      </div>
-
-      {/* Tabs */}
-      <div className="border-b border-border">
-        <nav className="flex gap-8">
-          {[
-            { label: 'Usuários', icon: Users },
-            { label: 'Escopo de Dados', icon: Shield },
-            { label: 'Formulários', icon: FileText },
-            { label: 'Regras IA', icon: Zap },
-          ].map((tab, index) => {
-            const Icon = tab.icon;
-            return (
+          <div className="flex items-center gap-1">
+            {FILTER_OPTIONS.map((option) => (
               <button
-                key={tab.label}
-                className={`pb-4 text-sm font-medium transition-colors relative flex items-center gap-2 ${
-                  index === 0
-                    ? 'text-primary border-b-2 border-primary'
-                    : 'text-muted-foreground hover:text-foreground'
+                key={option}
+                onClick={() => setActiveFilter(option)}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                  activeFilter === option
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-secondary text-muted-foreground hover:text-foreground'
                 }`}
               >
-                <Icon className="w-4 h-4" strokeWidth={1.5} />
-                {tab.label}
+                {option}
               </button>
-            );
-          })}
-        </nav>
-      </div>
-
-      {/* Users Management */}
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-foreground">Usuários e Permissões</h3>
-          <button className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors flex items-center gap-2">
-            <Plus className="w-4 h-4" strokeWidth={1.5} />
-            Novo Usuário
-          </button>
-        </div>
-
-        <div className="bg-card border border-border rounded-lg overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-secondary border-b border-border">
-              <tr>
-                <th className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Usuário
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Email
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Perfil
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Região
-                </th>
-                <th className="px-6 py-4 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-4 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Ações
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {users.map((user) => (
-                <tr key={user.email} className="hover:bg-secondary/50 transition-colors">
-                  <td className="px-6 py-4 font-medium text-foreground">{user.name}</td>
-                  <td className="px-6 py-4 text-sm text-muted-foreground">{user.email}</td>
-                  <td className="px-6 py-4">
-                    <RoleBadge role={user.role} />
-                  </td>
-                  <td className="px-6 py-4 text-sm text-foreground">{user.region}</td>
-                  <td className="px-6 py-4 text-center">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-success-light text-success-foreground">
-                      {user.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <button className="text-sm text-primary hover:text-primary-hover font-medium">
-                      Editar
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* AI Rules */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-foreground">Regras de Inteligência</h3>
-          <button className="px-4 py-2 border border-border rounded-lg text-sm font-medium hover:bg-secondary transition-colors flex items-center gap-2">
-            <Plus className="w-4 h-4" strokeWidth={1.5} />
-            Nova Regra
-          </button>
-        </div>
-
-        <div className="bg-card border border-border rounded-lg divide-y divide-border">
-          {aiRules.map((rule, index) => (
-            <div key={index} className="p-5 hover:bg-secondary/30 transition-colors">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <Zap className="w-4 h-4 text-ai-accent" strokeWidth={1.5} />
-                    <span className="font-medium text-foreground">{rule.trigger}</span>
-                  </div>
-                  <div className="text-sm text-muted-foreground ml-7">
-                    Ação: {rule.action}
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-success-light text-success-foreground">
-                    {rule.status}
-                  </span>
-                  <button className="text-sm text-primary hover:text-primary-hover font-medium">
-                    Editar
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Future Features */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <FeaturePlaceholder
-          icon={Trophy}
-          title="Gamificação"
-          description="Sistema de desafios e recompensas"
-          status="Em Breve"
-        />
-        <FeaturePlaceholder
-          icon={Megaphone}
-          title="Campanhas"
-          description="Gestão de campanhas comerciais"
-          status="Backlog"
-        />
-      </div>
-    </div>
-  );
-}
-
-function RoleBadge({ role }: { role: string }) {
-  const colors: Record<string, string> = {
-    Administrador: 'bg-purple-100 text-purple-700',
-    Gestor: 'bg-primary/10 text-primary',
-    Analista: 'bg-amber-100 text-amber-700',
-    Representante: 'bg-success/15 text-success',
-  };
-
-  return (
-    <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium ${
-        colors[role] || 'bg-secondary text-foreground'
-      }`}
-    >
-      {role}
-    </span>
-  );
-}
-
-function FeaturePlaceholder({
-  icon: Icon,
-  title,
-  description,
-  status,
-}: {
-  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
-  title: string;
-  description: string;
-  status: string;
-}) {
-  return (
-    <div className="bg-card border border-dashed border-border rounded-lg p-6 opacity-60">
-      <div className="flex items-start gap-4">
-        <div className="flex-shrink-0">
-          <div className="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center">
-            <Icon className="w-6 h-6 text-muted-foreground" strokeWidth={1.5} />
+            ))}
           </div>
         </div>
-        <div className="flex-1">
-          <div className="font-medium text-foreground mb-1">{title}</div>
-          <div className="text-sm text-muted-foreground mb-3">{description}</div>
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-muted-foreground">
-            {status}
-          </span>
-        </div>
+        <span className="text-sm text-muted-foreground flex-shrink-0">
+          {filtered.length} {filtered.length === 1 ? 'usuário' : 'usuários'}
+        </span>
+      </div>
+
+      {/* Table */}
+      <div className="bg-card border border-border rounded-lg overflow-hidden">
+        <table className="w-full">
+          <thead className="bg-secondary border-b border-border">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Usuário
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Perfil
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Região
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Último acesso
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Status
+              </th>
+              <th className="px-6 py-3 w-28" />
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {filtered.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="px-6 py-14 text-center text-sm text-muted-foreground">
+                  Nenhum usuário encontrado.
+                </td>
+              </tr>
+            ) : (
+              filtered.map((user) => (
+                <tr key={user.email} className="group hover:bg-secondary/50 transition-colors">
+                  {/* Usuário */}
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 ${ROLE_STYLES[user.role]}`}
+                      >
+                        {getInitials(user.name)}
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium text-foreground">{user.name}</div>
+                        <div className="text-xs text-muted-foreground mt-0.5">{user.email}</div>
+                      </div>
+                    </div>
+                  </td>
+                  {/* Perfil */}
+                  <td className="px-6 py-4">
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${ROLE_STYLES[user.role]}`}
+                    >
+                      {user.role}
+                    </span>
+                  </td>
+                  {/* Região */}
+                  <td className="px-6 py-4 text-sm text-muted-foreground">{user.region}</td>
+                  {/* Último acesso */}
+                  <td className="px-6 py-4 text-sm text-muted-foreground">{user.lastAccess}</td>
+                  {/* Status */}
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                        style={{ backgroundColor: user.status === 'Ativo' ? '#3B6D11' : 'var(--muted-foreground)' }}
+                      />
+                      <span className="text-sm text-foreground">
+                        {user.status}
+                      </span>
+                    </div>
+                  </td>
+                  {/* Ações */}
+                  <td className="px-6 py-4">
+                    <div className="flex items-center justify-end gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <ActionButton icon={Pencil} label="Editar usuário" />
+                      <ActionButton icon={Shield} label="Gerenciar permissões" />
+                      {user.status === 'Ativo' ? (
+                        <ActionButton icon={Ban} label="Desativar" danger />
+                      ) : (
+                        <ActionButton icon={CheckCircle2} label="Reativar" />
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
+  );
+}
+
+function ActionButton({
+  icon: Icon,
+  label,
+  danger = false,
+}: {
+  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
+  label: string;
+  danger?: boolean;
+}) {
+  return (
+    <button
+      title={label}
+      className={`w-7 h-7 flex items-center justify-center rounded-md transition-colors ${
+        danger
+          ? 'text-muted-foreground hover:bg-[#FCEBEB] hover:text-[#A32D2D]'
+          : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+      }`}
+    >
+      <Icon className="w-3.5 h-3.5" strokeWidth={1.5} />
+    </button>
   );
 }

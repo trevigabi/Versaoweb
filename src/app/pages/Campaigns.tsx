@@ -49,8 +49,8 @@ export function Campaigns() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-card border border-border rounded-lg p-6">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-lg bg-success-light flex items-center justify-center">
-              <Target className="w-5 h-5 text-success" strokeWidth={1.5} />
+            <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center">
+              <Target className="w-5 h-5 text-muted-foreground" strokeWidth={1.5} />
             </div>
             <div className="text-sm text-muted-foreground">Campanhas Ativas</div>
           </div>
@@ -58,8 +58,8 @@ export function Campaigns() {
         </div>
         <div className="bg-card border border-border rounded-lg p-6">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-lg bg-warning-light flex items-center justify-center">
-              <Calendar className="w-5 h-5 text-warning" strokeWidth={1.5} />
+            <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center">
+              <Calendar className="w-5 h-5 text-muted-foreground" strokeWidth={1.5} />
             </div>
             <div className="text-sm text-muted-foreground">Agendadas</div>
           </div>
@@ -67,8 +67,8 @@ export function Campaigns() {
         </div>
         <div className="bg-card border border-border rounded-lg p-6">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-primary" strokeWidth={1.5} />
+            <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center">
+              <TrendingUp className="w-5 h-5 text-muted-foreground" strokeWidth={1.5} />
             </div>
             <div className="text-sm text-muted-foreground">Performance Média</div>
           </div>
@@ -114,13 +114,7 @@ export function Campaigns() {
                 </div>
                 <div className="w-full bg-secondary rounded-full h-3 overflow-hidden">
                   <div
-                    className={`h-full ${
-                      campaign.progress >= 70
-                        ? 'bg-success'
-                        : campaign.progress >= 40
-                        ? 'bg-primary'
-                        : 'bg-warning'
-                    }`}
+                    className="h-full bg-primary"
                     style={{ width: `${campaign.progress}%` }}
                   ></div>
                 </div>
@@ -147,17 +141,18 @@ export function Campaigns() {
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const config = {
-    active: { bg: 'bg-success-light', text: 'text-success-foreground', label: 'Ativa' },
-    scheduled: { bg: 'bg-warning-light', text: 'text-warning-foreground', label: 'Agendada' },
-    completed: { bg: 'bg-secondary', text: 'text-foreground', label: 'Concluída' },
-  }[status] || { bg: 'bg-secondary', text: 'text-foreground', label: 'Inativa' };
+  const style: React.CSSProperties =
+    status === 'active'    ? { backgroundColor: '#EAF3DE', color: '#3B6D11' } :
+    status === 'scheduled' ? { backgroundColor: '#FAEEDA', color: '#854F0B' } :
+                             { backgroundColor: 'var(--secondary)', color: 'var(--foreground)' };
+  const label = status === 'active' ? 'Ativa' : status === 'scheduled' ? 'Agendada' : status === 'completed' ? 'Concluída' : 'Inativa';
 
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.bg} ${config.text}`}
+      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+      style={style}
     >
-      {config.label}
+      {label}
     </span>
   );
 }

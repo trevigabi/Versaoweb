@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { Link } from 'react-router';
 import { PageHeader } from '../components/PageHeader';
-import { CheckCircle, Route, ListOrdered, Brain, Trophy, MapPin } from 'lucide-react';
+import { Route, ListOrdered, Brain, Trophy, MapPin, Search, ChevronRight } from 'lucide-react';
 
 const modules = [
   {
@@ -8,7 +9,7 @@ const modules = [
     name: 'Direcionamento de rota',
     description: 'Otimização automática de percurso diário',
     badge: '3 regras ativas',
-    href: '/steering/route',
+    href: '/direcionamento',
   },
   {
     icon: ListOrdered,
@@ -41,62 +42,89 @@ const modules = [
 ];
 
 export function CommercialSteering() {
+  const [search, setSearch] = useState('');
+
+  const filtered = modules.filter(
+    (m) =>
+      m.name.toLowerCase().includes(search.toLowerCase()) ||
+      m.description.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-8 space-y-6">
       <PageHeader
         title="Direcionamento comercial"
         description="Configure como a IA orienta os representantes em campo."
       />
 
-      {/* Summary indicator */}
-      <div className="flex items-center gap-2 text-sm text-foreground">
-        <CheckCircle className="w-4 h-4 text-success flex-shrink-0" strokeWidth={2} />
-        <span>8 configurações ativas em 4 módulos</span>
+      {/* Search */}
+      <div className="relative w-72">
+        <Search
+          className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none"
+          strokeWidth={1.5}
+        />
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Buscar módulo..."
+          className="w-full pl-9 pr-3 py-2 text-sm border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+        />
       </div>
 
-      {/* Modules table */}
+      {/* Table */}
       <div className="bg-card border border-border rounded-lg overflow-hidden">
-        {/* Table header */}
-        <div className="grid grid-cols-[1fr_auto] items-center px-6 py-3 border-b border-border bg-secondary/50">
-          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Módulo
-          </span>
-          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider w-44 text-center">
-            Instruções ativas
-          </span>
-        </div>
-
-        {/* Table rows */}
-        <div className="divide-y divide-border">
-          {modules.map((mod) => {
-            const Icon = mod.icon;
-            return (
-              <Link
-                key={mod.name}
-                to={mod.href}
-                className="grid grid-cols-[1fr_auto] items-center px-6 py-4 hover:bg-secondary/30 transition-colors"
-              >
-                {/* Left: icon + name + description */}
-                <div className="flex items-center gap-4 min-w-0">
-                  <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <Icon className="w-4 h-4 text-primary" strokeWidth={1.5} />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-sm font-medium text-foreground">{mod.name}</div>
-                    <div className="text-xs text-muted-foreground">{mod.description}</div>
-                  </div>
-                </div>
-
-                {/* Badge */}
-                <div className="w-44 flex justify-center">
-                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-success/15 text-success">
-                    {mod.badge}
-                  </span>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
+        <table className="w-full">
+          <thead className="bg-secondary border-b border-border">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Módulo
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Instruções ativas
+              </th>
+              <th className="px-6 py-3 w-10" />
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {filtered.length === 0 ? (
+              <tr>
+                <td colSpan={3} className="px-6 py-14 text-center text-sm text-muted-foreground">
+                  Nenhum módulo encontrado.
+                </td>
+              </tr>
+            ) : (
+              filtered.map((mod) => {
+                const Icon = mod.icon;
+                return (
+                  <tr key={mod.name} className="group hover:bg-secondary/50 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          <Icon className="w-4 h-4 text-primary" strokeWidth={1.5} />
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium text-foreground">{mod.name}</div>
+                          <div className="text-xs text-muted-foreground mt-0.5">{mod.description}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-success/15 text-success">
+                        {mod.badge}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <Link to={mod.href} className="flex items-center justify-end">
+                        <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" strokeWidth={1.5} />
+                      </Link>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );

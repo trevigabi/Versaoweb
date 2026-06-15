@@ -19,17 +19,17 @@ export function Dashboard() {
         <div className="bg-card border border-border rounded-lg p-6">
           <div className="text-sm text-muted-foreground mb-2">Visitas hoje</div>
           <div className="text-4xl font-semibold text-foreground mb-2">127</div>
-          <div className="text-sm text-success">+12% vs ontem</div>
+          <div className="text-sm text-muted-foreground">+12% vs ontem</div>
         </div>
         <div className="bg-card border border-border rounded-lg p-6">
           <div className="text-sm text-muted-foreground mb-2">Taxa de conversão</div>
           <div className="text-4xl font-semibold text-foreground mb-2">54%</div>
-          <div className="text-sm text-danger">-3pp vs mês passado</div>
+          <div className="text-sm text-muted-foreground">-3pp vs mês passado</div>
         </div>
-        <div className="bg-card border border-warning/30 rounded-lg p-6">
+        <div className="bg-card border border-border rounded-lg p-6">
           <div className="text-sm text-muted-foreground mb-2">Clientes em risco</div>
-          <div className="text-4xl font-semibold text-warning mb-2">23</div>
-          <div className="text-sm text-danger">+5 esta semana</div>
+          <div className="text-4xl font-semibold text-foreground mb-2">23</div>
+          <div className="text-sm text-muted-foreground">+5 esta semana</div>
         </div>
       </div>
 
@@ -47,7 +47,7 @@ export function Dashboard() {
                   className="flex-1 rounded-t transition-opacity hover:opacity-80"
                   style={{
                     height: `${(value / maxVisit) * 100}%`,
-                    backgroundColor: isLast ? '#1D2B3A' : '#BFDBFE',
+                    backgroundColor: isLast ? 'var(--primary)' : 'var(--muted)',
                   }}
                 />
               );
@@ -60,21 +60,21 @@ export function Dashboard() {
           <h3 className="text-sm font-medium text-foreground mb-6">Alertas ativos</h3>
           <div className="space-y-5">
             <div className="flex items-start gap-3">
-              <div className="w-2.5 h-2.5 rounded-full bg-danger mt-0.5 flex-shrink-0" />
+              <div className="w-2.5 h-2.5 rounded-full mt-0.5 flex-shrink-0" style={{ backgroundColor: '#A32D2D' }} />
               <div>
                 <div className="text-sm font-medium text-foreground">23 clientes em risco</div>
                 <div className="text-xs text-muted-foreground">Inativação &lt; 15 dias</div>
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <div className="w-2.5 h-2.5 rounded-full bg-warning mt-0.5 flex-shrink-0" />
+              <div className="w-2.5 h-2.5 rounded-full mt-0.5 flex-shrink-0" style={{ backgroundColor: '#EF9F27' }} />
               <div>
                 <div className="text-sm font-medium text-foreground">8 rotas não confirmadas</div>
                 <div className="text-xs text-muted-foreground">Amanhã sem planejamento</div>
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <div className="w-2.5 h-2.5 rounded-full bg-success mt-0.5 flex-shrink-0" />
+              <div className="w-2.5 h-2.5 rounded-full mt-0.5 flex-shrink-0" style={{ backgroundColor: '#3B6D11' }} />
               <div>
                 <div className="text-sm font-medium text-foreground">Sul acima da meta</div>
                 <div className="text-xs text-muted-foreground">+18% vs projeção</div>

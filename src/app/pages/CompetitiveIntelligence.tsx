@@ -106,8 +106,8 @@ export function CompetitiveIntelligence() {
       />
 
       {/* Featured insight */}
-      <div className="bg-blue-50 border border-blue-100 rounded-lg p-6">
-        <div className="text-xs font-semibold text-blue-500 uppercase tracking-wider mb-2">
+      <div className="bg-secondary border border-border rounded-lg p-6">
+        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
           Insight principal da semana
         </div>
         <div className="text-lg font-semibold text-foreground mb-2">
@@ -117,8 +117,8 @@ export function CompetitiveIntelligence() {
           Produtos da linha infantil apresentam crescimento consistente enquanto demais categorias crescem 7%. Janela de captura identificada para os próximos 30 dias.
         </p>
         <div className="flex gap-2">
-          <span className="px-2.5 py-1 rounded-full bg-blue-100 text-blue-600 text-xs font-medium">Oportunidade</span>
-          <span className="px-2.5 py-1 rounded-full bg-secondary text-muted-foreground text-xs font-medium">Nacional</span>
+          <span className="px-2.5 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#E6F1FB', color: '#185FA5' }}>Oportunidade</span>
+          <span className="px-2.5 py-1 rounded-full bg-card text-muted-foreground text-xs font-medium border border-border">Nacional</span>
         </div>
       </div>
 
@@ -139,7 +139,7 @@ export function CompetitiveIntelligence() {
                     : <ChevronDown className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />}
                 </div>
                 <div className="text-3xl font-semibold text-foreground">{kpi.value}</div>
-                <div className="text-xs text-success mt-1">{kpi.sub}</div>
+                <div className="text-xs text-muted-foreground mt-1">{kpi.sub}</div>
               </button>
               {open && (
                 <div className="mt-2 bg-card border border-border rounded-lg p-4">
@@ -187,14 +187,14 @@ export function CompetitiveIntelligence() {
                       <div className="text-sm font-medium text-foreground mb-1.5">{c.name}</div>
                       <div className="w-full bg-secondary rounded-full h-1.5">
                         <div
-                          className="h-full bg-primary/60 rounded-full"
+                          className="h-full bg-primary rounded-full"
                           style={{ width: `${(c.mentions / 142) * 100}%` }}
                         />
                       </div>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <span className="text-xs text-muted-foreground">{c.mentions}</span>
-                      <span className={`text-xs font-medium ${c.trend === 'up' ? 'text-danger' : c.trend === 'down' ? 'text-success' : 'text-muted-foreground'}`}>
+                      <span className="text-xs font-medium text-foreground">
                         {c.change}
                       </span>
                     </div>
@@ -235,7 +235,7 @@ export function CompetitiveIntelligence() {
                       <div className="text-sm font-medium text-foreground mb-1.5">{o.reason}</div>
                       <div className="w-full bg-secondary rounded-full h-1.5">
                         <div
-                          className="h-full bg-warning/70 rounded-full"
+                          className="h-full bg-primary rounded-full"
                           style={{ width: `${(o.frequency / 34) * 100}%` }}
                         />
                       </div>
@@ -273,7 +273,7 @@ export function CompetitiveIntelligence() {
                 >
                   <div className="font-medium text-foreground mb-1">{opp.title}</div>
                   <div className="text-sm text-muted-foreground mb-3">{opp.description}</div>
-                  <div className="text-lg font-semibold text-success">{opp.potential}</div>
+                  <div className="text-lg font-semibold text-foreground">{opp.potential}</div>
                 </button>
                 {open && (
                   <div className="mt-2 bg-card border border-border rounded-lg p-4 space-y-3">
