@@ -1,94 +1,103 @@
-import { useState } from 'react';
 import { PageHeader } from '../components/PageHeader';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs';
-import { Switch } from '../components/ui/switch';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '../components/ui/dialog';
+import { Settings as SettingsIcon, Shield, Bell, Globe } from 'lucide-react';
 
-// ── Dialog de edição inline ─────────────────────────────────────────────────
-
-interface EditDialogProps {
-  open: boolean;
-  label: string;
-  value: string;
-  onClose: () => void;
-  onSave: (value: string) => void;
-}
-
-function EditDialog({ open, label, value, onClose, onSave }: EditDialogProps) {
-  const [draft, setDraft] = useState(value);
-
-  const handleSave = () => {
-    onSave(draft);
-    onClose();
-  };
-
+export function Settings() {
   return (
-    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-sm">
-        <DialogHeader>
-          <DialogTitle>{label}</DialogTitle>
-        </DialogHeader>
-        <input
-          type="text"
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSave()}
-          className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-          autoFocus
-        />
-        <DialogFooter>
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-sm border border-border rounded-lg hover:bg-secondary transition-colors text-foreground"
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={handleSave}
-            className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary-hover transition-colors"
-          >
-            Salvar
-          </button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <div className="p-8 space-y-8">
+      <PageHeader
+        title="Configurações"
+        description="Preferências gerais e configurações do sistema"
+      />
+
+      <div className="max-w-3xl space-y-6">
+        {/* General */}
+        <div className="bg-card border border-border rounded-lg p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <SettingsIcon className="w-5 h-5 text-primary" strokeWidth={1.5} />
+            <h3 className="font-semibold text-foreground">Geral</h3>
+          </div>
+          <div className="space-y-4">
+            <SettingRow
+              label="Nome da Empresa"
+              description="Como sua empresa aparece no sistema"
+              value="Pace Route Distribuidora"
+            />
+            <SettingRow label="Fuso Horário" description="UTC-3 São Paulo" value="(GMT-3)" />
+          </div>
+        </div>
+
+        {/* Security */}
+        <div className="bg-card border border-border rounded-lg p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <Shield className="w-5 h-5 text-primary" strokeWidth={1.5} />
+            <h3 className="font-semibold text-foreground">Segurança</h3>
+          </div>
+          <div className="space-y-4">
+            <SettingToggle
+              label="Autenticação de dois fatores"
+              description="Requer código adicional no login"
+              enabled={true}
+            />
+            <SettingToggle
+              label="Sessão automática"
+              description="Desconectar após 30 minutos de inatividade"
+              enabled={true}
+            />
+          </div>
+        </div>
+
+        {/* Notifications */}
+        <div className="bg-card border border-border rounded-lg p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <Bell className="w-5 h-5 text-primary" strokeWidth={1.5} />
+            <h3 className="font-semibold text-foreground">Notificações</h3>
+          </div>
+          <div className="space-y-4">
+            <SettingToggle
+              label="Alertas de IA"
+              description="Receber notificações de insights"
+              enabled={true}
+            />
+            <SettingToggle
+              label="Resumo diário"
+              description="Email com resumo da operação"
+              enabled={false}
+            />
+          </div>
+        </div>
+
+        {/* Region */}
+        <div className="bg-card border border-border rounded-lg p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <Globe className="w-5 h-5 text-primary" strokeWidth={1.5} />
+            <h3 className="font-semibold text-foreground">Região e Idioma</h3>
+          </div>
+          <div className="space-y-4">
+            <SettingRow label="Idioma" description="Português (Brasil)" value="pt-BR" />
+            <SettingRow label="Formato de data" description="DD/MM/YYYY" value="Brasil" />
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
-// ── Componentes de linha ─────────────────────────────────────────────────────
-
-function SettingField({
+function SettingRow({
   label,
   description,
   value,
-  onEdit,
 }: {
   label: string;
   description: string;
   value: string;
-  onEdit: () => void;
 }) {
   return (
-    <div className="flex items-center justify-between py-4 border-b border-border last:border-0 gap-4">
-      <div className="flex-1 min-w-0">
+    <div className="flex items-center justify-between py-3 border-b border-border last:border-0">
+      <div>
         <div className="text-sm font-medium text-foreground">{label}</div>
-        <div className="text-xs text-muted-foreground mt-0.5">{description}</div>
+        <div className="text-xs text-muted-foreground">{description}</div>
       </div>
-      <div className="flex items-center gap-3 flex-shrink-0">
-        <span className="text-sm text-foreground">{value}</span>
-        <button
-          onClick={onEdit}
-          className="text-sm text-primary hover:text-primary-hover font-medium transition-colors"
-        >
-          Alterar
-        </button>
-      </div>
+      <button className="text-sm text-primary hover:text-primary-hover">Alterar</button>
     </div>
   );
 }
@@ -96,156 +105,19 @@ function SettingField({
 function SettingToggle({
   label,
   description,
-  checked,
-  onCheckedChange,
+  enabled,
 }: {
   label: string;
   description: string;
-  checked: boolean;
-  onCheckedChange: (v: boolean) => void;
+  enabled: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between py-4 border-b border-border last:border-0 gap-4">
-      <div className="flex-1 min-w-0">
+    <div className="flex items-center justify-between py-3 border-b border-border last:border-0">
+      <div>
         <div className="text-sm font-medium text-foreground">{label}</div>
-        <div className="text-xs text-muted-foreground mt-0.5">{description}</div>
+        <div className="text-xs text-muted-foreground">{description}</div>
       </div>
-      <Switch checked={checked} onCheckedChange={onCheckedChange} />
-    </div>
-  );
-}
-
-// ── Página ───────────────────────────────────────────────────────────────────
-
-export function Settings() {
-  // Geral
-  const [companyName, setCompanyName] = useState('Calçados Beira Rio');
-  const [timezone, setTimezone] = useState('UTC-3 São Paulo');
-
-  // Segurança
-  const [twoFactor, setTwoFactor] = useState(true);
-  const [autoSession, setAutoSession] = useState(true);
-
-  // Notificações
-  const [aiAlerts, setAiAlerts] = useState(true);
-  const [dailySummary, setDailySummary] = useState(false);
-
-  // Região e idioma
-  const [language, setLanguage] = useState('Português (Brasil)');
-  const [dateFormat, setDateFormat] = useState('DD/MM/YYYY');
-
-  // Dialog
-  const [dialog, setDialog] = useState<{ label: string; value: string; onSave: (v: string) => void } | null>(null);
-
-  const openDialog = (label: string, value: string, onSave: (v: string) => void) =>
-    setDialog({ label, value, onSave });
-
-  return (
-    <div className="p-8 space-y-6">
-      <PageHeader
-        title="Configurações"
-        description="Preferências gerais e configurações do sistema"
-      />
-
-      <Tabs defaultValue="geral">
-        <TabsList>
-          <TabsTrigger value="geral">Geral</TabsTrigger>
-          <TabsTrigger value="seguranca">Segurança</TabsTrigger>
-          <TabsTrigger value="notificacoes">Notificações</TabsTrigger>
-          <TabsTrigger value="regiao">Região e idioma</TabsTrigger>
-        </TabsList>
-
-        {/* Tab — Geral */}
-        <TabsContent value="geral">
-          <div className="pt-4 max-w-[560px]">
-            <div className="bg-card border border-border rounded-lg px-6">
-              <SettingField
-                label="Nome da empresa"
-                description="Como sua empresa aparece no sistema"
-                value={companyName}
-                onEdit={() => openDialog('Nome da empresa', companyName, setCompanyName)}
-              />
-              <SettingField
-                label="Fuso horário"
-                description="Usado em datas e agendamentos"
-                value={timezone}
-                onEdit={() => openDialog('Fuso horário', timezone, setTimezone)}
-              />
-            </div>
-          </div>
-        </TabsContent>
-
-        {/* Tab — Segurança */}
-        <TabsContent value="seguranca">
-          <div className="pt-4 max-w-[560px]">
-            <div className="bg-card border border-border rounded-lg px-6">
-              <SettingToggle
-                label="Autenticação de dois fatores"
-                description="Requer código adicional no login"
-                checked={twoFactor}
-                onCheckedChange={setTwoFactor}
-              />
-              <SettingToggle
-                label="Sessão automática"
-                description="Desconectar após 30 minutos de inatividade"
-                checked={autoSession}
-                onCheckedChange={setAutoSession}
-              />
-            </div>
-          </div>
-        </TabsContent>
-
-        {/* Tab — Notificações */}
-        <TabsContent value="notificacoes">
-          <div className="pt-4 max-w-[560px]">
-            <div className="bg-card border border-border rounded-lg px-6">
-              <SettingToggle
-                label="Alertas de IA"
-                description="Receber notificações de insights"
-                checked={aiAlerts}
-                onCheckedChange={setAiAlerts}
-              />
-              <SettingToggle
-                label="Resumo diário"
-                description="E-mail com resumo da operação"
-                checked={dailySummary}
-                onCheckedChange={setDailySummary}
-              />
-            </div>
-          </div>
-        </TabsContent>
-
-        {/* Tab — Região e idioma */}
-        <TabsContent value="regiao">
-          <div className="pt-4 max-w-[560px]">
-            <div className="bg-card border border-border rounded-lg px-6">
-              <SettingField
-                label="Idioma"
-                description="Idioma da interface do portal"
-                value={language}
-                onEdit={() => openDialog('Idioma', language, setLanguage)}
-              />
-              <SettingField
-                label="Formato de data"
-                description="Exibição de datas no sistema"
-                value={dateFormat}
-                onEdit={() => openDialog('Formato de data', dateFormat, setDateFormat)}
-              />
-            </div>
-          </div>
-        </TabsContent>
-      </Tabs>
-
-      {/* Dialog de edição */}
-      {dialog && (
-        <EditDialog
-          open
-          label={dialog.label}
-          value={dialog.value}
-          onClose={() => setDialog(null)}
-          onSave={dialog.onSave}
-        />
-      )}
+      <input type="checkbox" defaultChecked={enabled} className="w-5 h-5" />
     </div>
   );
 }

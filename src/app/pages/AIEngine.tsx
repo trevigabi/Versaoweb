@@ -1,285 +1,217 @@
-import { useState } from 'react';
 import { PageHeader } from '../components/PageHeader';
-import { Save, X } from 'lucide-react';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs';
+import { Sparkles, Info, Zap } from 'lucide-react';
+import { useState } from 'react';
 
-type Weight = 'Alta' | 'Média' | 'Baixa';
-
-const propensityVariables: { label: string; description: string; defaultWeight: Weight }[] = [
-  { label: 'RFM', description: 'recência, frequência e valor', defaultWeight: 'Alta' },
-  { label: 'Sazonalidade histórica', description: 'padrões de compra por época do ano', defaultWeight: 'Alta' },
-  { label: 'Mix gap', description: 'linhas não compradas', defaultWeight: 'Média' },
-  { label: 'Contexto financeiro', description: 'inadimplência', defaultWeight: 'Alta' },
-  { label: 'Benchmark regional', description: 'clientes similares', defaultWeight: 'Média' },
+const priorityFactors = [
+  {
+    id: 'purchase_timing',
+    label: 'Momento de Recompra',
+    description: 'Prioriza clientes próximos da janela ideal de recompra',
+    businessImpact: 'Aumenta taxa de conversão em 23%',
+    defaultValue: 85,
+  },
+  {
+    id: 'revenue_potential',
+    label: 'Potencial de Receita',
+    description: 'Clientes com maior ticket médio histórico',
+    businessImpact: 'Foca em clientes de alto valor',
+    defaultValue: 80,
+  },
+  {
+    id: 'churn_risk',
+    label: 'Risco de Perda',
+    description: 'Clientes com sinais de afastamento ou redução de compras',
+    businessImpact: 'Recuperação proativa de carteira',
+    defaultValue: 75,
+  },
+  {
+    id: 'growth_opportunity',
+    label: 'Oportunidade de Crescimento',
+    description: 'Clientes com padrão de compra abaixo do potencial',
+    businessImpact: 'Expande receita por cliente',
+    defaultValue: 70,
+  },
+  {
+    id: 'strategic_category',
+    label: 'Categoria Estratégica',
+    description: 'Produtos ou linhas prioritárias definidas pela empresa',
+    businessImpact: 'Alinha execução com estratégia',
+    defaultValue: 65,
+  },
+  {
+    id: 'geographic_efficiency',
+    label: 'Eficiência Geográfica',
+    description: 'Proximidade e otimização de rota',
+    businessImpact: 'Reduz tempo de deslocamento em 18%',
+    defaultValue: 60,
+  },
 ];
 
-const inactivityConfig: { label: string; dotColor: string | null; defaultValue: number }[] = [
-  { label: 'Janela de inatividade', dotColor: null, defaultValue: 180 },
-  { label: 'Alerta Atenção', dotColor: '#EF9F27', defaultValue: 30 },
-  { label: 'Alerta Risco', dotColor: '#E07A2F', defaultValue: 15 },
-  { label: 'Alerta Crítico', dotColor: '#A32D2D', defaultValue: 5 },
+const churnIndicators = [
+  {
+    id: 'no_purchase',
+    label: 'Sem compra há mais de 60 dias',
+    weight: 90,
+    enabled: true,
+  },
+  {
+    id: 'declining_frequency',
+    label: 'Redução de frequência de compra',
+    weight: 75,
+    enabled: true,
+  },
+  {
+    id: 'ticket_reduction',
+    label: 'Queda de ticket médio',
+    weight: 70,
+    enabled: true,
+  },
+  {
+    id: 'payment_delay',
+    label: 'Atraso recorrente no pagamento',
+    weight: 60,
+    enabled: false,
+  },
 ];
-
-const featuresConfig = [
-  { id: 'briefing', label: 'Briefing pré-visita', description: 'Resumo do cliente antes de cada visita', defaultActive: true },
-  { id: 'nba', label: 'Next best action', description: 'Sugestão da próxima ação ideal por cliente', defaultActive: true },
-  { id: 'anomaly', label: 'Detecção de anomalias', description: 'Identifica padrões incomuns no comportamento', defaultActive: true },
-  { id: 'vision', label: 'Visão computacional', description: 'Análise de imagens em campo', defaultActive: false },
-];
-
-const weightStyles: Record<Weight, React.CSSProperties> = {
-  Alta:  { backgroundColor: '#E6F1FB', color: '#185FA5' },
-  Média: { backgroundColor: '#FAEEDA', color: '#854F0B' },
-  Baixa: { backgroundColor: '#EAF3DE', color: '#3B6D11' },
-};
-
-function WeightSelector({ value, onChange }: { value: Weight; onChange: (w: Weight) => void }) {
-  return (
-    <div className="flex rounded-lg border border-border overflow-hidden flex-shrink-0">
-      {(['Baixa', 'Média', 'Alta'] as Weight[]).map((option, idx) => (
-        <button
-          key={option}
-          onClick={() => onChange(option)}
-          className={`px-3 py-1.5 text-xs font-medium transition-colors ${idx > 0 ? 'border-l border-border' : ''} ${value !== option ? 'bg-background text-muted-foreground hover:bg-secondary' : ''}`}
-          style={value === option ? weightStyles[option] : undefined}
-        >
-          {option}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function Toggle({ active, onChange }: { active: boolean; onChange: () => void }) {
-  return (
-    <button
-      onClick={onChange}
-      className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${
-        active ? 'bg-primary' : 'bg-muted'
-      }`}
-    >
-      <span
-        className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${
-          active ? 'translate-x-4' : 'translate-x-0'
-        }`}
-      />
-    </button>
-  );
-}
 
 export function AIEngine() {
-  const [weights, setWeights] = useState<Weight[]>(
-    propensityVariables.map((v) => v.defaultWeight)
+  const [priorities, setPriorities] = useState<Record<string, number>>(
+    priorityFactors.reduce((acc, f) => ({ ...acc, [f.id]: f.defaultValue }), {})
   );
-  const [inactivity, setInactivity] = useState(inactivityConfig.map((c) => c.defaultValue));
-  const [features, setFeatures] = useState(featuresConfig.map((f) => f.defaultActive));
 
-  const counts = {
-    Alta: weights.filter((w) => w === 'Alta').length,
-    Média: weights.filter((w) => w === 'Média').length,
-    Baixa: weights.filter((w) => w === 'Baixa').length,
-  };
-  const total = weights.length;
-
-  const handleDiscard = () => {
-    setWeights(propensityVariables.map((v) => v.defaultWeight));
-    setInactivity(inactivityConfig.map((c) => c.defaultValue));
-    setFeatures(featuresConfig.map((f) => f.defaultActive));
+  const handlePriorityChange = (id: string, value: number) => {
+    setPriorities({ ...priorities, [id]: value });
   };
 
   return (
-    <div className="flex flex-col min-h-full">
-      <div className="p-8 space-y-6 flex-1">
-        <PageHeader
-          title="Parâmetros de Inteligência"
-          description="Configure os modelos e regras que orientam as sugestões do sistema"
-        />
+    <div className="p-8 space-y-8">
+      <PageHeader
+        title="Motor de Inteligência"
+        description="Configure como a IA prioriza visitas e identifica oportunidades"
+      />
 
-        <Tabs defaultValue="propensao">
-          <TabsList>
-            <TabsTrigger value="propensao">Propensão de compra</TabsTrigger>
-            <TabsTrigger value="alertas">Alertas de inatividade</TabsTrigger>
-            <TabsTrigger value="funcionalidades">Funcionalidades</TabsTrigger>
-          </TabsList>
-
-          {/* Tab 1 — Propensão de compra */}
-          <TabsContent value="propensao">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-4">
-              {/* Left — Weights */}
-              <div className="bg-card border border-border rounded-lg overflow-hidden">
-                <div className="px-6 py-4 border-b border-border">
-                  <h3 className="text-sm font-semibold text-foreground">Pesos por variável</h3>
-                </div>
-                <div className="divide-y divide-border">
-                  {propensityVariables.map((variable, i) => (
-                    <div key={variable.label} className="flex items-center justify-between px-6 py-4 gap-4">
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium text-foreground">{variable.label}</div>
-                        <div className="text-xs text-muted-foreground mt-0.5">{variable.description}</div>
-                      </div>
-                      <WeightSelector
-                        value={weights[i]}
-                        onChange={(w) => {
-                          const next = [...weights];
-                          next[i] = w;
-                          setWeights(next);
-                        }}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Right — Impact + Info */}
-              <div className="space-y-4">
-                <div className="bg-card border border-border rounded-lg p-6 space-y-4">
-                  <h3 className="text-sm font-semibold text-foreground">Impacto dos pesos</h3>
-                  <p className="text-sm">
-                    <span className="font-medium" style={{ color: '#185FA5' }}>{counts.Alta} alta</span>
-                    <span className="text-muted-foreground"> · </span>
-                    <span className="font-medium" style={{ color: '#854F0B' }}>{counts.Média} média</span>
-                    <span className="text-muted-foreground"> · </span>
-                    <span className="font-medium" style={{ color: '#3B6D11' }}>{counts.Baixa} baixa</span>
-                  </p>
-                  <div className="flex rounded-full overflow-hidden h-2.5 bg-border gap-px">
-                    {counts.Alta > 0 && (
-                      <div
-                        className="transition-all duration-300"
-                        style={{ width: `${(counts.Alta / total) * 100}%`, backgroundColor: '#185FA5' }}
-                      />
-                    )}
-                    {counts.Média > 0 && (
-                      <div
-                        className="transition-all duration-300"
-                        style={{ width: `${(counts.Média / total) * 100}%`, backgroundColor: '#EF9F27' }}
-                      />
-                    )}
-                    {counts.Baixa > 0 && (
-                      <div
-                        className="transition-all duration-300"
-                        style={{ width: `${(counts.Baixa / total) * 100}%`, backgroundColor: '#3B6D11' }}
-                      />
-                    )}
-                  </div>
-                  <div className="flex gap-5 text-xs text-muted-foreground">
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#185FA5' }} />
-                      Alta
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#EF9F27' }} />
-                      Média
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#3B6D11' }} />
-                      Baixa
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-secondary border border-border rounded-lg p-5">
-                  <p className="text-sm text-foreground leading-relaxed">
-                    Variáveis com peso <strong>Alta</strong> têm 3× mais influência no score final.
-                    O modelo recalcula automaticamente ao salvar.
-                  </p>
-                </div>
-              </div>
+      {/* Info Banner */}
+      <div className="bg-ai-accent-light border border-ai-accent/30 rounded-lg p-6">
+        <div className="flex gap-4">
+          <div className="flex-shrink-0">
+            <div className="w-12 h-12 rounded-lg bg-ai-accent flex items-center justify-center">
+              <Sparkles className="w-6 h-6 text-ai-foreground" strokeWidth={1.5} />
             </div>
-          </TabsContent>
-
-          {/* Tab 2 — Alertas de inatividade */}
-          <TabsContent value="alertas">
-            <div className="pt-4 max-w-lg">
-              <div className="bg-card border border-border rounded-lg overflow-hidden">
-                <div className="px-6 py-4 border-b border-border">
-                  <h3 className="text-sm font-semibold text-foreground">Alertas de inatividade</h3>
-                </div>
-                <div className="divide-y divide-border">
-                  {inactivityConfig.map((config, i) => (
-                    <div key={config.label} className="flex items-center justify-between px-6 py-4 gap-4">
-                      <div className="flex items-center gap-3 flex-1">
-                        <div
-                          className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                          style={{ backgroundColor: config.dotColor ?? 'var(--muted-foreground)' }}
-                        />
-                        <span className="text-sm text-foreground">{config.label}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="number"
-                          value={inactivity[i]}
-                          min={1}
-                          onChange={(e) => {
-                            const next = [...inactivity];
-                            next[i] = Number(e.target.value);
-                            setInactivity(next);
-                          }}
-                          className="w-20 text-sm text-right border border-border rounded-lg px-2 py-1.5 bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                        />
-                        <span className="text-sm text-muted-foreground w-7">dias</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+          </div>
+          <div>
+            <h3 className="font-semibold text-foreground mb-2">
+              Como Funciona a Priorização Inteligente
+            </h3>
+            <p className="text-sm text-muted-foreground mb-3">
+              O sistema analisa múltiplos fatores para sugerir a sequência ideal de visitas.
+              Ajuste os pesos abaixo para alinhar a IA com a estratégia comercial da sua empresa.
+            </p>
+            <div className="flex items-center gap-2 text-sm text-primary">
+              <Zap className="w-4 h-4" strokeWidth={1.5} />
+              <span>Alterações são aplicadas em tempo real no app móvel</span>
             </div>
-          </TabsContent>
-
-          {/* Tab 3 — Funcionalidades */}
-          <TabsContent value="funcionalidades">
-            <div className="pt-4 max-w-lg">
-              <div className="bg-card border border-border rounded-lg overflow-hidden">
-                <div className="px-6 py-4 border-b border-border">
-                  <h3 className="text-sm font-semibold text-foreground">Funcionalidades</h3>
-                </div>
-                <div className="divide-y divide-border">
-                  {featuresConfig.map((feature, i) => (
-                    <div key={feature.id} className="flex items-center justify-between px-6 py-4 gap-4">
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-foreground">{feature.label}</div>
-                        <div className="text-xs text-muted-foreground mt-0.5">{feature.description}</div>
-                      </div>
-                      <div className="flex items-center gap-3 flex-shrink-0">
-                        <span
-                          className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
-                          style={features[i]
-                            ? { backgroundColor: '#EAF3DE', color: '#3B6D11' }
-                            : { backgroundColor: 'var(--secondary)', color: 'var(--muted-foreground)' }}
-                        >
-                          {features[i] ? 'Ativo' : 'Inativo'}
-                        </span>
-                        <Toggle
-                          active={features[i]}
-                          onChange={() => {
-                            const next = [...features];
-                            next[i] = !next[i];
-                            setFeatures(next);
-                          }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </TabsContent>
-
-        </Tabs>
+          </div>
+        </div>
       </div>
 
-      {/* Footer */}
-      <div className="sticky bottom-0 bg-background border-t border-border px-8 py-4 flex items-center justify-end gap-3">
-        <button
-          onClick={handleDiscard}
-          className="flex items-center gap-2 px-4 py-2 text-sm border border-border rounded-lg hover:bg-secondary transition-colors text-foreground"
-        >
-          <X className="w-4 h-4" strokeWidth={1.5} />
-          Descartar
-        </button>
-        <button className="flex items-center gap-2 px-4 py-2 text-sm bg-primary text-primary-foreground rounded-lg hover:bg-primary-hover transition-colors">
-          <Save className="w-4 h-4" strokeWidth={1.5} />
-          Salvar alterações
-        </button>
+      {/* Priority Configuration */}
+      <div className="bg-card border border-border rounded-lg p-6">
+        <h3 className="font-semibold text-foreground mb-6">
+          Fatores de Priorização de Visitas
+        </h3>
+        <div className="space-y-8">
+          {priorityFactors.map((factor) => (
+            <div key={factor.id}>
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-medium text-foreground">{factor.label}</span>
+                    <button
+                      className="text-muted-foreground hover:text-foreground"
+                      title={factor.businessImpact}
+                    >
+                      <Info className="w-4 h-4" strokeWidth={1.5} />
+                    </button>
+                  </div>
+                  <div className="text-sm text-muted-foreground mb-1">
+                    {factor.description}
+                  </div>
+                  <div className="text-xs text-success">{factor.businessImpact}</div>
+                </div>
+                <div className="ml-6 flex flex-col items-end gap-1">
+                  <span className="text-3xl font-semibold text-foreground tabular-nums">
+                    {priorities[factor.id]}
+                  </span>
+                  <span className="text-xs text-muted-foreground">prioridade</span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={priorities[factor.id]}
+                  onChange={(e) => handlePriorityChange(factor.id, parseInt(e.target.value))}
+                  className="w-full"
+                />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>Não priorizar</span>
+                  <span>Prioridade máxima</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Churn Detection */}
+      <div className="bg-card border border-border rounded-lg p-6">
+        <h3 className="font-semibold text-foreground mb-4">
+          Indicadores de Risco de Perda (Churn)
+        </h3>
+        <p className="text-sm text-muted-foreground mb-6">
+          Configure quais comportamentos indicam risco de perda do cliente
+        </p>
+        <div className="space-y-4">
+          {churnIndicators.map((indicator) => (
+            <div
+              key={indicator.id}
+              className="flex items-center justify-between py-4 border-b border-border last:border-0"
+            >
+              <div className="flex items-center gap-4 flex-1">
+                <input
+                  type="checkbox"
+                  defaultChecked={indicator.enabled}
+                  className="w-5 h-5 rounded border-border"
+                />
+                <div>
+                  <div className="font-medium text-foreground">{indicator.label}</div>
+                  <div className="text-sm text-muted-foreground">
+                    Peso: {indicator.weight}/100
+                  </div>
+                </div>
+              </div>
+              <button className="text-sm text-primary hover:text-primary-hover">
+                Configurar
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Actions */}
+      <div className="flex items-center justify-between">
+        <div className="text-sm text-muted-foreground">
+          Última atualização: Hoje às 14:32
+        </div>
+        <div className="flex gap-3">
+          <button className="px-5 py-2.5 border border-border rounded-lg font-medium hover:bg-secondary transition-colors">
+            Restaurar Padrões
+          </button>
+          <button className="px-5 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary-hover transition-colors">
+            Salvar Configurações
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -195,22 +195,30 @@ export function Clients() {
 
 function CategoryBadge({ category }: { category: string }) {
   return (
-    <span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-secondary text-foreground">
+    <span
+      className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium ${
+        category === 'Premium'
+          ? 'bg-primary/10 text-primary'
+          : 'bg-secondary text-foreground'
+      }`}
+    >
       {category}
     </span>
   );
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const style: React.CSSProperties =
-    status === 'Ativo'   ? { backgroundColor: '#EAF3DE', color: '#3B6D11' } :
-    status === 'Atenção' ? { backgroundColor: '#FAEEDA', color: '#854F0B' } :
-                           { backgroundColor: '#FCEBEB', color: '#A32D2D' };
+  const getColor = (status: string) => {
+    if (status === 'Ativo') return 'bg-success-light text-success-foreground';
+    if (status === 'Atenção') return 'bg-warning-light text-warning-foreground';
+    return 'bg-danger-light text-danger-foreground';
+  };
 
   return (
     <span
-      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-      style={style}
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getColor(
+        status
+      )}`}
     >
       {status}
     </span>

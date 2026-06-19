@@ -3,19 +3,17 @@ import { Target, TrendingUp } from 'lucide-react';
 import { useState } from 'react';
 
 function GoalStatusBadge({ status }: { status: string }) {
-  const style: React.CSSProperties =
-    status === 'success' ? { backgroundColor: '#EAF3DE', color: '#3B6D11' } :
-    status === 'warning' ? { backgroundColor: '#FAEEDA', color: '#854F0B' } :
-    status === 'danger'  ? { backgroundColor: '#FCEBEB', color: '#A32D2D' } :
-                           { backgroundColor: 'var(--secondary)', color: 'var(--foreground)' };
-  const label = status === 'success' ? 'No Prazo' : status === 'warning' ? 'Atenção' : status === 'danger' ? 'Atrasado' : 'Normal';
+  const config = {
+    success: { bg: 'bg-success-light', text: 'text-success-foreground', label: 'No Prazo' },
+    warning: { bg: 'bg-warning-light', text: 'text-warning-foreground', label: 'Atenção' },
+    danger: { bg: 'bg-danger-light', text: 'text-danger-foreground', label: 'Atrasado' },
+  }[status] || { bg: 'bg-secondary', text: 'text-foreground', label: 'Normal' };
 
   return (
     <span
-      className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
-      style={style}
+      className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}
     >
-      {label}
+      {config.label}
     </span>
   );
 }
@@ -36,8 +34,8 @@ export function Goals() {
           <div className="text-sm text-muted-foreground mb-2">Meta Total Q2</div>
           <div className="text-3xl font-semibold text-foreground mb-2">R$ 8.5M</div>
           <div className="flex items-center gap-2 text-sm">
-            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#3B6D11' }} />
-            <span className="text-muted-foreground">No ritmo</span>
+            <div className="w-2 h-2 rounded-full bg-success"></div>
+            <span className="text-success">No ritmo</span>
           </div>
         </div>
         <div className="bg-card border border-border rounded-lg p-6">
@@ -47,8 +45,8 @@ export function Goals() {
         </div>
         <div className="bg-card border border-border rounded-lg p-6">
           <div className="text-sm text-muted-foreground mb-2">Projeção</div>
-          <div className="text-3xl font-semibold text-foreground mb-2">R$ 8.9M</div>
-          <div className="text-sm text-muted-foreground">+5% acima da meta</div>
+          <div className="text-3xl font-semibold text-success mb-2">R$ 8.9M</div>
+          <div className="text-sm text-success">+5% acima da meta</div>
         </div>
       </div>
 
@@ -61,7 +59,7 @@ export function Goals() {
             {[45, 52, 48, 61, 58, 67, 63, 71, 68, 75, 72, 78, 74, 82, 79, 85, 81, 88, 84, 91, 87, 94, 90, 97, 93, 89, 92, 95, 91, 96].map((value, index) => (
               <div
                 key={index}
-                className="flex-1 bg-muted hover:bg-primary rounded-t transition-all duration-200 cursor-pointer"
+                className="flex-1 bg-ai-accent hover:bg-primary rounded-t transition-all duration-200 cursor-pointer"
                 style={{ height: `${value}%` }}
               ></div>
             ))}
@@ -72,26 +70,26 @@ export function Goals() {
         <div className="bg-card border border-border rounded-lg p-6">
           <h3 className="font-semibold text-foreground mb-6">Cenários</h3>
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-3 bg-secondary rounded-lg">
+            <div className="flex items-center justify-between p-3 bg-success-light/30 rounded-lg">
               <div>
                 <div className="text-xs font-medium text-muted-foreground mb-1">Otimista</div>
                 <div className="text-base font-semibold text-foreground">R$ 1,15M</div>
               </div>
-              <div className="text-xl font-semibold text-foreground">92%</div>
+              <div className="text-xl font-semibold text-success">92%</div>
             </div>
-            <div className="flex items-center justify-between p-3 bg-secondary rounded-lg">
+            <div className="flex items-center justify-between p-3 bg-warning-light/30 rounded-lg">
               <div>
                 <div className="text-xs font-medium text-muted-foreground mb-1">Realista</div>
                 <div className="text-base font-semibold text-foreground">R$ 1,08M</div>
               </div>
-              <div className="text-xl font-semibold text-foreground">85%</div>
+              <div className="text-xl font-semibold text-warning">85%</div>
             </div>
-            <div className="flex items-center justify-between p-3 bg-secondary rounded-lg">
+            <div className="flex items-center justify-between p-3 bg-danger-light/30 rounded-lg">
               <div>
                 <div className="text-xs font-medium text-muted-foreground mb-1">Pessimista</div>
                 <div className="text-base font-semibold text-foreground">R$ 980k</div>
               </div>
-              <div className="text-xl font-semibold text-foreground">73%</div>
+              <div className="text-xl font-semibold text-danger">73%</div>
             </div>
           </div>
         </div>
@@ -106,7 +104,7 @@ export function Goals() {
               onClick={() => setActiveTab('region')}
               className={`px-6 py-4 text-sm font-medium transition-colors ${
                 activeTab === 'region'
-                  ? 'text-primary border-b-2 border-primary bg-secondary'
+                  ? 'text-primary border-b-2 border-primary bg-primary/5'
                   : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
               }`}
             >
@@ -116,7 +114,7 @@ export function Goals() {
               onClick={() => setActiveTab('representative')}
               className={`px-6 py-4 text-sm font-medium transition-colors ${
                 activeTab === 'representative'
-                  ? 'text-primary border-b-2 border-primary bg-secondary'
+                  ? 'text-primary border-b-2 border-primary bg-primary/5'
                   : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
               }`}
             >
@@ -151,10 +149,10 @@ export function Goals() {
                     <div
                       className={`h-full ${
                         item.progress >= 80
-                          ? 'bg-primary'
+                          ? 'bg-success'
                           : item.progress >= 60
                           ? 'bg-primary'
-                          : 'bg-primary'
+                          : 'bg-warning'
                       }`}
                       style={{ width: `${item.progress}%` }}
                     ></div>
