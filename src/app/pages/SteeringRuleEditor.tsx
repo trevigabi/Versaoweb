@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useNavigate, useParams, useSearchParams, Link } from 'react-router';
-import { ChevronDown, ChevronUp, X, Plus } from 'lucide-react';
+import { ChevronDown, ChevronUp, X, Plus, Heart, TrendingUp, Package, CreditCard, Map } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
+import type { LucideIcon } from 'lucide-react';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
-type WeightValue = 'Despriorizar' | 'Ignorar' | 'Baixa' | 'Média' | 'Alta';
+type WeightValue = 'Despriorizar' | 'Ignorar' | 'Média' | 'Alta';
 
 // ── Static data ──────────────────────────────────────────────────────────────
 
@@ -22,11 +23,11 @@ const MODES = [
   { id: 'Personalizado', hint: 'Configure manualmente os pesos de cada variável.' },
 ];
 
-const DIMENSIONS = [
+const DIMENSIONS: { id: string; label: string; icon: LucideIcon; variables: { id: string; label: string; description: string }[] }[] = [
   {
     id: 'carteira',
     label: 'Carteira e retenção',
-    emoji: '❤️',
+    icon: Heart,
     variables: [
       { id: 'risco-inativacao', label: 'Risco de inativação', description: 'Clientes sem compra próximos da janela de inatividade' },
       { id: 'cliente-reativavel', label: 'Cliente reativável', description: 'Inativo recente com histórico de alto faturamento' },
@@ -36,7 +37,7 @@ const DIMENSIONS = [
   {
     id: 'performance',
     label: 'Performance comercial',
-    emoji: '📈',
+    icon: TrendingUp,
     variables: [
       { id: 'maior-ticket', label: 'Maior ticket histórico', description: 'Clientes com maior volume médio de pedido' },
       { id: 'prob-fechamento', label: 'Probabilidade alta de fechamento', description: 'Score de propensão acima de 80%' },
@@ -46,7 +47,7 @@ const DIMENSIONS = [
   {
     id: 'mix',
     label: 'Mix e coleção',
-    emoji: '👟',
+    icon: Package,
     variables: [
       { id: 'mix-gap', label: 'Mix gap — categoria não explorada', description: 'Cliente nunca comprou determinada linha' },
       { id: 'colecao-nova', label: 'Nova coleção não apresentada', description: 'Cliente ainda não recebeu apresentação da coleção atual' },
@@ -55,7 +56,7 @@ const DIMENSIONS = [
   {
     id: 'credito',
     label: 'Crédito e saúde financeira',
-    emoji: '💳',
+    icon: CreditCard,
     variables: [
       { id: 'limite-disponivel', label: 'Limite disponível alto', description: 'Cliente com crédito liberado para novos pedidos' },
       { id: 'inadimplencia', label: 'Inadimplência recente', description: 'Cliente com pagamento em atraso nos últimos 60 dias' },
@@ -64,7 +65,7 @@ const DIMENSIONS = [
   {
     id: 'cobertura',
     label: 'Cobertura territorial',
-    emoji: '🗺️',
+    icon: Map,
     variables: [
       { id: 'regiao-pouco-visitada', label: 'Região pouco visitada no mês', description: 'Área com menos de 30% de cobertura no ciclo atual' },
       { id: 'sem-visita-30', label: 'Cliente sem visita há mais de 30 dias', description: 'Fora da frequência esperada de visita' },
@@ -80,39 +81,39 @@ const DEFAULT_WEIGHTS: Record<string, WeightValue> = Object.fromEntries(
 
 const MODE_PRESETS: Record<string, Record<string, WeightValue>> = {
   Crescimento: {
-    'risco-inativacao': 'Média', 'cliente-reativavel': 'Alta', 'nps-baixo': 'Baixa',
+    'risco-inativacao': 'Média', 'cliente-reativavel': 'Alta', 'nps-baixo': 'Ignorar',
     'maior-ticket': 'Alta', 'prob-fechamento': 'Alta', 'queda-volume': 'Média',
     'mix-gap': 'Alta', 'colecao-nova': 'Média',
     'limite-disponivel': 'Alta', 'inadimplencia': 'Despriorizar',
-    'regiao-pouco-visitada': 'Baixa', 'sem-visita-30': 'Baixa',
+    'regiao-pouco-visitada': 'Ignorar', 'sem-visita-30': 'Ignorar',
   },
   Recuperação: {
     'risco-inativacao': 'Alta', 'cliente-reativavel': 'Alta', 'nps-baixo': 'Alta',
-    'maior-ticket': 'Média', 'prob-fechamento': 'Baixa', 'queda-volume': 'Alta',
-    'mix-gap': 'Baixa', 'colecao-nova': 'Baixa',
+    'maior-ticket': 'Média', 'prob-fechamento': 'Ignorar', 'queda-volume': 'Alta',
+    'mix-gap': 'Ignorar', 'colecao-nova': 'Ignorar',
     'limite-disponivel': 'Média', 'inadimplencia': 'Média',
     'regiao-pouco-visitada': 'Média', 'sem-visita-30': 'Alta',
   },
   Rentabilidade: {
-    'risco-inativacao': 'Baixa', 'cliente-reativavel': 'Média', 'nps-baixo': 'Média',
+    'risco-inativacao': 'Ignorar', 'cliente-reativavel': 'Média', 'nps-baixo': 'Média',
     'maior-ticket': 'Alta', 'prob-fechamento': 'Alta', 'queda-volume': 'Média',
-    'mix-gap': 'Média', 'colecao-nova': 'Baixa',
+    'mix-gap': 'Média', 'colecao-nova': 'Ignorar',
     'limite-disponivel': 'Alta', 'inadimplencia': 'Despriorizar',
-    'regiao-pouco-visitada': 'Ignorar', 'sem-visita-30': 'Baixa',
+    'regiao-pouco-visitada': 'Ignorar', 'sem-visita-30': 'Ignorar',
   },
   Cobertura: {
-    'risco-inativacao': 'Média', 'cliente-reativavel': 'Média', 'nps-baixo': 'Baixa',
-    'maior-ticket': 'Baixa', 'prob-fechamento': 'Baixa', 'queda-volume': 'Baixa',
-    'mix-gap': 'Baixa', 'colecao-nova': 'Baixa',
+    'risco-inativacao': 'Média', 'cliente-reativavel': 'Média', 'nps-baixo': 'Ignorar',
+    'maior-ticket': 'Ignorar', 'prob-fechamento': 'Ignorar', 'queda-volume': 'Ignorar',
+    'mix-gap': 'Ignorar', 'colecao-nova': 'Ignorar',
     'limite-disponivel': 'Ignorar', 'inadimplencia': 'Ignorar',
     'regiao-pouco-visitada': 'Alta', 'sem-visita-30': 'Alta',
   },
   Coleção: {
-    'risco-inativacao': 'Baixa', 'cliente-reativavel': 'Média', 'nps-baixo': 'Baixa',
-    'maior-ticket': 'Alta', 'prob-fechamento': 'Média', 'queda-volume': 'Baixa',
+    'risco-inativacao': 'Ignorar', 'cliente-reativavel': 'Média', 'nps-baixo': 'Ignorar',
+    'maior-ticket': 'Alta', 'prob-fechamento': 'Média', 'queda-volume': 'Ignorar',
     'mix-gap': 'Alta', 'colecao-nova': 'Alta',
     'limite-disponivel': 'Média', 'inadimplencia': 'Despriorizar',
-    'regiao-pouco-visitada': 'Baixa', 'sem-visita-30': 'Média',
+    'regiao-pouco-visitada': 'Ignorar', 'sem-visita-30': 'Média',
   },
   Personalizado: { ...DEFAULT_WEIGHTS },
 };
@@ -132,6 +133,10 @@ const RULE_PREFILL: Record<string, { name: string; regions: string[]; reps: stri
 };
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
+
+const VAR_LABEL_MAP: Record<string, string> = Object.fromEntries(
+  DIMENSIONS.flatMap((d) => d.variables.map((v) => [v.id, v.label]))
+);
 
 function getDimensionSummary(varIds: string[], weights: Record<string, WeightValue>): string {
   const counts: Partial<Record<WeightValue, number>> = {};
@@ -183,42 +188,146 @@ function detectConflict(
   return { conflict: false };
 }
 
-// ── Sub-components ───────────────────────────────────────────────────────────
+interface FormState {
+  name: string;
+  regions: string[];
+  regionExceptions: string[];
+  reps: string[];
+  repExceptions: string[];
+  clients: string[];
+  startDate: string;
+  endDate: string;
+  mode: string;
+  weights: Record<string, WeightValue>;
+}
 
-const WEIGHT_OPTIONS: WeightValue[] = ['Despriorizar', 'Ignorar', 'Baixa', 'Média', 'Alta'];
+function estimateImpact(form: FormState): { base: number; priorizados: number } {
+  const regionCount = form.regions.includes('Nacional') ? 6 : form.regions.length;
+  const base = regionCount * 45 + form.reps.length * 30 + form.clients.length;
+  if (base === 0) return { base: 0, priorizados: 0 };
+  const altaCount = Object.values(form.weights).filter((v) => v === 'Alta').length;
+  const priorizados = Math.round(base * (0.15 + 0.04 * altaCount));
+  return { base, priorizados };
+}
+
+function getPrioritySummary(weights: Record<string, WeightValue>) {
+  const groups: Record<'Alta' | 'Média' | 'Despriorizar', string[]> = { Alta: [], Média: [], Despriorizar: [] };
+  for (const [id, v] of Object.entries(weights)) {
+    if (v === 'Alta' || v === 'Média' || v === 'Despriorizar') {
+      groups[v].push(VAR_LABEL_MAP[id] ?? id);
+    }
+  }
+  return groups;
+}
+
+// ── Sub-components ───────────────────────────────────────────────────────────
 
 const WEIGHT_ACTIVE_STYLES: Record<WeightValue, React.CSSProperties> = {
   Despriorizar: { backgroundColor: '#FCEBEB', color: '#A32D2D', borderColor: '#F09595' },
   Ignorar:      { backgroundColor: 'var(--secondary)', color: 'var(--muted-foreground)', borderColor: 'var(--border)' },
-  Baixa:        { backgroundColor: '#EAF3DE', color: '#3B6D11', borderColor: '#97C459' },
   Média:        { backgroundColor: '#FAEEDA', color: '#854F0B', borderColor: '#EF9F27' },
   Alta:         { backgroundColor: '#E6F1FB', color: '#185FA5', borderColor: '#85B7EB' },
 };
 
-const WEIGHT_INACTIVE: React.CSSProperties = {
-  borderWidth: '0.5px', borderStyle: 'solid',
-  borderColor: 'var(--border)', backgroundColor: 'transparent', color: 'var(--muted-foreground)',
-};
+function WeightControl({ value, onChange }: { value: WeightValue; onChange: (v: WeightValue) => void }) {
+  const isDesp = value === 'Despriorizar';
+  const mainOptions: WeightValue[] = ['Ignorar', 'Média', 'Alta'];
 
-function WeightSelector({ value, onChange }: { value: WeightValue; onChange: (v: WeightValue) => void }) {
   return (
-    <div className="flex gap-1 flex-shrink-0 flex-wrap">
-      {WEIGHT_OPTIONS.map((opt) => {
-        const isActive = value === opt;
-        const style: React.CSSProperties = isActive
-          ? { borderWidth: '0.5px', borderStyle: 'solid', ...WEIGHT_ACTIVE_STYLES[opt] }
-          : WEIGHT_INACTIVE;
-        return (
-          <button
-            key={opt}
-            onClick={() => onChange(opt)}
-            className="px-2.5 py-1 text-[11px] font-medium transition-colors rounded-full whitespace-nowrap"
-            style={style}
-          >
-            {opt}
-          </button>
-        );
-      })}
+    <div className="flex items-center gap-2 flex-shrink-0">
+      <div
+        className="flex rounded-lg overflow-hidden"
+        style={{
+          border: '0.5px solid var(--border)',
+          opacity: isDesp ? 0.35 : 1,
+          pointerEvents: isDesp ? 'none' : 'auto',
+        }}
+      >
+        {mainOptions.map((opt, i) => {
+          const isActive = !isDesp && value === opt;
+          return (
+            <button
+              key={opt}
+              onClick={() => onChange(opt)}
+              className="px-3 py-1 text-[11px] font-medium transition-colors"
+              style={{
+                ...(isActive
+                  ? { backgroundColor: WEIGHT_ACTIVE_STYLES[opt].backgroundColor, color: WEIGHT_ACTIVE_STYLES[opt].color }
+                  : { backgroundColor: 'var(--background)', color: 'var(--muted-foreground)' }),
+                borderLeft: i > 0 ? '0.5px solid var(--border)' : 'none',
+              }}
+            >
+              {opt}
+            </button>
+          );
+        })}
+      </div>
+      <button
+        onClick={() => onChange(isDesp ? 'Ignorar' : 'Despriorizar')}
+        className="px-2 py-1 text-[11px] rounded-lg transition-colors"
+        style={
+          isDesp
+            ? { backgroundColor: '#FCEBEB', color: '#A32D2D', border: '0.5px solid #F09595' }
+            : { border: '0.5px solid var(--border)', color: 'var(--muted-foreground)', backgroundColor: 'transparent' }
+        }
+        title={isDesp ? 'Remover despriorização' : 'Despriorizar'}
+      >
+        ⊘
+      </button>
+    </div>
+  );
+}
+
+function ImpactPreview({ form }: { form: FormState }) {
+  const { base, priorizados } = estimateImpact(form);
+  if (base === 0) return null;
+  return (
+    <div className="flex items-center gap-2 px-4 py-3 rounded-lg border border-border bg-secondary/30 text-[13px]">
+      <span className="text-foreground">≈ <strong>{base}</strong> clientes no escopo</span>
+      <span className="text-muted-foreground">·</span>
+      <span className="text-foreground"><strong>{priorizados}</strong> priorizados nesta vigência</span>
+    </div>
+  );
+}
+
+function PrioritySummary({ weights }: { weights: Record<string, WeightValue> }) {
+  const groups = getPrioritySummary(weights);
+  const hasAnything = groups.Alta.length > 0 || groups.Média.length > 0 || groups.Despriorizar.length > 0;
+  if (!hasAnything) return null;
+
+  return (
+    <div className="border border-border rounded-lg p-4 space-y-2.5 bg-card">
+      <h3 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Resumo das prioridades</h3>
+      {groups.Alta.length > 0 && (
+        <div className="flex items-start gap-2.5">
+          <span className="text-[11px] font-semibold w-20 flex-shrink-0 mt-0.5" style={{ color: '#185FA5' }}>Alta</span>
+          <div className="flex flex-wrap gap-1">
+            {groups.Alta.map((label) => (
+              <span key={label} className="px-2 py-0.5 text-[11px] rounded-full" style={{ backgroundColor: '#E6F1FB', color: '#185FA5', border: '0.5px solid #85B7EB' }}>{label}</span>
+            ))}
+          </div>
+        </div>
+      )}
+      {groups.Média.length > 0 && (
+        <div className="flex items-start gap-2.5">
+          <span className="text-[11px] font-semibold w-20 flex-shrink-0 mt-0.5" style={{ color: '#854F0B' }}>Média</span>
+          <div className="flex flex-wrap gap-1">
+            {groups.Média.map((label) => (
+              <span key={label} className="px-2 py-0.5 text-[11px] rounded-full" style={{ backgroundColor: '#FAEEDA', color: '#854F0B', border: '0.5px solid #EF9F27' }}>{label}</span>
+            ))}
+          </div>
+        </div>
+      )}
+      {groups.Despriorizar.length > 0 && (
+        <div className="flex items-start gap-2.5">
+          <span className="text-[11px] font-semibold w-20 flex-shrink-0 mt-0.5" style={{ color: '#A32D2D' }}>Desprioriza</span>
+          <div className="flex flex-wrap gap-1">
+            {groups.Despriorizar.map((label) => (
+              <span key={label} className="px-2 py-0.5 text-[11px] rounded-full" style={{ backgroundColor: '#FCEBEB', color: '#A32D2D', border: '0.5px solid #F09595' }}>{label}</span>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -350,7 +459,6 @@ function Stepper({ step }: { step: 1 | 2 }) {
 
   return (
     <div className="flex items-center gap-3">
-      {/* Step 1 */}
       <div className="flex items-center gap-2">
         <div
           className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-semibold flex-shrink-0"
@@ -366,7 +474,6 @@ function Stepper({ step }: { step: 1 | 2 }) {
         </span>
       </div>
 
-      {/* Connector */}
       <div
         style={{
           width: 40, height: '0.5px',
@@ -374,7 +481,6 @@ function Stepper({ step }: { step: 1 | 2 }) {
         }}
       />
 
-      {/* Step 2 */}
       <div className="flex items-center gap-2">
         <div
           className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-semibold flex-shrink-0"
@@ -414,9 +520,9 @@ function DimensionAccordion({
         className="w-full flex items-center justify-between px-5 py-3.5 bg-card hover:bg-secondary/30 transition-colors text-left"
       >
         <div className="flex items-center gap-2.5">
-          <span className="text-sm leading-none" style={{ color: 'var(--muted-foreground)' }}>
-            {dimension.emoji}
-          </span>
+          <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
+            <dimension.icon className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
+          </div>
           <div>
             <div className="text-[13px] font-medium text-foreground">{dimension.label}</div>
             <div className="text-[11px] mt-0.5 text-muted-foreground">{summary}</div>
@@ -436,7 +542,7 @@ function DimensionAccordion({
                 <div className="text-[13px] font-medium text-foreground">{variable.label}</div>
                 <div className="text-[11px] text-muted-foreground mt-0.5">{variable.description}</div>
               </div>
-              <WeightSelector
+              <WeightControl
                 value={weights[variable.id] ?? 'Ignorar'}
                 onChange={(v) => onWeightChange(variable.id, v)}
               />
@@ -450,19 +556,6 @@ function DimensionAccordion({
 
 // ── Main component ───────────────────────────────────────────────────────────
 
-interface FormState {
-  name: string;
-  regions: string[];
-  regionExceptions: string[];
-  reps: string[];
-  repExceptions: string[];
-  clients: string[];
-  startDate: string;
-  endDate: string;
-  mode: string;
-  weights: Record<string, WeightValue>;
-}
-
 export function SteeringRuleEditor() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
@@ -471,7 +564,8 @@ export function SteeringRuleEditor() {
   const fromId = searchParams.get('from');
 
   const [step, setStep] = useState<1 | 2>(1);
-  const [openAccordions, setOpenAccordions] = useState<Set<string>>(new Set(['carteira']));
+  const [openAccordions, setOpenAccordions] = useState<Set<string>>(new Set());
+  const [showManual, setShowManual] = useState(false);
 
   const [form, setForm] = useState<FormState>(() => {
     if (fromId && RULE_PREFILL[fromId]) {
@@ -529,6 +623,9 @@ export function SteeringRuleEditor() {
     if (MODE_PRESETS[modeId]) {
       setField('weights', { ...MODE_PRESETS[modeId] });
     }
+    if (modeId === 'Personalizado') {
+      setShowManual(true);
+    }
   };
 
   const toggleAccordion = (dimId: string) =>
@@ -575,7 +672,7 @@ export function SteeringRuleEditor() {
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-sm">
         <Link to="/direcionamento" className="text-muted-foreground hover:text-foreground transition-colors">
-          Direcionamento de rota
+          Replanejamento estratégico
         </Link>
         <span className="text-muted-foreground">›</span>
         <span className="text-foreground">{pageTitle}</span>
@@ -738,7 +835,7 @@ export function SteeringRuleEditor() {
 
       {/* ── STEP 2 ─────────────────────────────────────────────────────────── */}
       {step === 2 && (
-        <div className="space-y-6 max-w-2xl">
+        <div className="space-y-5 max-w-2xl">
           {/* Scope summary pills */}
           {scopePills.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
@@ -753,6 +850,9 @@ export function SteeringRuleEditor() {
               ))}
             </div>
           )}
+
+          {/* Impact preview */}
+          <ImpactPreview form={form} />
 
           {/* Modo estratégico */}
           <div className="space-y-3">
@@ -779,21 +879,40 @@ export function SteeringRuleEditor() {
             )}
           </div>
 
-          {/* Acordeões de pesos */}
-          <div className="space-y-2">
-            {DIMENSIONS.map((dim) => (
-              <DimensionAccordion
-                key={dim.id}
-                dimension={dim}
-                isOpen={openAccordions.has(dim.id)}
-                onToggle={() => toggleAccordion(dim.id)}
-                weights={form.weights}
-                onWeightChange={(varId, v) =>
-                  setForm((prev) => ({ ...prev, weights: { ...prev.weights, [varId]: v } }))
+          {/* Priority summary — read-only */}
+          {form.mode && <PrioritySummary weights={form.weights} />}
+
+          {/* Manual adjustment disclosure */}
+          {form.mode && (
+            <div>
+              <button
+                onClick={() => setShowManual((v) => !v)}
+                className="flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {showManual
+                  ? <ChevronUp className="w-4 h-4" strokeWidth={1.5} />
+                  : <ChevronDown className="w-4 h-4" strokeWidth={1.5} />
                 }
-              />
-            ))}
-          </div>
+                Ajustar pesos manualmente
+              </button>
+              {showManual && (
+                <div className="mt-3 space-y-2">
+                  {DIMENSIONS.map((dim) => (
+                    <DimensionAccordion
+                      key={dim.id}
+                      dimension={dim}
+                      isOpen={openAccordions.has(dim.id)}
+                      onToggle={() => toggleAccordion(dim.id)}
+                      weights={form.weights}
+                      onWeightChange={(varId, v) =>
+                        setForm((prev) => ({ ...prev, weights: { ...prev.weights, [varId]: v } }))
+                      }
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Footer step 2 */}
           <div className="flex items-center justify-between pt-2">

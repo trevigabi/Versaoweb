@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { PageHeader } from '../components/PageHeader';
-import { Route, ListOrdered, Brain, Trophy, MapPin, Search, ChevronRight } from 'lucide-react';
+import { Route, ListOrdered, Brain, Search, ChevronRight } from 'lucide-react';
 
 const modules = [
   {
     icon: Route,
-    name: 'Direcionamento de rota',
+    name: 'Replanejamento estratégico',
     description: 'Otimização automática de percurso diário',
     badge: '3 regras ativas',
     href: '/direcionamento',
@@ -24,20 +24,6 @@ const modules = [
     description: 'Contexto e orientações antes de cada visita',
     badge: '1 instrução ativa',
     href: '/steering/briefing',
-  },
-  {
-    icon: Trophy,
-    name: 'Missões ativas',
-    description: 'Objetivos táticos em andamento no campo',
-    badge: '2 missões rodando',
-    href: '/steering/missions',
-  },
-  {
-    icon: MapPin,
-    name: 'Territórios',
-    description: 'Gestão e visualização de territórios de venda',
-    badge: 'Ver territórios',
-    href: '/territories',
   },
 ];
 
@@ -100,8 +86,8 @@ export function CommercialSteering() {
                   <tr key={mod.name} className="group hover:bg-secondary/50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                          <Icon className="w-4 h-4 text-primary" strokeWidth={1.5} />
+                        <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
+                          <Icon className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
                         </div>
                         <div>
                           <div className="text-sm font-medium text-foreground">{mod.name}</div>
@@ -110,7 +96,7 @@ export function CommercialSteering() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-success/15 text-success">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" style={{ backgroundColor: '#EAF3DE', color: '#3B6D11' }}>
                         {mod.badge}
                       </span>
                     </td>

@@ -121,7 +121,7 @@ export function SteeringRoute() {
   return (
     <div className="p-8 space-y-6">
       <PageHeader
-        title="Direcionamento de rota"
+        title="Replanejamento estratégico"
         description="Regras que definem como a IA prioriza visitas para cada escopo"
         actions={
           <button
