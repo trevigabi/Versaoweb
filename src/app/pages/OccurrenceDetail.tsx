@@ -128,6 +128,20 @@ export function OccurrenceDetail() {
         <div>
           <h1 className="text-3xl font-semibold text-foreground mb-2">{occurrence.type}</h1>
         </div>
+        <div className="flex gap-3">
+          <button className="px-5 py-3 border border-border rounded-lg text-sm font-medium hover:bg-secondary transition-colors flex items-center gap-2">
+            <X className="w-4 h-4" strokeWidth={1.5} />
+            Dispensar
+          </button>
+          <button className="px-5 py-3 border border-border rounded-lg text-sm font-medium hover:bg-secondary transition-colors flex items-center gap-2">
+            <Flag className="w-4 h-4" strokeWidth={1.5} />
+            Sinalizar
+          </button>
+          <button className="px-5 py-3 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors flex items-center gap-2">
+            <MessageSquare className="w-4 h-4" strokeWidth={1.5} />
+            Contactar
+          </button>
+        </div>
       </div>
 
       {/* Main Content Grid */}

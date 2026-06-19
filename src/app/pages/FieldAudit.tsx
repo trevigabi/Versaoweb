@@ -1,5 +1,5 @@
 import { PageHeader } from '../components/PageHeader';
-import { MapPin } from 'lucide-react';
+import { AlertTriangle, MapPin, Clock } from 'lucide-react';
 import { Link } from 'react-router';
 
 const occurrences = [
@@ -68,21 +68,21 @@ export function FieldAudit() {
         <div className="bg-card border border-border rounded-lg p-5">
           <div className="text-sm text-muted-foreground mb-2">Visitas Hoje</div>
           <div className="text-3xl font-semibold text-foreground">127</div>
-          <div className="text-xs text-muted-foreground mt-1">+12% vs ontem</div>
+          <div className="text-xs text-success mt-1">+12% vs ontem</div>
         </div>
-        <div className="bg-card border border-border rounded-lg p-5">
+        <div className="bg-card border border-success/20 rounded-lg p-5">
           <div className="text-sm text-muted-foreground mb-2">Execução Normal</div>
-          <div className="text-3xl font-semibold text-foreground">96%</div>
+          <div className="text-3xl font-semibold text-success">96%</div>
           <div className="text-xs text-muted-foreground mt-1">122 visitas</div>
         </div>
-        <div className="bg-card border border-border rounded-lg p-5">
+        <div className="bg-card border border-warning/20 rounded-lg p-5">
           <div className="text-sm text-muted-foreground mb-2">Para Revisão</div>
-          <div className="text-3xl font-semibold text-foreground">4</div>
+          <div className="text-3xl font-semibold text-warning">4</div>
           <div className="text-xs text-muted-foreground mt-1">Atenção</div>
         </div>
-        <div className="bg-card border border-border rounded-lg p-5">
+        <div className="bg-card border border-danger/20 rounded-lg p-5">
           <div className="text-sm text-muted-foreground mb-2">Alta Severidade</div>
-          <div className="text-3xl font-semibold text-foreground">2</div>
+          <div className="text-3xl font-semibold text-danger">2</div>
           <div className="text-xs text-muted-foreground mt-1">Investigar</div>
         </div>
       </div>
@@ -304,36 +304,73 @@ export function FieldAudit() {
   );
 }
 
+function SeverityBadge({ severity }: { severity: string }) {
+  const config = {
+    high: {
+      bg: 'bg-danger-light',
+      border: 'border-danger/30',
+      text: 'text-danger-foreground',
+      icon: AlertTriangle,
+      label: 'Alta',
+    },
+    medium: {
+      bg: 'bg-warning-light',
+      border: 'border-warning/30',
+      text: 'text-warning-foreground',
+      icon: Clock,
+      label: 'Média',
+    },
+    low: {
+      bg: 'bg-secondary',
+      border: 'border-border',
+      text: 'text-foreground',
+      icon: AlertTriangle,
+      label: 'Baixa',
+    },
+  }[severity] || {
+    bg: 'bg-secondary',
+    border: 'border-border',
+    text: 'text-foreground',
+    icon: AlertTriangle,
+    label: 'Normal',
+  };
+
+  const Icon = config.icon;
+
+  return (
+    <div className={`w-12 h-12 rounded-lg border ${config.border} ${config.bg} flex items-center justify-center`}>
+      <Icon className={`w-6 h-6 ${config.text}`} strokeWidth={1.5} />
+    </div>
+  );
+}
+
 function SeverityBadgeSmall({ severity }: { severity: string }) {
-  const style: React.CSSProperties =
-    severity === 'high'   ? { backgroundColor: '#FCEBEB', color: '#A32D2D' } :
-    severity === 'medium' ? { backgroundColor: '#FAEEDA', color: '#854F0B' } :
-                            { backgroundColor: 'var(--secondary)', color: 'var(--foreground)' };
-  const label = severity === 'high' ? 'Alta' : severity === 'medium' ? 'Média' : 'Baixa';
+  const config = {
+    high: { bg: 'bg-danger-light', text: 'text-danger-foreground', label: 'Alta' },
+    medium: { bg: 'bg-warning-light', text: 'text-warning-foreground', label: 'Média' },
+    low: { bg: 'bg-secondary', text: 'text-foreground', label: 'Baixa' },
+  }[severity] || { bg: 'bg-secondary', text: 'text-foreground', label: 'Normal' };
 
   return (
     <span
-      className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
-      style={style}
+      className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}
     >
-      {label}
+      {config.label}
     </span>
   );
 }
 
 function VisitResultBadge({ result }: { result: string }) {
-  const style: React.CSSProperties =
-    result === 'positive' ? { backgroundColor: '#EAF3DE', color: '#3B6D11' } :
-    result === 'negative' ? { backgroundColor: '#FCEBEB', color: '#A32D2D' } :
-                            { backgroundColor: 'var(--secondary)', color: 'var(--foreground)' };
-  const label = result === 'positive' ? 'Positiva' : result === 'negative' ? 'Negativa' : 'Sem resultado';
+  const config = {
+    positive: { bg: 'bg-success-light', text: 'text-success-foreground', label: 'Positiva' },
+    negative: { bg: 'bg-danger-light', text: 'text-danger-foreground', label: 'Negativa' },
+  }[result] || { bg: 'bg-secondary', text: 'text-foreground', label: 'Sem resultado' };
 
   return (
     <span
-      className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
-      style={style}
+      className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}
     >
-      {label}
+      {config.label}
     </span>
   );
 }

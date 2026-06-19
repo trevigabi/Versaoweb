@@ -199,15 +199,17 @@ export function Representatives() {
 }
 
 function ScoreBadge({ score }: { score: number }) {
-  const style: React.CSSProperties =
-    score >= 90 ? { backgroundColor: '#EAF3DE', color: '#3B6D11' } :
-    score >= 80 ? { backgroundColor: '#FAEEDA', color: '#854F0B' } :
-                 { backgroundColor: '#FCEBEB', color: '#A32D2D' };
+  const getColor = (score: number) => {
+    if (score >= 90) return 'bg-success-light text-success-foreground';
+    if (score >= 80) return 'bg-warning-light text-warning-foreground';
+    return 'bg-danger-light text-danger-foreground';
+  };
 
   return (
     <span
-      className="inline-flex items-center justify-center px-3 py-1 rounded-full text-sm font-medium"
-      style={style}
+      className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-sm font-medium ${getColor(
+        score
+      )}`}
     >
       {score}
     </span>
@@ -215,21 +217,40 @@ function ScoreBadge({ score }: { score: number }) {
 }
 
 function AppStatusBadge({ status }: { status: 'active' | 'attention' | 'inactive' | 'never' }) {
-  const config: Record<string, { bg: string; text: string; dot: string; label: string }> = {
-    active:    { bg: '#EAF3DE', text: '#3B6D11', dot: '#3B6D11', label: 'Ativo' },
-    attention: { bg: '#FAEEDA', text: '#854F0B', dot: '#EF9F27', label: 'Atenção' },
-    inactive:  { bg: '#FCEBEB', text: '#A32D2D', dot: '#A32D2D', label: 'Sem uso' },
-    never:     { bg: 'var(--secondary)', text: 'var(--muted-foreground)', dot: 'var(--muted-foreground)', label: 'Nunca ativado' },
+  const config = {
+    active: {
+      bg: 'bg-success-light',
+      text: 'text-success-foreground',
+      label: 'Ativo',
+      dot: 'bg-success',
+    },
+    attention: {
+      bg: 'bg-warning-light',
+      text: 'text-warning-foreground',
+      label: 'Atenção',
+      dot: 'bg-warning',
+    },
+    inactive: {
+      bg: 'bg-danger-light',
+      text: 'text-danger-foreground',
+      label: 'Sem uso',
+      dot: 'bg-danger',
+    },
+    never: {
+      bg: 'bg-secondary',
+      text: 'text-muted-foreground',
+      label: 'Nunca ativado',
+      dot: 'bg-muted-foreground',
+    },
   };
 
   const c = config[status];
 
   return (
     <span
-      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
-      style={{ backgroundColor: c.bg, color: c.text }}
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${c.bg} ${c.text}`}
     >
-      <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: c.dot }} />
+      <span className={`w-1.5 h-1.5 rounded-full ${c.dot}`}></span>
       {c.label}
     </span>
   );
