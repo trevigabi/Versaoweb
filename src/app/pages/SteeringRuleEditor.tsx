@@ -449,8 +449,7 @@ export function SteeringRuleEditor() {
                 </div>
                 <button
                   onClick={() => setDatePopoverOpen(false)}
-                  className="w-full py-1.5 text-xs font-medium text-white rounded-lg transition-colors"
-                  style={{ backgroundColor: '#185FA5' }}
+                  className="w-full py-1.5 text-xs font-medium bg-primary text-primary-foreground rounded-lg transition-colors"
                 >
                   Confirmar período
                 </button>
@@ -487,8 +486,7 @@ export function SteeringRuleEditor() {
           </button>
           <button
             onClick={() => navigate('/direcionamento')}
-            className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-white rounded-lg transition-colors whitespace-nowrap"
-            style={{ backgroundColor: '#185FA5' }}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium bg-primary text-primary-foreground rounded-lg transition-colors whitespace-nowrap"
           >
             Salvar direcionamento
           </button>

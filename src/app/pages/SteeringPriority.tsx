@@ -43,7 +43,7 @@ export function SteeringPriority() {
           </Link>
           <h1 className="text-2xl font-semibold text-foreground">Prioridade de clientes</h1>
         </div>
-        <button className="px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
+        <button className="px-3 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
           Salvar e aplicar
         </button>
       </div>

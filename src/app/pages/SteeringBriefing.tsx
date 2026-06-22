@@ -194,11 +194,10 @@ export function SteeringBriefing() {
               Voltar para Direcionamento
             </Link>
             <h1 className="text-2xl font-semibold text-foreground">Briefing estratégico</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">Instruções contextuais exibidas ao representante antes de cada visita.</p>
           </div>
           <button
             onClick={openCreate}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary-hover transition-colors flex-shrink-0"
+            className="flex items-center gap-2 px-3 py-2 text-xs font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary-hover transition-colors flex-shrink-0"
           >
             <Plus className="w-4 h-4" strokeWidth={1.5} />
             Nova instrução
@@ -405,21 +404,68 @@ export function SteeringBriefing() {
   return (
     <div className="p-8 space-y-6 max-w-[1200px]">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-start gap-4 justify-between">
         <div>
-          <button onClick={() => setView('list')} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-1">
+          <button onClick={() => setView('list')} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-2">
             <ArrowLeft className="w-4 h-4" strokeWidth={1.5} />
             Voltar para Briefing estratégico
           </button>
-          <h1 className="text-2xl font-semibold text-foreground">
-            {editing ? `Editar — ${editing.name}` : 'Nova instrução'}
-          </h1>
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <button onClick={() => handleSave(true)} className="px-4 py-2 text-sm border border-border rounded-lg hover:bg-secondary transition-colors text-foreground">
+        <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
+          <Popover open={vigenciaOpen} onOpenChange={setVigenciaOpen}>
+            <PopoverTrigger asChild>
+              <button className="flex items-center gap-2 px-3 py-2 bg-card border border-border rounded-lg text-xs hover:bg-secondary transition-colors">
+                <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isActive ? 'bg-green-500' : 'bg-muted-foreground'}`} />
+                <span className="font-medium text-foreground whitespace-nowrap">
+                  {isActive ? 'Instrução ativa' : 'Inativa'}
+                </span>
+                {form.startDate && form.endDate ? (
+                  <span className="text-muted-foreground hidden sm:inline">
+                    {new Date(form.startDate + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} – {new Date(form.endDate + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                  </span>
+                ) : (
+                  <span className="text-muted-foreground hidden sm:inline">Definir período</span>
+                )}
+                <Calendar className="w-3 h-3 text-muted-foreground" strokeWidth={1.5} />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-72 p-0 overflow-hidden">
+              <div className="px-4 py-3 space-y-3">
+                <div className="text-xs font-semibold text-foreground">Período de vigência</div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[11px] text-muted-foreground block mb-1">Início</label>
+                    <input type="date" value={form.startDate} onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))} className="w-full text-xs border border-border rounded-lg px-2.5 py-1.5 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary" />
+                  </div>
+                  <div>
+                    <label className="text-[11px] text-muted-foreground block mb-1">Fim</label>
+                    <input type="date" value={form.endDate} onChange={e => setForm(f => ({ ...f, endDate: e.target.value }))} className="w-full text-xs border border-border rounded-lg px-2.5 py-1.5 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary" />
+                  </div>
+                </div>
+                <button onClick={() => setVigenciaOpen(false)} className="w-full py-1.5 text-xs font-medium bg-primary text-primary-foreground rounded-lg transition-colors">
+                  Confirmar período
+                </button>
+              </div>
+              <div className="border-t border-border px-4 py-3">
+                <div className="text-[11px] text-muted-foreground mb-2">Ação rápida</div>
+                {isActive ? (
+                  <button onClick={() => { setIsActive(false); setVigenciaOpen(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs rounded-lg border border-border hover:bg-red-50 hover:border-red-200 transition-colors text-red-600">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" />
+                    Inativar instrução agora
+                  </button>
+                ) : (
+                  <button onClick={() => { setIsActive(true); setVigenciaOpen(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs rounded-lg border border-border hover:bg-green-50 hover:border-green-200 transition-colors text-green-700">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 flex-shrink-0" />
+                    Reativar instrução
+                  </button>
+                )}
+              </div>
+            </PopoverContent>
+          </Popover>
+          <button onClick={() => handleSave(true)} className="px-3 py-2 text-xs border border-border rounded-lg hover:bg-secondary transition-colors text-foreground">
             Salvar como rascunho
           </button>
-          <button onClick={() => handleSave(false)} disabled={!hasContent} className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+          <button onClick={() => handleSave(false)} disabled={!hasContent} className="px-3 py-2 text-xs font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
             {editing ? 'Salvar alterações' : 'Publicar instrução'}
           </button>
         </div>
@@ -487,10 +533,9 @@ export function SteeringBriefing() {
             </div>
           </div>
 
-          {/* Targeting + Validity */}
+          {/* Targeting */}
           <div className="bg-card border border-border rounded-lg p-6 space-y-5">
-            <h2 className="text-sm font-semibold text-foreground">Escopo e vigência</h2>
-
+            <h2 className="text-sm font-semibold text-foreground">Escopo</h2>
             <div className="space-y-2">
               <label className="text-xs text-muted-foreground">Aplicar para</label>
               <select
@@ -502,80 +547,6 @@ export function SteeringBriefing() {
                 <option value="Por região">Por região</option>
                 <option value="Por representante">Por representante específico</option>
               </select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-xs text-muted-foreground">Vigência</label>
-              <Popover open={vigenciaOpen} onOpenChange={setVigenciaOpen}>
-                <PopoverTrigger asChild>
-                  <button className="flex items-center gap-2 px-3 py-2 bg-secondary border border-border rounded-lg text-xs hover:bg-secondary/80 transition-colors w-full sm:w-auto">
-                    <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isActive ? 'bg-green-500' : 'bg-muted-foreground'}`} />
-                    <span className="font-medium text-foreground">
-                      {isActive ? 'Instrução ativa' : 'Inativa'}
-                    </span>
-                    {form.startDate && form.endDate ? (
-                      <span className="text-muted-foreground">
-                        {new Date(form.startDate + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} – {new Date(form.endDate + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
-                      </span>
-                    ) : (
-                      <span className="text-muted-foreground">Definir período</span>
-                    )}
-                    <Calendar className="w-3 h-3 text-muted-foreground ml-auto" strokeWidth={1.5} />
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent align="start" className="w-72 p-0 overflow-hidden">
-                  <div className="px-4 py-3 space-y-3">
-                    <div className="text-xs font-semibold text-foreground">Período de vigência</div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <label className="text-[11px] text-muted-foreground block mb-1">Início</label>
-                        <input
-                          type="date"
-                          value={form.startDate}
-                          onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))}
-                          className="w-full text-xs border border-border rounded-lg px-2.5 py-1.5 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-[11px] text-muted-foreground block mb-1">Fim</label>
-                        <input
-                          type="date"
-                          value={form.endDate}
-                          onChange={e => setForm(f => ({ ...f, endDate: e.target.value }))}
-                          className="w-full text-xs border border-border rounded-lg px-2.5 py-1.5 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                        />
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => setVigenciaOpen(false)}
-                      className="w-full py-1.5 text-xs font-medium text-white rounded-lg transition-colors"
-                      style={{ backgroundColor: '#185FA5' }}
-                    >
-                      Confirmar período
-                    </button>
-                  </div>
-                  <div className="border-t border-border px-4 py-3">
-                    <div className="text-[11px] text-muted-foreground mb-2">Ação rápida</div>
-                    {isActive ? (
-                      <button
-                        onClick={() => { setIsActive(false); setVigenciaOpen(false); }}
-                        className="w-full flex items-center gap-2 px-3 py-2 text-xs rounded-lg border border-border hover:bg-red-50 hover:border-red-200 transition-colors text-red-600"
-                      >
-                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" />
-                        Inativar instrução agora
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => { setIsActive(true); setVigenciaOpen(false); }}
-                        className="w-full flex items-center gap-2 px-3 py-2 text-xs rounded-lg border border-border hover:bg-green-50 hover:border-green-200 transition-colors text-green-700"
-                      >
-                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 flex-shrink-0" />
-                        Reativar instrução
-                      </button>
-                    )}
-                  </div>
-                </PopoverContent>
-              </Popover>
             </div>
           </div>
         </div>

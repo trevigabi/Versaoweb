@@ -253,7 +253,7 @@ export function FormEditor() {
             <Eye className="w-4 h-4" strokeWidth={1.5} />
             Preview
           </button>
-<button className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary-hover transition-colors">
+<button className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary-hover transition-colors">
             Publicar alterações
           </button>
         </div>

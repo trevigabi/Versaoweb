@@ -43,29 +43,29 @@ export function Coverage() {
       {/* Coverage Tabs */}
       <div className="bg-card border border-border rounded-lg overflow-hidden">
         {/* Tab Headers */}
-        <div className="border-b border-border">
-          <div className="flex">
+        <div className="border-b border-border px-2">
+          <nav className="flex gap-1">
             <button
               onClick={() => setActiveTab('region')}
-              className={`px-6 py-4 text-sm font-medium transition-colors ${
+              className={`px-4 pb-3 pt-1 text-sm font-medium transition-colors relative ${
                 activeTab === 'region'
-                  ? 'text-primary border-b-2 border-primary bg-primary/5'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                  ? 'text-primary border-b-2 border-primary'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               Por Região
             </button>
             <button
               onClick={() => setActiveTab('representative')}
-              className={`px-6 py-4 text-sm font-medium transition-colors ${
+              className={`px-4 pb-3 pt-1 text-sm font-medium transition-colors relative ${
                 activeTab === 'representative'
-                  ? 'text-primary border-b-2 border-primary bg-primary/5'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                  ? 'text-primary border-b-2 border-primary'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               Por Representante
             </button>
-          </div>
+          </nav>
         </div>
 
         {/* Tab Content */}

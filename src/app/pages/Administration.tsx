@@ -84,7 +84,7 @@ export function Administration() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="font-semibold text-foreground">Usuários e Permissões</h3>
-            <button className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors flex items-center gap-2">
+            <button className="px-3 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors flex items-center gap-2">
               <Plus className="w-4 h-4" strokeWidth={1.5} />
               Novo Usuário
             </button>

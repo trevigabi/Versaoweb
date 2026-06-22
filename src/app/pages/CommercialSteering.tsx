@@ -21,7 +21,7 @@ const modules = [
   {
     icon: Brain,
     name: 'Briefing estratégico',
-    description: 'Contexto e orientações antes de cada visita',
+    description: 'Instruções contextuais exibidas ao representante',
     badge: '1 instrução ativa',
     href: '/steering/briefing',
   },

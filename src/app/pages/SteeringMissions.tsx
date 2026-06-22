@@ -63,7 +63,7 @@ export function SteeringMissions() {
           </Link>
           <h1 className="text-2xl font-semibold text-foreground">Missões ativas</h1>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
+        <button className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
           <Plus className="w-4 h-4" strokeWidth={2} />
           Nova missão
         </button>
