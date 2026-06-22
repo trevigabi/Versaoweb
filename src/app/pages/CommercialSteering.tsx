@@ -7,7 +7,7 @@ const modules = [
   {
     icon: Route,
     name: 'Replanejamento estratégico',
-    description: 'Otimização automática de percurso diário',
+    description: 'Defina as prioridades que irão influenciar automaticamente a ordem das rotas recomendadas para os representantes.',
     badge: '3 regras ativas',
     href: '/direcionamento',
   },
@@ -44,7 +44,7 @@ export function CommercialSteering() {
       />
 
       {/* Search */}
-      <div className="relative w-72">
+      <div className="relative w-full sm:w-72">
         <Search
           className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none"
           strokeWidth={1.5}
@@ -59,8 +59,8 @@ export function CommercialSteering() {
       </div>
 
       {/* Table */}
-      <div className="bg-card border border-border rounded-lg overflow-hidden">
-        <table className="w-full">
+      <div className="bg-card border border-border rounded-lg overflow-hidden overflow-x-auto">
+        <table className="w-full min-w-[480px]">
           <thead className="bg-secondary border-b border-border">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
@@ -96,7 +96,7 @@ export function CommercialSteering() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" style={{ backgroundColor: '#EAF3DE', color: '#3B6D11' }}>
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-success-light text-success-foreground">
                         {mod.badge}
                       </span>
                     </td>

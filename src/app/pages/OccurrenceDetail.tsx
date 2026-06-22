@@ -1,5 +1,5 @@
 import { Link, useParams } from 'react-router';
-import { ArrowLeft, X, Flag, FileText, MessageSquare, Check, AlertCircle, TrendingDown } from 'lucide-react';
+import { ArrowLeft, X, Flag, FileText, MessageSquare, Check, AlertCircle } from 'lucide-react';
 
 // Mock data - in real app, this would come from API based on ID
 const getOccurrenceData = (id: string) => {

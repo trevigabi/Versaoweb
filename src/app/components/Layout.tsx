@@ -10,10 +10,7 @@ import {
   Target,
   FileText,
   Compass,
-  Brain,
   Flag,
-  BellDot,
-  Sparkles,
 } from 'lucide-react';
 
 const navigationGroups = [
@@ -23,7 +20,6 @@ const navigationGroups = [
       { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
       { name: 'Cobertura', href: '/coverage', icon: Target },
       { name: 'Metas', href: '/goals', icon: Flag },
-      { name: 'Insights comerciais', href: '/intelligence', icon: Sparkles },
     ],
   },
   {
@@ -37,10 +33,8 @@ const navigationGroups = [
   {
     label: 'GERENCIADOR',
     items: [
-      { name: 'Usuários', href: '/administration', icon: Users },
-      { name: 'Inteligência', href: '/ai-engine', icon: Brain },
+      { name: 'Configurações', href: '/administration', icon: Users },
       { name: 'Formulários', href: '/form-builder', icon: FileText },
-      { name: 'Alertas', href: '/settings', icon: BellDot },
       { name: 'Direcionamento', href: '/steering', icon: Compass },
     ],
   },
