@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router';
 import {
   ArrowLeft, Plus, MoreVertical, TrendingUp, RefreshCw, DollarSign,
-  Map, Gem, Settings2, Users, Globe, Calendar, Sparkles, Eye,
+  Map, Gem, Settings2, Users, Globe, Calendar, Sparkles, Eye, PencilLine,
 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
 
@@ -24,6 +24,8 @@ interface Briefing {
   status: BriefingStatus;
   adherence: number;
   audience: number;
+  origin: 'user' | 'ai';
+  editedByUser?: boolean;
 }
 
 // ── Data ──────────────────────────────────────────────────────────────────────
@@ -34,42 +36,49 @@ const INITIAL_BRIEFINGS: Briefing[] = [
     description: 'Apresentar a coleção Moleca SS26 como prioridade nas visitas. Destacar os novos modelos e condições especiais de lançamento disponíveis até o fim do mês.',
     strategy: 'Coleção', scope: 'Todos os representantes', scopeDetail: 'Todos os representantes',
     startDate: '2026-06-01', endDate: '2026-06-30', status: 'Ativo', adherence: 72, audience: 38,
+    origin: 'ai', editedByUser: false,
   },
   {
     id: '2', name: 'Inverno 2026',
     description: 'Oferecer condições especiais da linha de inverno para clientes com histórico de compra de calçados fechados.',
     strategy: 'Rentabilidade', scope: 'Por região', scopeDetail: 'Região Sul — 46 representantes',
     startDate: '2026-06-10', endDate: '2026-07-15', status: 'Ativo', adherence: 68, audience: 46,
+    origin: 'ai', editedByUser: true,
   },
   {
     id: '3', name: 'Reativação de clientes',
     description: 'Abordar clientes sem compra nos últimos 80 dias com proposta de reativação e condições facilitadas.',
     strategy: 'Recuperação', scope: 'Todos os representantes', scopeDetail: 'Todos os representantes',
     startDate: '2026-06-15', endDate: '2026-07-20', status: 'Ativo', adherence: 58, audience: 38,
+    origin: 'user',
   },
   {
     id: '4', name: 'Foco em Mix',
     description: 'Ampliar a presença de categorias estratégicas na carteira de clientes que ainda não exploraram determinadas linhas.',
     strategy: 'Coleção', scope: 'Por representante', scopeDetail: 'Grupo de clientes — 524 clientes',
     startDate: '2026-06-01', endDate: '2026-07-31', status: 'Ativo', adherence: 65, audience: 22,
+    origin: 'user',
   },
   {
     id: '5', name: 'Cobertura de Novos Clientes',
     description: 'Priorizar visitas a clientes ainda não atendidos no mês, especialmente aqueles com alto potencial na Região Nordeste.',
     strategy: 'Cobertura', scope: 'Por região', scopeDetail: 'Região Nordeste — 62 representantes',
     startDate: '2026-06-01', endDate: '2026-06-30', status: 'Ativo', adherence: 60, audience: 62,
+    origin: 'ai', editedByUser: false,
   },
   {
     id: '6', name: 'Campanha Verão — Pré-layout',
     description: 'Rascunho de instrução para a campanha de verão. Aguardando aprovação final do time de marketing.',
     strategy: 'Crescimento', scope: 'Todos os representantes', scopeDetail: 'Todos os representantes',
     startDate: '2026-08-01', endDate: '2026-09-30', status: 'Rascunho', adherence: 0, audience: 38,
+    origin: 'user',
   },
   {
     id: '7', name: 'Black Friday 2025',
     description: 'Instrução especial para a campanha de Black Friday com metas de conversão agressivas.',
     strategy: 'Crescimento', scope: 'Todos os representantes', scopeDetail: 'Todos os representantes',
     startDate: '2025-11-01', endDate: '2025-11-30', status: 'Encerrado', adherence: 81, audience: 38,
+    origin: 'ai', editedByUser: false,
   },
 ];
 
@@ -97,6 +106,7 @@ const EMPTY_BRIEFING: Omit<Briefing, 'id' | 'adherence'> = {
   name: '', description: '', strategy: 'Crescimento',
   scope: 'Todos os representantes', scopeDetail: 'Todos os representantes',
   startDate: '', endDate: '', status: 'Rascunho', audience: 38,
+  origin: 'user',
 };
 
 type Tab = 'Ativo' | 'Rascunho' | 'Encerrado';
@@ -127,9 +137,10 @@ export function SteeringBriefing() {
   const handleSave = (asDraft = false) => {
     const status: BriefingStatus = asDraft ? 'Rascunho' : 'Ativo';
     if (editing) {
-      setBriefings(prev => prev.map(b => b.id === editing.id ? { ...b, ...form, status } : b));
+      const editedByUser = editing.origin === 'ai' ? true : undefined;
+      setBriefings(prev => prev.map(b => b.id === editing.id ? { ...b, ...form, status, editedByUser } : b));
     } else {
-      setBriefings(prev => [...prev, { ...form, id: String(Date.now()), adherence: 0, status }]);
+      setBriefings(prev => [...prev, { ...form, id: String(Date.now()), adherence: 0, status, origin: 'user' }]);
     }
     setView('list');
   };
@@ -213,7 +224,21 @@ export function SteeringBriefing() {
                 return (
                   <tr key={b.id} className="hover:bg-secondary/40 transition-colors cursor-pointer" onClick={() => openEdit(b)}>
                     <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-foreground">{b.name}</div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-foreground">{b.name}</span>
+                        {b.origin === 'ai' && !b.editedByUser && (
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-violet-50 text-violet-600 border border-violet-100 flex-shrink-0">
+                            <Sparkles className="w-2.5 h-2.5" strokeWidth={1.5} />
+                            IA
+                          </span>
+                        )}
+                        {b.origin === 'ai' && b.editedByUser && (
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-50 text-amber-600 border border-amber-100 flex-shrink-0">
+                            <PencilLine className="w-2.5 h-2.5" strokeWidth={1.5} />
+                            IA · editado
+                          </span>
+                        )}
+                      </div>
                       <div className="text-xs text-muted-foreground mt-0.5 max-w-xs truncate">{b.description}</div>
                     </td>
                     <td className="px-6 py-4">
