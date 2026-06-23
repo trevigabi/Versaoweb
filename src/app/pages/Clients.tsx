@@ -85,26 +85,24 @@ export function Clients() {
       />
 
       {/* Quick Filters */}
-      <div className="flex gap-3 overflow-x-auto pb-2">
-        {filters.map((filter) => (
-          <button
-            key={filter.label}
-            className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
-              filter.active
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-card border border-border hover:bg-secondary text-foreground'
-            }`}
-          >
-            {filter.label}
-            <span
-              className={`ml-2 ${
-                filter.active ? 'text-primary-foreground/70' : 'text-muted-foreground'
+      <div className="border-b border-border">
+        <nav className="flex gap-1 overflow-x-auto">
+          {filters.map((filter) => (
+            <button
+              key={filter.label}
+              className={`px-4 pb-3 pt-1 text-sm font-medium whitespace-nowrap transition-colors relative flex items-center gap-2 ${
+                filter.active
+                  ? 'text-primary border-b-2 border-primary'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              ({filter.count})
-            </span>
-          </button>
-        ))}
+              {filter.label}
+              <span className={`text-[11px] px-1.5 py-0.5 rounded-full font-medium ${
+                filter.active ? 'bg-primary/10 text-primary' : 'bg-secondary text-muted-foreground'
+              }`}>{filter.count}</span>
+            </button>
+          ))}
+        </nav>
       </div>
 
       {/* Search and Filters */}
