@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { PageHeader } from '../components/PageHeader';
-import { Route, ListOrdered, Brain, Search, ChevronRight } from 'lucide-react';
+import { Route, Brain, Search, ChevronRight } from 'lucide-react';
 
 const modules = [
   {
@@ -10,13 +10,6 @@ const modules = [
     description: 'Defina as prioridades que irão influenciar automaticamente a ordem das rotas recomendadas para os representantes.',
     badge: '3 regras ativas',
     href: '/direcionamento',
-  },
-  {
-    icon: ListOrdered,
-    name: 'Prioridade de clientes',
-    description: 'Ordenação inteligente por potencial e risco',
-    badge: '2 grupos configurados',
-    href: '/steering/priority',
   },
   {
     icon: Brain,
