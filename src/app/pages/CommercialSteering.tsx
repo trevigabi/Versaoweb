@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Link } from 'react-router';
+import { useNavigate } from 'react-router';
 import { PageHeader } from '../components/PageHeader';
-import { Route, Brain, Search, ChevronRight } from 'lucide-react';
+import { Route, Brain, Search } from 'lucide-react';
 
 const modules = [
   {
@@ -21,6 +21,7 @@ const modules = [
 ];
 
 export function CommercialSteering() {
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
 
   const filtered = modules.filter(
@@ -62,7 +63,6 @@ export function CommercialSteering() {
               <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Instruções ativas
               </th>
-              <th className="px-6 py-3 w-10" />
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -76,7 +76,11 @@ export function CommercialSteering() {
               filtered.map((mod) => {
                 const Icon = mod.icon;
                 return (
-                  <tr key={mod.name} className="group hover:bg-secondary/50 transition-colors">
+                  <tr
+                    key={mod.name}
+                    onClick={() => navigate(mod.href)}
+                    className="hover:bg-secondary/50 transition-colors cursor-pointer"
+                  >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
@@ -92,11 +96,6 @@ export function CommercialSteering() {
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-success-light text-success-foreground">
                         {mod.badge}
                       </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <Link to={mod.href} className="flex items-center justify-end">
-                        <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" strokeWidth={1.5} />
-                      </Link>
                     </td>
                   </tr>
                 );
