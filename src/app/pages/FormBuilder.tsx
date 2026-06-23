@@ -1,222 +1,254 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router';
 import { PageHeader } from '../components/PageHeader';
-import { Plus, GripVertical, Type, CheckSquare, Camera, ListChecks } from 'lucide-react';
+import {
+  Plus, MoreVertical, Calendar, Type, ListChecks, CheckSquare, Camera,
+} from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
 
-const forms = [
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+type FormStatus = 'Ativo' | 'Rascunho' | 'Inativo';
+
+interface FormItem {
+  id: string;
+  name: string;
+  description: string;
+  fieldCount: number;
+  requiredCount: number;
+  status: FormStatus;
+  updatedAt: string;
+  responses: number;
+  fieldTypes: ('text' | 'choice' | 'checklist' | 'photo')[];
+}
+
+// ── Data ──────────────────────────────────────────────────────────────────────
+
+const INITIAL_FORMS: FormItem[] = [
   {
     id: '1',
     name: 'Visita Padrão',
-    fields: 8,
-    mandatory: 3,
-    lastUpdated: '2 dias atrás',
-    status: 'active',
+    description: 'Checklist padrão para visitas comerciais regulares',
+    fieldCount: 8,
+    requiredCount: 3,
+    status: 'Ativo',
+    updatedAt: '2 dias atrás',
+    responses: 142,
+    fieldTypes: ['text', 'choice', 'photo'],
   },
   {
     id: '2',
     name: 'Auditoria de PDV',
-    fields: 12,
-    mandatory: 6,
-    lastUpdated: '1 semana atrás',
-    status: 'active',
+    description: 'Verificação de presença e organização no ponto de venda',
+    fieldCount: 12,
+    requiredCount: 6,
+    status: 'Ativo',
+    updatedAt: '1 semana atrás',
+    responses: 89,
+    fieldTypes: ['choice', 'text', 'photo'],
   },
   {
     id: '3',
     name: 'Prospecção',
-    fields: 6,
-    mandatory: 4,
-    lastUpdated: '3 dias atrás',
-    status: 'draft',
+    description: 'Formulário de qualificação para novos clientes',
+    fieldCount: 6,
+    requiredCount: 4,
+    status: 'Rascunho',
+    updatedAt: '3 dias atrás',
+    responses: 0,
+    fieldTypes: ['choice', 'text'],
   },
 ];
 
-const fieldTypes = [
-  { icon: Type, label: 'Texto', type: 'text' },
-  { icon: CheckSquare, label: 'Múltipla Escolha', type: 'choice' },
-  { icon: ListChecks, label: 'Checklist', type: 'checklist' },
-  { icon: Camera, label: 'Foto', type: 'photo' },
-];
+const STATUS_STYLES: Record<FormStatus, React.CSSProperties> = {
+  Ativo:    { backgroundColor: '#EAF3DE', color: '#3B6D11' },
+  Rascunho: { backgroundColor: '#FAEEDA', color: '#854F0B' },
+  Inativo:  { border: '1px solid var(--border)', color: 'var(--muted-foreground)' },
+};
+
+const FIELD_TYPE_ICONS: Record<string, React.ComponentType<{ className?: string; strokeWidth?: number }>> = {
+  text: Type,
+  choice: ListChecks,
+  checklist: CheckSquare,
+  photo: Camera,
+};
+
+type Tab = 'Ativo' | 'Rascunho' | 'Inativo';
+const TABS: Tab[] = ['Ativo', 'Rascunho', 'Inativo'];
+
+// ── Component ─────────────────────────────────────────────────────────────────
 
 export function FormBuilder() {
+  const navigate = useNavigate();
+  const [tab, setTab] = useState<Tab>('Ativo');
+  const [forms, setForms] = useState(INITIAL_FORMS);
+
+  const filtered = forms.filter(f => f.status === tab);
+
+  const handleDelete = (id: string) => setForms(prev => prev.filter(f => f.id !== id));
+  const handleDuplicate = (form: FormItem) => {
+    const copy: FormItem = {
+      ...form,
+      id: String(Date.now()),
+      name: `${form.name} (cópia)`,
+      status: 'Rascunho',
+      responses: 0,
+      updatedAt: 'agora',
+    };
+    setForms(prev => [...prev, copy]);
+  };
+
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-8 space-y-6">
       <PageHeader
-        title="Formulários de Visita"
+        title="Formulários de visita"
         description="Configure questionários personalizados para cada tipo de visita"
         actions={
-          <button className="px-4 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary-hover transition-colors flex items-center gap-2">
+          <button
+            onClick={() => navigate('/form-builder/novo')}
+            className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary-hover transition-colors"
+          >
             <Plus className="w-4 h-4" strokeWidth={1.5} />
-            Novo Formulário
+            Novo formulário
           </button>
         }
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Form List */}
-        <div className="lg:col-span-1">
-          <h3 className="font-semibold text-foreground mb-4">Formulários</h3>
-          <div className="space-y-3">
-            {forms.map((form, index) => (
+      {/* Tabs */}
+      <div className="border-b border-border">
+        <nav className="flex gap-1">
+          {TABS.map((t) => {
+            const count = forms.filter(f => f.status === t).length;
+            return (
               <button
-                key={form.id}
-                className={`w-full text-left p-4 rounded-lg border transition-colors ${
-                  index === 0
-                    ? 'bg-primary/5 border-primary'
-                    : 'bg-card border-border hover:bg-secondary'
+                key={t}
+                onClick={() => setTab(t)}
+                className={`px-4 pb-3 pt-1 text-sm font-medium transition-colors relative flex items-center gap-2 ${
+                  tab === t
+                    ? 'text-primary border-b-2 border-primary'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
-                <div className="flex items-start justify-between mb-2">
-                  <div className="font-medium text-foreground">{form.name}</div>
-                  <StatusBadge status={form.status} />
-                </div>
-                <div className="text-sm text-muted-foreground space-y-1">
-                  <div>{form.fields} campos • {form.mandatory} obrigatórios</div>
-                  <div>{form.lastUpdated}</div>
-                </div>
+                {t === 'Ativo' ? 'Ativos' : t === 'Rascunho' ? 'Rascunhos' : 'Inativos'}
+                <span className={`text-[11px] px-1.5 py-0.5 rounded-full font-medium ${
+                  tab === t ? 'bg-primary/10 text-primary' : 'bg-secondary text-muted-foreground'
+                }`}>{count}</span>
               </button>
+            );
+          })}
+        </nav>
+      </div>
+
+      {/* Table */}
+      <div className="bg-card border border-border rounded-lg overflow-hidden">
+        <table className="w-full">
+          <thead className="bg-secondary border-b border-border">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Formulário</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Campos</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Atualização</th>
+              {tab === 'Ativo' && (
+                <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">Respostas</th>
+              )}
+              <th className="px-6 py-3 w-12" />
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {filtered.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="px-6 py-14 text-center text-sm text-muted-foreground">
+                  Nenhum formulário encontrado.
+                </td>
+              </tr>
+            ) : filtered.map((form) => (
+              <tr
+                key={form.id}
+                onClick={() => navigate(`/form-builder/${form.id}`)}
+                className="hover:bg-secondary/50 transition-colors cursor-pointer"
+              >
+                {/* Formulário */}
+                <td className="px-6 py-4">
+                  <div className="text-sm font-medium text-foreground">{form.name}</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">{form.description}</div>
+                  <div className="flex items-center gap-1 mt-1.5">
+                    {form.fieldTypes.map((ft) => {
+                      const Icon = FIELD_TYPE_ICONS[ft];
+                      return Icon ? <Icon key={ft} className="w-3 h-3 text-muted-foreground" strokeWidth={1.5} /> : null;
+                    })}
+                  </div>
+                </td>
+
+                {/* Campos */}
+                <td className="px-6 py-4">
+                  <div className="text-sm text-foreground">{form.fieldCount} campos</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">{form.requiredCount} obrigatórios</div>
+                </td>
+
+                {/* Status */}
+                <td className="px-6 py-4">
+                  <span
+                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                    style={STATUS_STYLES[form.status]}
+                  >
+                    {form.status}
+                  </span>
+                </td>
+
+                {/* Atualização */}
+                <td className="px-6 py-4">
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Calendar className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={1.5} />
+                    {form.updatedAt}
+                  </div>
+                </td>
+
+                {/* Respostas (só na aba Ativo) */}
+                {tab === 'Ativo' && (
+                  <td className="px-6 py-4 text-right">
+                    <span className="text-sm font-semibold tabular-nums text-foreground">{form.responses}</span>
+                  </td>
+                )}
+
+                {/* Ações */}
+                <td className="px-4 py-4" onClick={e => e.stopPropagation()}>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button className="w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
+                        <MoreVertical className="w-4 h-4" strokeWidth={1.5} />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-36 p-1" align="end">
+                      <button
+                        onClick={() => navigate(`/form-builder/${form.id}`)}
+                        className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-secondary transition-colors text-foreground"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        onClick={() => handleDuplicate(form)}
+                        className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-secondary transition-colors text-foreground"
+                      >
+                        Duplicar
+                      </button>
+                      <button
+                        onClick={() => handleDelete(form.id)}
+                        className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-red-50 transition-colors text-red-600"
+                      >
+                        Excluir
+                      </button>
+                    </PopoverContent>
+                  </Popover>
+                </td>
+              </tr>
             ))}
-          </div>
-        </div>
-
-        {/* Form Builder */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="bg-card border border-border rounded-lg p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="font-semibold text-foreground">Visita Padrão</h3>
-              <div className="flex gap-2">
-                <button className="px-3 py-1.5 text-sm border border-border rounded-lg hover:bg-secondary transition-colors">
-                  Preview
-                </button>
-                <button className="px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded-lg hover:bg-primary-hover transition-colors">
-                  Publicar
-                </button>
-              </div>
-            </div>
-
-            {/* Fields */}
-            <div className="space-y-3 mb-6">
-              <FormField
-                label="Observações da Visita"
-                type="Texto longo"
-                required={true}
-              />
-              <FormField
-                label="Cliente estava aberto?"
-                type="Sim/Não"
-                required={true}
-              />
-              <FormField
-                label="Nível de Estoque"
-                type="Múltipla escolha"
-                required={false}
-              />
-              <FormField
-                label="Foto da Fachada"
-                type="Foto"
-                required={true}
-              />
-            </div>
-
-            {/* Add Field */}
-            <div className="border-t border-border pt-6">
-              <div className="text-sm font-medium text-foreground mb-3">
-                Adicionar Campo
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                {fieldTypes.map((field) => {
-                  const Icon = field.icon;
-                  return (
-                    <button
-                      key={field.type}
-                      className="flex items-center gap-3 p-3 border border-border rounded-lg hover:bg-secondary transition-colors text-left"
-                    >
-                      <Icon className="w-5 h-5 text-primary" strokeWidth={1.5} />
-                      <span className="text-sm font-medium text-foreground">
-                        {field.label}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* Settings */}
-          <div className="bg-card border border-border rounded-lg p-6">
-            <h4 className="font-medium text-foreground mb-4">Configurações</h4>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between py-3 border-b border-border">
-                <div>
-                  <div className="text-sm font-medium text-foreground">
-                    Obrigar foto da fachada
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    Representante não pode finalizar sem foto
-                  </div>
-                </div>
-                <input type="checkbox" defaultChecked className="w-5 h-5" />
-              </div>
-              <div className="flex items-center justify-between py-3 border-b border-border">
-                <div>
-                  <div className="text-sm font-medium text-foreground">
-                    Permitir visita offline
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    Dados sincronizam quando conectar
-                  </div>
-                </div>
-                <input type="checkbox" defaultChecked className="w-5 h-5" />
-              </div>
-            </div>
-          </div>
-        </div>
+          </tbody>
+        </table>
       </div>
+
+      <p className="text-xs text-muted-foreground">
+        {filtered.length} {filtered.length === 1 ? 'formulário' : 'formulários'}
+      </p>
     </div>
-  );
-}
-
-function FormField({
-  label,
-  type,
-  required,
-}: {
-  label: string;
-  type: string;
-  required: boolean;
-}) {
-  return (
-    <div className="flex items-center gap-3 p-4 bg-secondary rounded-lg group hover:bg-accent transition-colors">
-      <GripVertical
-        className="w-5 h-5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity cursor-move"
-        strokeWidth={1.5}
-      />
-      <div className="flex-1">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-foreground">{label}</span>
-          {required && (
-            <span className="px-1.5 py-0.5 text-xs bg-danger-light text-danger-foreground rounded">
-              Obrigatório
-            </span>
-          )}
-        </div>
-        <div className="text-xs text-muted-foreground mt-1">{type}</div>
-      </div>
-      <button className="text-sm text-muted-foreground hover:text-foreground">
-        Editar
-      </button>
-    </div>
-  );
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const config = {
-    active: { bg: 'bg-success-light', text: 'text-success-foreground', label: 'Ativo' },
-    draft: { bg: 'bg-warning-light', text: 'text-warning-foreground', label: 'Rascunho' },
-  }[status] || { bg: 'bg-secondary', text: 'text-foreground', label: 'Inativo' };
-
-  return (
-    <span
-      className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${config.bg} ${config.text}`}
-    >
-      {config.label}
-    </span>
   );
 }
