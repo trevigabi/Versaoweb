@@ -134,26 +134,35 @@ export function SteeringRoute() {
         }
       />
 
-      {/* Toolbar */}
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-1.5">
-          {FILTERS.map((f) => (
-            <button
-              key={f}
-              onClick={() => setActiveFilter(f)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                activeFilter === f
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-background border border-border text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              {f}
-            </button>
-          ))}
-        </div>
-        <span className="text-sm text-muted-foreground">
-          {filtered.length} {filtered.length === 1 ? 'regra' : 'regras'}
-        </span>
+      {/* Tabs */}
+      <div className="border-b border-border">
+        <nav className="flex gap-1">
+          {FILTERS.map((f) => {
+            const count = f === 'Todas' ? rules.length : rules.filter(r =>
+              f === 'Ativas' ? r.status === 'Ativa' :
+              f === 'Futuras' ? r.status === 'Futura' :
+              r.status === 'Expirada'
+            ).length;
+            return (
+              <button
+                key={f}
+                onClick={() => setActiveFilter(f)}
+                className={`px-4 pb-3 pt-1 text-sm font-medium transition-colors relative flex items-center gap-2 ${
+                  activeFilter === f
+                    ? 'text-primary border-b-2 border-primary'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {f}
+                <span className={`text-[11px] px-1.5 py-0.5 rounded-full font-medium ${
+                  activeFilter === f
+                    ? 'bg-primary/10 text-primary'
+                    : 'bg-secondary text-muted-foreground'
+                }`}>{count}</span>
+              </button>
+            );
+          })}
+        </nav>
       </div>
 
       {/* Table */}
