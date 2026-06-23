@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 import {
   ArrowLeft, Plus, MoreVertical, TrendingUp, RefreshCw, DollarSign,
   Map, Gem, Settings2, Users, Globe, Calendar, Sparkles, Eye, PencilLine,
-  Search, X,
+  Search, X, Check,
 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
 
@@ -103,6 +103,17 @@ const STATUS_STYLE: Record<BriefingStatus, string> = {
   Encerrado: 'bg-secondary text-muted-foreground',
 };
 
+const REGIONS = [
+  'Região Sul', 'Região Sudeste', 'Região Centro-Oeste',
+  'Região Norte', 'Região Nordeste',
+];
+
+const REPRESENTATIVES = [
+  'João Silva', 'Ana Costa', 'Carlos Mendes', 'Patrícia Lima',
+  'Roberto Alves', 'Fernanda Souza', 'Marcos Oliveira', 'Juliana Pereira',
+  'Eduardo Santos', 'Camila Rodrigues',
+];
+
 const EMPTY_BRIEFING: Omit<Briefing, 'id' | 'adherence'> = {
   name: '', description: '', strategy: 'Crescimento',
   scope: 'Todos os representantes', scopeDetail: 'Todos os representantes',
@@ -124,18 +135,33 @@ export function SteeringBriefing() {
   const [vigenciaOpen, setVigenciaOpen] = useState(false);
   const [isActive, setIsActive]     = useState(true);
   const [search, setSearch]         = useState('');
+  const [scopeSearch, setScopeSearch] = useState('');
+  const [selectedScopeItems, setSelectedScopeItems] = useState<string[]>([]);
   const [originFilter, setOriginFilter] = useState<OriginFilter>('all');
   const [strategyFilter, setStrategyFilter] = useState<StrategyMode | 'all'>('all');
 
   const openCreate = () => {
     setForm({ ...EMPTY_BRIEFING });
     setEditing(null);
+    setScopeSearch('');
+    setSelectedScopeItems([]);
     setView('editor');
   };
 
   const openEdit = (b: Briefing) => {
     setForm({ name: b.name, description: b.description, strategy: b.strategy, scope: b.scope, scopeDetail: b.scopeDetail, startDate: b.startDate, endDate: b.endDate, status: b.status, audience: b.audience });
     setEditing(b);
+    setScopeSearch('');
+    // restore selected items from scopeDetail if applicable
+    if (b.scope === 'Por região') {
+      const match = REGIONS.find(r => b.scopeDetail.startsWith(r));
+      setSelectedScopeItems(match ? [match] : []);
+    } else if (b.scope === 'Por representante') {
+      const match = REPRESENTATIVES.find(r => b.scopeDetail.startsWith(r));
+      setSelectedScopeItems(match ? [match] : []);
+    } else {
+      setSelectedScopeItems([]);
+    }
     setView('editor');
   };
 
@@ -538,16 +564,98 @@ export function SteeringBriefing() {
             <h2 className="text-sm font-semibold text-foreground">Escopo</h2>
             <div className="space-y-2">
               <label className="text-xs text-muted-foreground">Aplicar para</label>
-              <select
-                value={form.scope}
-                onChange={e => setForm(f => ({ ...f, scope: e.target.value as Scope, scopeDetail: e.target.value }))}
-                className="w-full px-3 py-2 bg-secondary border-0 rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-              >
-                <option value="Todos os representantes">Todos os representantes</option>
-                <option value="Por região">Por região</option>
-                <option value="Por representante">Por representante específico</option>
-              </select>
+              <div className="flex gap-2">
+                {([
+                  { value: 'Todos os representantes', label: 'Todos' },
+                  { value: 'Por região', label: 'Por região' },
+                  { value: 'Por representante', label: 'Por representante' },
+                ] as { value: Scope; label: string }[]).map(opt => (
+                  <button
+                    key={opt.value}
+                    onClick={() => {
+                      setForm(f => ({ ...f, scope: opt.value, scopeDetail: opt.value === 'Todos os representantes' ? 'Todos os representantes' : '' }));
+                      setScopeSearch('');
+                      setSelectedScopeItems([]);
+                    }}
+                    className={`flex-1 px-3 py-2 rounded-lg text-xs font-medium border transition-colors ${
+                      form.scope === opt.value
+                        ? 'bg-primary text-primary-foreground border-primary'
+                        : 'bg-secondary text-foreground border-border hover:border-primary/40'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
             </div>
+
+            {/* Secondary: region or rep picker */}
+            {form.scope !== 'Todos os representantes' && (() => {
+              const list = form.scope === 'Por região' ? REGIONS : REPRESENTATIVES;
+              const filtered = list.filter(item =>
+                item.toLowerCase().includes(scopeSearch.toLowerCase())
+              );
+              const toggleItem = (item: string) => {
+                const next = selectedScopeItems.includes(item)
+                  ? selectedScopeItems.filter(i => i !== item)
+                  : [...selectedScopeItems, item];
+                setSelectedScopeItems(next);
+                const detail = next.length === 0
+                  ? ''
+                  : next.length === 1
+                    ? `${next[0]}`
+                    : `${next[0]} +${next.length - 1} ${form.scope === 'Por região' ? 'regiões' : 'representantes'}`;
+                setForm(f => ({ ...f, scopeDetail: detail }));
+              };
+              return (
+                <div className="space-y-2">
+                  <label className="text-xs text-muted-foreground">
+                    {form.scope === 'Por região' ? 'Selecionar regiões' : 'Selecionar representantes'}
+                  </label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" strokeWidth={1.5} />
+                    <input
+                      type="text"
+                      value={scopeSearch}
+                      onChange={e => setScopeSearch(e.target.value)}
+                      placeholder={form.scope === 'Por região' ? 'Buscar região...' : 'Buscar representante...'}
+                      className="w-full pl-8 pr-3 py-2 text-sm bg-secondary border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
+                  <div className="border border-border rounded-lg divide-y divide-border max-h-48 overflow-y-auto">
+                    {filtered.length === 0 ? (
+                      <div className="px-3 py-3 text-xs text-muted-foreground text-center">Nenhum resultado.</div>
+                    ) : filtered.map(item => {
+                      const selected = selectedScopeItems.includes(item);
+                      return (
+                        <button
+                          key={item}
+                          onClick={() => toggleItem(item)}
+                          className={`w-full flex items-center justify-between px-3 py-2.5 text-sm text-left transition-colors ${
+                            selected ? 'bg-primary/5 text-foreground' : 'hover:bg-secondary text-foreground'
+                          }`}
+                        >
+                          <span>{item}</span>
+                          {selected && <Check className="w-3.5 h-3.5 text-primary flex-shrink-0" strokeWidth={2} />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {selectedScopeItems.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      {selectedScopeItems.map(item => (
+                        <span key={item} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-primary/10 text-primary font-medium">
+                          {item}
+                          <button onClick={() => toggleItem(item)} className="hover:opacity-70 transition-opacity">
+                            <X className="w-3 h-3" strokeWidth={2} />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
           </div>
         </div>
 
