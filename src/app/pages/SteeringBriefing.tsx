@@ -539,7 +539,7 @@ export function SteeringBriefing() {
       <div className="bg-card border border-border rounded-lg p-6 space-y-5">
         <div className="flex items-center gap-2">
           <PencilLine className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
-          <h2 className="text-sm font-semibold text-foreground">Identificação</h2>
+          <h2 className="text-sm font-semibold text-foreground">1. Identificação</h2>
         </div>
         <div className="space-y-2">
           <label className="text-xs text-muted-foreground">Nome da instrução</label>
@@ -582,7 +582,7 @@ export function SteeringBriefing() {
         <div className="bg-card border border-border rounded-lg p-6 flex flex-col space-y-4">
           <div className="flex items-center gap-2">
             <AlignLeft className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
-            <h2 className="text-sm font-semibold text-foreground">Contexto da instrução</h2>
+            <h2 className="text-sm font-semibold text-foreground">2. Contexto da instrução</h2>
           </div>
           <div className="flex flex-col flex-1 space-y-2">
             <label className="text-xs text-muted-foreground">O que o representante deve saber antes de cada visita?</label>
@@ -624,7 +624,7 @@ export function SteeringBriefing() {
         <div className="bg-card border border-border rounded-lg p-6 flex flex-col space-y-5">
           <div className="flex items-center gap-2">
             <Users className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
-            <h2 className="text-sm font-semibold text-foreground">Escopo</h2>
+            <h2 className="text-sm font-semibold text-foreground">3. Escopo</h2>
           </div>
           <div className="space-y-2">
             <label className="text-xs text-muted-foreground">Aplicar para</label>
