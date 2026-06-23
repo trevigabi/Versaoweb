@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 import {
   ArrowLeft, Plus, MoreVertical, TrendingUp, RefreshCw, DollarSign,
   Map, Gem, Settings2, Users, Globe, Calendar, Sparkles, Eye, PencilLine,
-  Search, X, Check,
+  Search, X, Check, Target, Info, BarChart2, ChevronRight, Users2,
 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
 
@@ -568,36 +568,35 @@ export function SteeringBriefing() {
         </div>
       </div>
 
-      {/* Contexto | Prévia — side by side */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        <div className="bg-card border border-border rounded-lg p-6 space-y-4">
+      {/* Contexto | Prévia — side by side, same height */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+        <div className="bg-card border border-border rounded-lg p-6 flex flex-col space-y-4">
           <h2 className="text-sm font-semibold text-foreground">Contexto da instrução</h2>
-          <div className="space-y-2">
+          <div className="flex flex-col flex-1 space-y-2">
             <label className="text-xs text-muted-foreground">O que o representante deve saber antes de cada visita?</label>
             <textarea
-              rows={6}
               value={form.description}
               onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
               placeholder="Descreva o contexto que a IA deve incorporar ao briefing pré-visita. Ex: destacar o lançamento da linha SS26, condições especiais de campanha, produtos em foco..."
-              className="w-full px-3 py-2 bg-secondary border-0 rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+              className="flex-1 min-h-[120px] w-full px-3 py-2 bg-secondary border-0 rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none"
             />
             <p className="text-[11px] text-muted-foreground">{form.description.length}/500 caracteres</p>
           </div>
         </div>
 
-        <div className="bg-card border border-border rounded-lg overflow-hidden">
+        <div className="bg-card border border-border rounded-lg overflow-hidden flex flex-col">
           <div className="px-5 py-3 border-b border-border flex items-center gap-2">
             <Eye className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Prévia do briefing</span>
           </div>
-          <div className="p-5 space-y-3">
+          <div className="p-5 flex flex-col flex-1 space-y-3">
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 rounded flex items-center justify-center flex-shrink-0" style={{ backgroundColor: stratStyle.bg }}>
                 <StratIcon className="w-3.5 h-3.5" strokeWidth={1.5} style={{ color: stratStyle.text }} />
               </div>
               <span className="text-xs font-semibold text-foreground">{form.name || 'Nome da instrução'}</span>
             </div>
-            <div className="bg-secondary rounded-lg p-3">
+            <div className="bg-secondary rounded-lg p-3 flex-1">
               <div className="flex items-start gap-2">
                 <Sparkles className="w-3.5 h-3.5 text-ai-accent flex-shrink-0 mt-0.5" strokeWidth={1.5} />
                 <p className="text-xs text-foreground leading-relaxed">{previewText}</p>
@@ -608,9 +607,9 @@ export function SteeringBriefing() {
         </div>
       </div>
 
-      {/* Escopo | Estimativa — side by side */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        <div className="bg-card border border-border rounded-lg p-6 space-y-5">
+      {/* Escopo | Estimativa — side by side, same height */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+        <div className="bg-card border border-border rounded-lg p-6 flex flex-col space-y-5">
           <h2 className="text-sm font-semibold text-foreground">Escopo</h2>
           <div className="space-y-2">
             <label className="text-xs text-muted-foreground">Aplicar para</label>
@@ -707,27 +706,74 @@ export function SteeringBriefing() {
           })()}
         </div>
 
-        <div className="bg-card border border-border rounded-lg p-5 space-y-4">
-          <h3 className="text-sm font-semibold text-foreground">Estimativa de alcance</h3>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-secondary rounded-lg p-3 text-center">
-              <div className="text-2xl font-semibold text-foreground">{form.audience}</div>
-              <div className="text-xs text-muted-foreground mt-0.5">Representantes</div>
+        <div className="bg-card border border-border rounded-lg overflow-hidden flex flex-col">
+          {/* Header */}
+          <div className="px-5 py-4 border-b border-border">
+            <div className="flex items-center gap-2">
+              <Target className="w-4 h-4 text-primary" strokeWidth={1.5} />
+              <span className="text-sm font-semibold text-foreground">Estimativa de alcance</span>
+              <Info className="w-3.5 h-3.5 text-muted-foreground ml-auto cursor-help" strokeWidth={1.5} />
             </div>
-            <div className="bg-secondary rounded-lg p-3 text-center">
-              <div className="text-2xl font-semibold text-foreground">~{Math.round(form.audience * 18.4)}</div>
-              <div className="text-xs text-muted-foreground mt-0.5">Visitas/semana</div>
+            <p className="text-xs text-muted-foreground mt-1">Projeção baseada em instruções semelhantes anteriores.</p>
+          </div>
+
+          {/* Metrics */}
+          <div className="p-5 flex-1 space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              {/* Representantes */}
+              <div className="bg-secondary rounded-lg p-4 space-y-2">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#E6F1FB' }}>
+                  <Users2 className="w-4 h-4" style={{ color: '#185FA5' }} strokeWidth={1.5} />
+                </div>
+                <div>
+                  <div className="text-2xl font-semibold text-foreground">{form.audience}</div>
+                  <div className="text-xs text-muted-foreground">Representantes</div>
+                </div>
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-blue-50 text-blue-600">
+                  ~100% da equipe
+                </span>
+              </div>
+
+              {/* Visitas */}
+              <div className="bg-secondary rounded-lg p-4 space-y-2">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#EAF3DE' }}>
+                  <Calendar className="w-4 h-4" style={{ color: '#3B6D11' }} strokeWidth={1.5} />
+                </div>
+                <div>
+                  <div className="text-2xl font-semibold text-foreground">~{Math.round(form.audience * 18.4)}</div>
+                  <div className="text-xs text-muted-foreground">Visitas/semana</div>
+                </div>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-green-50 text-green-700">
+                  ↗ +21% vs. instruções anteriores
+                </span>
+              </div>
+            </div>
+
+            {/* Aderência */}
+            <div>
+              <div className="flex items-center justify-between text-xs mb-2">
+                <span className="text-muted-foreground">Aderência média esperada</span>
+                <span className="font-semibold text-foreground">65%</span>
+              </div>
+              <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                <div className="h-full bg-foreground rounded-full transition-all" style={{ width: '65%' }} />
+              </div>
             </div>
           </div>
-          <div>
-            <div className="flex items-center justify-between text-xs mb-1.5">
-              <span className="text-muted-foreground">Aderência média esperada</span>
-              <span className="font-semibold text-foreground">65%</span>
+
+          {/* Footer */}
+          <div className="px-5 py-3 border-t border-border flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <BarChart2 className="w-4 h-4 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
+              <div>
+                <div className="text-xs font-medium text-foreground">Baseado no histórico dos últimos 90 dias</div>
+                <div className="text-[11px] text-muted-foreground">Instruções com contexto e público semelhantes</div>
+              </div>
             </div>
-            <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
-              <div className="h-full bg-primary rounded-full" style={{ width: '65%' }} />
-            </div>
-            <p className="text-[11px] text-muted-foreground mt-1.5">Baseado em instruções similares anteriores.</p>
+            <button className="flex items-center gap-1 text-xs font-medium text-primary hover:underline flex-shrink-0">
+              Ver detalhes
+              <ChevronRight className="w-3.5 h-3.5" strokeWidth={1.5} />
+            </button>
           </div>
         </div>
       </div>
