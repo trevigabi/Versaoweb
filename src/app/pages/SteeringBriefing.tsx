@@ -538,7 +538,6 @@ export function SteeringBriefing() {
       {/* Identificação — full width */}
       <div className="bg-card border border-border rounded-lg p-6 space-y-5">
         <div className="flex items-center gap-2">
-          <PencilLine className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
           <h2 className="text-sm font-semibold text-foreground">1. Identificação</h2>
         </div>
         <div className="space-y-2">
@@ -581,7 +580,6 @@ export function SteeringBriefing() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
         <div className="bg-card border border-border rounded-lg p-6 flex flex-col space-y-4">
           <div className="flex items-center gap-2">
-            <AlignLeft className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
             <h2 className="text-sm font-semibold text-foreground">2. Contexto da instrução</h2>
           </div>
           <div className="flex flex-col flex-1 space-y-2">
@@ -623,7 +621,6 @@ export function SteeringBriefing() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
         <div className="bg-card border border-border rounded-lg p-6 flex flex-col space-y-5">
           <div className="flex items-center gap-2">
-            <Users className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
             <h2 className="text-sm font-semibold text-foreground">3. Escopo</h2>
           </div>
           <div className="space-y-2">
