@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 import {
   ArrowLeft, Plus, MoreVertical, TrendingUp, RefreshCw, DollarSign,
   Map, Gem, Settings2, Users, Globe, Calendar, Sparkles, Eye, PencilLine,
-  Search, X, Check, Target, Info, BarChart2, ChevronRight, Users2,
+  Search, X, Check, Target, Info, BarChart2, ChevronRight, Users2, AlignLeft,
 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
 
@@ -531,7 +531,10 @@ export function SteeringBriefing() {
 
       {/* Identificação — full width */}
       <div className="bg-card border border-border rounded-lg p-6 space-y-5">
-        <h2 className="text-sm font-semibold text-foreground">Identificação</h2>
+        <div className="flex items-center gap-2">
+          <PencilLine className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
+          <h2 className="text-sm font-semibold text-foreground">Identificação</h2>
+        </div>
         <div className="space-y-2">
           <label className="text-xs text-muted-foreground">Nome da instrução</label>
           <input
@@ -571,7 +574,10 @@ export function SteeringBriefing() {
       {/* Contexto | Prévia — side by side, same height */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
         <div className="bg-card border border-border rounded-lg p-6 flex flex-col space-y-4">
-          <h2 className="text-sm font-semibold text-foreground">Contexto da instrução</h2>
+          <div className="flex items-center gap-2">
+            <AlignLeft className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
+            <h2 className="text-sm font-semibold text-foreground">Contexto da instrução</h2>
+          </div>
           <div className="flex flex-col flex-1 space-y-2">
             <label className="text-xs text-muted-foreground">O que o representante deve saber antes de cada visita?</label>
             <textarea
@@ -585,9 +591,9 @@ export function SteeringBriefing() {
         </div>
 
         <div className="bg-card border border-border rounded-lg overflow-hidden flex flex-col">
-          <div className="px-5 py-3 border-b border-border flex items-center gap-2">
-            <Eye className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Prévia do briefing</span>
+          <div className="px-5 py-4 border-b border-border flex items-center gap-2">
+            <Eye className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
+            <h2 className="text-sm font-semibold text-foreground">Prévia do briefing</h2>
           </div>
           <div className="p-5 flex flex-col flex-1 space-y-3">
             <div className="flex items-center gap-2">
@@ -610,7 +616,10 @@ export function SteeringBriefing() {
       {/* Escopo | Estimativa — side by side, same height */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
         <div className="bg-card border border-border rounded-lg p-6 flex flex-col space-y-5">
-          <h2 className="text-sm font-semibold text-foreground">Escopo</h2>
+          <div className="flex items-center gap-2">
+            <Users className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
+            <h2 className="text-sm font-semibold text-foreground">Escopo</h2>
+          </div>
           <div className="space-y-2">
             <label className="text-xs text-muted-foreground">Aplicar para</label>
             <div className="flex gap-2">
