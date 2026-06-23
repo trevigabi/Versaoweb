@@ -497,245 +497,237 @@ export function SteeringBriefing() {
         </div>
       </div>
 
-      {/* Two-column layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start">
-
-        {/* Left — form */}
-        <div className="space-y-5">
-          {/* Name */}
-          <div className="bg-card border border-border rounded-lg p-6 space-y-5">
-            <h2 className="text-sm font-semibold text-foreground">Identificação</h2>
-            <div className="space-y-2">
-              <label className="text-xs text-muted-foreground">Nome da instrução</label>
-              <input
-                type="text"
-                value={form.name}
-                onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                placeholder="Ex: Lançamento SS26, Campanha Inverno..."
-                className="w-full px-3 py-2 bg-secondary border-0 rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-            </div>
-
-            {/* Estratégia */}
-            <div className="space-y-2">
-              <label className="text-xs text-muted-foreground">Estratégia relacionada</label>
-              <div className="flex flex-wrap gap-2">
-                {(Object.keys(STRATEGY_ICONS) as StrategyMode[]).map((s) => {
-                  const SIcon = STRATEGY_ICONS[s];
-                  const ss = STRATEGY_STYLE[s];
-                  const active = form.strategy === s;
-                  return (
-                    <button
-                      key={s}
-                      onClick={() => setForm(f => ({ ...f, strategy: s }))}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all"
-                      style={active
-                        ? { backgroundColor: ss.bg, color: ss.text, borderColor: ss.text + '60' }
-                        : { backgroundColor: 'var(--secondary)', color: 'var(--muted-foreground)', borderColor: 'var(--border)' }
-                      }
-                    >
-                      <SIcon className="w-3 h-3" strokeWidth={1.5} />
-                      {s}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+      {/* Resumo — full width */}
+      <div className="bg-card border border-border rounded-lg p-5">
+        <div className="flex items-center gap-6 flex-wrap text-xs">
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground">Estratégia</span>
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: stratStyle.bg, color: stratStyle.text }}>
+              <StratIcon className="w-3 h-3" strokeWidth={1.5} />
+              {form.strategy}
+            </span>
           </div>
-
-          {/* Context */}
-          <div className="bg-card border border-border rounded-lg p-6 space-y-4">
-            <h2 className="text-sm font-semibold text-foreground">Contexto da instrução</h2>
-            <div className="space-y-2">
-              <label className="text-xs text-muted-foreground">O que o representante deve saber antes de cada visita?</label>
-              <textarea
-                rows={5}
-                value={form.description}
-                onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-                placeholder="Descreva o contexto que a IA deve incorporar ao briefing pré-visita. Ex: destacar o lançamento da linha SS26, condições especiais de campanha, produtos em foco..."
-                className="w-full px-3 py-2 bg-secondary border-0 rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none"
-              />
-              <p className="text-[11px] text-muted-foreground">{form.description.length}/500 caracteres</p>
-            </div>
+          <div className="w-px h-4 bg-border" />
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground">Escopo</span>
+            <span className="font-medium text-foreground">{form.scope === 'Todos os representantes' ? 'Todos os representantes' : form.scopeDetail || form.scope}</span>
           </div>
+          <div className="w-px h-4 bg-border" />
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground">Vigência</span>
+            <span className="font-medium text-foreground">
+              {form.startDate && form.endDate
+                ? `${new Date(form.startDate + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} – ${new Date(form.endDate + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}`
+                : '—'}
+            </span>
+          </div>
+          <div className="w-px h-4 bg-border" />
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground">Status</span>
+            <span className="font-medium text-foreground">{isActive ? 'Ativa' : 'Inativa'}</span>
+          </div>
+        </div>
+      </div>
 
-          {/* Targeting */}
-          <div className="bg-card border border-border rounded-lg p-6 space-y-5">
-            <h2 className="text-sm font-semibold text-foreground">Escopo</h2>
-            <div className="space-y-2">
-              <label className="text-xs text-muted-foreground">Aplicar para</label>
-              <div className="flex gap-2">
-                {([
-                  { value: 'Todos os representantes', label: 'Todos' },
-                  { value: 'Por região', label: 'Por região' },
-                  { value: 'Por representante', label: 'Por representante' },
-                ] as { value: Scope; label: string }[]).map(opt => (
-                  <button
-                    key={opt.value}
-                    onClick={() => {
-                      setForm(f => ({ ...f, scope: opt.value, scopeDetail: opt.value === 'Todos os representantes' ? 'Todos os representantes' : '' }));
-                      setScopeSearch('');
-                      setSelectedScopeItems([]);
-                    }}
-                    className={`flex-1 px-3 py-2 rounded-lg text-xs font-medium border transition-colors ${
-                      form.scope === opt.value
-                        ? 'bg-primary text-primary-foreground border-primary'
-                        : 'bg-secondary text-foreground border-border hover:border-primary/40'
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Secondary: region or rep picker */}
-            {form.scope !== 'Todos os representantes' && (() => {
-              const list = form.scope === 'Por região' ? REGIONS : REPRESENTATIVES;
-              const filtered = list.filter(item =>
-                item.toLowerCase().includes(scopeSearch.toLowerCase())
-              );
-              const toggleItem = (item: string) => {
-                const next = selectedScopeItems.includes(item)
-                  ? selectedScopeItems.filter(i => i !== item)
-                  : [...selectedScopeItems, item];
-                setSelectedScopeItems(next);
-                const detail = next.length === 0
-                  ? ''
-                  : next.length === 1
-                    ? `${next[0]}`
-                    : `${next[0]} +${next.length - 1} ${form.scope === 'Por região' ? 'regiões' : 'representantes'}`;
-                setForm(f => ({ ...f, scopeDetail: detail }));
-              };
+      {/* Identificação — full width */}
+      <div className="bg-card border border-border rounded-lg p-6 space-y-5">
+        <h2 className="text-sm font-semibold text-foreground">Identificação</h2>
+        <div className="space-y-2">
+          <label className="text-xs text-muted-foreground">Nome da instrução</label>
+          <input
+            type="text"
+            value={form.name}
+            onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+            placeholder="Ex: Lançamento SS26, Campanha Inverno..."
+            className="w-full px-3 py-2 bg-secondary border-0 rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+        </div>
+        <div className="space-y-2">
+          <label className="text-xs text-muted-foreground">Estratégia relacionada</label>
+          <div className="flex flex-wrap gap-2">
+            {(Object.keys(STRATEGY_ICONS) as StrategyMode[]).map((s) => {
+              const SIcon = STRATEGY_ICONS[s];
+              const ss = STRATEGY_STYLE[s];
+              const active = form.strategy === s;
               return (
-                <div className="space-y-2">
-                  <label className="text-xs text-muted-foreground">
-                    {form.scope === 'Por região' ? 'Selecionar regiões' : 'Selecionar representantes'}
-                  </label>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" strokeWidth={1.5} />
-                    <input
-                      type="text"
-                      value={scopeSearch}
-                      onChange={e => setScopeSearch(e.target.value)}
-                      placeholder={form.scope === 'Por região' ? 'Buscar região...' : 'Buscar representante...'}
-                      className="w-full pl-8 pr-3 py-2 text-sm bg-secondary border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                    />
-                  </div>
-                  <div className="border border-border rounded-lg divide-y divide-border max-h-48 overflow-y-auto">
-                    {filtered.length === 0 ? (
-                      <div className="px-3 py-3 text-xs text-muted-foreground text-center">Nenhum resultado.</div>
-                    ) : filtered.map(item => {
-                      const selected = selectedScopeItems.includes(item);
-                      return (
-                        <button
-                          key={item}
-                          onClick={() => toggleItem(item)}
-                          className={`w-full flex items-center justify-between px-3 py-2.5 text-sm text-left transition-colors ${
-                            selected ? 'bg-primary/5 text-foreground' : 'hover:bg-secondary text-foreground'
-                          }`}
-                        >
-                          <span>{item}</span>
-                          {selected && <Check className="w-3.5 h-3.5 text-primary flex-shrink-0" strokeWidth={2} />}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  {selectedScopeItems.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 pt-1">
-                      {selectedScopeItems.map(item => (
-                        <span key={item} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-primary/10 text-primary font-medium">
-                          {item}
-                          <button onClick={() => toggleItem(item)} className="hover:opacity-70 transition-opacity">
-                            <X className="w-3 h-3" strokeWidth={2} />
-                          </button>
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                <button
+                  key={s}
+                  onClick={() => setForm(f => ({ ...f, strategy: s }))}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all"
+                  style={active
+                    ? { backgroundColor: ss.bg, color: ss.text, borderColor: ss.text + '60' }
+                    : { backgroundColor: 'var(--secondary)', color: 'var(--muted-foreground)', borderColor: 'var(--border)' }
+                  }
+                >
+                  <SIcon className="w-3 h-3" strokeWidth={1.5} />
+                  {s}
+                </button>
               );
-            })()}
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Contexto | Prévia — side by side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        <div className="bg-card border border-border rounded-lg p-6 space-y-4">
+          <h2 className="text-sm font-semibold text-foreground">Contexto da instrução</h2>
+          <div className="space-y-2">
+            <label className="text-xs text-muted-foreground">O que o representante deve saber antes de cada visita?</label>
+            <textarea
+              rows={6}
+              value={form.description}
+              onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+              placeholder="Descreva o contexto que a IA deve incorporar ao briefing pré-visita. Ex: destacar o lançamento da linha SS26, condições especiais de campanha, produtos em foco..."
+              className="w-full px-3 py-2 bg-secondary border-0 rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+            />
+            <p className="text-[11px] text-muted-foreground">{form.description.length}/500 caracteres</p>
           </div>
         </div>
 
-        {/* Right — preview + stats */}
-        <div className="space-y-4">
-
-          {/* Preview */}
-          <div className="bg-card border border-border rounded-lg overflow-hidden">
-            <div className="px-5 py-3 border-b border-border flex items-center gap-2">
-              <Eye className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Prévia do briefing</span>
+        <div className="bg-card border border-border rounded-lg overflow-hidden">
+          <div className="px-5 py-3 border-b border-border flex items-center gap-2">
+            <Eye className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Prévia do briefing</span>
+          </div>
+          <div className="p-5 space-y-3">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded flex items-center justify-center flex-shrink-0" style={{ backgroundColor: stratStyle.bg }}>
+                <StratIcon className="w-3.5 h-3.5" strokeWidth={1.5} style={{ color: stratStyle.text }} />
+              </div>
+              <span className="text-xs font-semibold text-foreground">{form.name || 'Nome da instrução'}</span>
             </div>
-            <div className="p-5 space-y-3">
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded flex items-center justify-center flex-shrink-0" style={{ backgroundColor: stratStyle.bg }}>
-                  <StratIcon className="w-3.5 h-3.5" strokeWidth={1.5} style={{ color: stratStyle.text }} />
-                </div>
-                <span className="text-xs font-semibold text-foreground">{form.name || 'Nome da instrução'}</span>
+            <div className="bg-secondary rounded-lg p-3">
+              <div className="flex items-start gap-2">
+                <Sparkles className="w-3.5 h-3.5 text-ai-accent flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+                <p className="text-xs text-foreground leading-relaxed">{previewText}</p>
               </div>
-              <div className="bg-secondary rounded-lg p-3">
-                <div className="flex items-start gap-2">
-                  <Sparkles className="w-3.5 h-3.5 text-ai-accent flex-shrink-0 mt-0.5" strokeWidth={1.5} />
-                  <p className="text-xs text-foreground leading-relaxed">{previewText}</p>
-                </div>
-              </div>
-              <p className="text-[11px] text-muted-foreground">Assim o representante verá o briefing antes de cada visita.</p>
+            </div>
+            <p className="text-[11px] text-muted-foreground">Assim o representante verá o briefing antes de cada visita.</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Escopo | Estimativa — side by side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        <div className="bg-card border border-border rounded-lg p-6 space-y-5">
+          <h2 className="text-sm font-semibold text-foreground">Escopo</h2>
+          <div className="space-y-2">
+            <label className="text-xs text-muted-foreground">Aplicar para</label>
+            <div className="flex gap-2">
+              {([
+                { value: 'Todos os representantes', label: 'Todos' },
+                { value: 'Por região', label: 'Por região' },
+                { value: 'Por representante', label: 'Por representante' },
+              ] as { value: Scope; label: string }[]).map(opt => (
+                <button
+                  key={opt.value}
+                  onClick={() => {
+                    setForm(f => ({ ...f, scope: opt.value, scopeDetail: opt.value === 'Todos os representantes' ? 'Todos os representantes' : '' }));
+                    setScopeSearch('');
+                    setSelectedScopeItems([]);
+                  }}
+                  className={`flex-1 px-3 py-2 rounded-lg text-xs font-medium border transition-colors ${
+                    form.scope === opt.value
+                      ? 'bg-primary text-primary-foreground border-primary'
+                      : 'bg-secondary text-foreground border-border hover:border-primary/40'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
             </div>
           </div>
 
-          {/* Stats */}
-          <div className="bg-card border border-border rounded-lg p-5 space-y-4">
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Estimativa de alcance</h3>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-secondary rounded-lg p-3 text-center">
-                <div className="text-2xl font-semibold text-foreground">{form.audience}</div>
-                <div className="text-xs text-muted-foreground mt-0.5">Representantes</div>
+          {form.scope !== 'Todos os representantes' && (() => {
+            const list = form.scope === 'Por região' ? REGIONS : REPRESENTATIVES;
+            const scopeFiltered = list.filter(item =>
+              item.toLowerCase().includes(scopeSearch.toLowerCase())
+            );
+            const toggleItem = (item: string) => {
+              const next = selectedScopeItems.includes(item)
+                ? selectedScopeItems.filter(i => i !== item)
+                : [...selectedScopeItems, item];
+              setSelectedScopeItems(next);
+              const detail = next.length === 0
+                ? ''
+                : next.length === 1
+                  ? `${next[0]}`
+                  : `${next[0]} +${next.length - 1} ${form.scope === 'Por região' ? 'regiões' : 'representantes'}`;
+              setForm(f => ({ ...f, scopeDetail: detail }));
+            };
+            return (
+              <div className="space-y-2">
+                <label className="text-xs text-muted-foreground">
+                  {form.scope === 'Por região' ? 'Selecionar regiões' : 'Selecionar representantes'}
+                </label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" strokeWidth={1.5} />
+                  <input
+                    type="text"
+                    value={scopeSearch}
+                    onChange={e => setScopeSearch(e.target.value)}
+                    placeholder={form.scope === 'Por região' ? 'Buscar região...' : 'Buscar representante...'}
+                    className="w-full pl-8 pr-3 py-2 text-sm bg-secondary border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+                <div className="border border-border rounded-lg divide-y divide-border max-h-48 overflow-y-auto">
+                  {scopeFiltered.length === 0 ? (
+                    <div className="px-3 py-3 text-xs text-muted-foreground text-center">Nenhum resultado.</div>
+                  ) : scopeFiltered.map(item => {
+                    const selected = selectedScopeItems.includes(item);
+                    return (
+                      <button
+                        key={item}
+                        onClick={() => toggleItem(item)}
+                        className={`w-full flex items-center justify-between px-3 py-2.5 text-sm text-left transition-colors ${
+                          selected ? 'bg-primary/5 text-foreground' : 'hover:bg-secondary text-foreground'
+                        }`}
+                      >
+                        <span>{item}</span>
+                        {selected && <Check className="w-3.5 h-3.5 text-primary flex-shrink-0" strokeWidth={2} />}
+                      </button>
+                    );
+                  })}
+                </div>
+                {selectedScopeItems.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {selectedScopeItems.map(item => (
+                      <span key={item} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-primary/10 text-primary font-medium">
+                        {item}
+                        <button onClick={() => toggleItem(item)} className="hover:opacity-70 transition-opacity">
+                          <X className="w-3 h-3" strokeWidth={2} />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
-              <div className="bg-secondary rounded-lg p-3 text-center">
-                <div className="text-2xl font-semibold text-foreground">~{Math.round(form.audience * 18.4)}</div>
-                <div className="text-xs text-muted-foreground mt-0.5">Visitas/semana</div>
-              </div>
+            );
+          })()}
+        </div>
+
+        <div className="bg-card border border-border rounded-lg p-5 space-y-4">
+          <h3 className="text-sm font-semibold text-foreground">Estimativa de alcance</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-secondary rounded-lg p-3 text-center">
+              <div className="text-2xl font-semibold text-foreground">{form.audience}</div>
+              <div className="text-xs text-muted-foreground mt-0.5">Representantes</div>
             </div>
-            <div>
-              <div className="flex items-center justify-between text-xs mb-1.5">
-                <span className="text-muted-foreground">Aderência média esperada</span>
-                <span className="font-semibold text-foreground">65%</span>
-              </div>
-              <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
-                <div className="h-full bg-primary rounded-full" style={{ width: '65%' }} />
-              </div>
-              <p className="text-[11px] text-muted-foreground mt-1.5">Baseado em instruções similares anteriores.</p>
+            <div className="bg-secondary rounded-lg p-3 text-center">
+              <div className="text-2xl font-semibold text-foreground">~{Math.round(form.audience * 18.4)}</div>
+              <div className="text-xs text-muted-foreground mt-0.5">Visitas/semana</div>
             </div>
           </div>
-
-          {/* Strategy summary */}
-          <div className="bg-card border border-border rounded-lg p-5 space-y-3">
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Resumo</h3>
-            <div className="space-y-2.5 text-xs">
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Estratégia</span>
-                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full font-medium text-[11px]" style={{ backgroundColor: stratStyle.bg, color: stratStyle.text }}>
-                  <StratIcon className="w-3 h-3" strokeWidth={1.5} />
-                  {form.strategy}
-                </span>
-              </div>
-              <div className="h-px bg-border" />
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Escopo</span>
-                <span className="font-medium text-foreground">{form.scope === 'Todos os representantes' ? 'Todos' : form.scope}</span>
-              </div>
-              <div className="h-px bg-border" />
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Vigência</span>
-                <span className="font-medium text-foreground">
-                  {form.startDate && form.endDate
-                    ? `${new Date(form.startDate + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} – ${new Date(form.endDate + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}`
-                    : '—'}
-                </span>
-              </div>
+          <div>
+            <div className="flex items-center justify-between text-xs mb-1.5">
+              <span className="text-muted-foreground">Aderência média esperada</span>
+              <span className="font-semibold text-foreground">65%</span>
             </div>
+            <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
+              <div className="h-full bg-primary rounded-full" style={{ width: '65%' }} />
+            </div>
+            <p className="text-[11px] text-muted-foreground mt-1.5">Baseado em instruções similares anteriores.</p>
           </div>
         </div>
       </div>
