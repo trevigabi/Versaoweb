@@ -11,7 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popove
 
 type BriefingStatus = 'Ativo' | 'Rascunho' | 'Encerrado';
 type StrategyMode = 'Crescimento' | 'Recuperação' | 'Rentabilidade' | 'Coleção' | 'Cobertura' | 'Personalizado';
-type Scope = 'Todos os representantes' | 'Por região' | 'Por representante';
+type Scope = 'Todos os representantes' | 'Por região' | 'Por representante' | 'Por clientes';
 
 interface Briefing {
   id: string;
@@ -112,6 +112,12 @@ const REPRESENTATIVES = [
   'João Silva', 'Ana Costa', 'Carlos Mendes', 'Patrícia Lima',
   'Roberto Alves', 'Fernanda Souza', 'Marcos Oliveira', 'Juliana Pereira',
   'Eduardo Santos', 'Camila Rodrigues',
+];
+
+const CLIENTS = [
+  'Farmácia Central', 'Drogaria Moderna', 'Rede Saúde Sul', 'Saúde & Vida',
+  'Farma Rápida', 'Drogamax', 'Pague Menos Norte', 'Ultrafarma SP',
+  'Drogaleste', 'Farmácia Popular', 'Bem-Estar Farma', 'Saúde Total',
 ];
 
 const EMPTY_BRIEFING: Omit<Briefing, 'id' | 'adherence'> = {
@@ -622,11 +628,12 @@ export function SteeringBriefing() {
           </div>
           <div className="space-y-2">
             <label className="text-xs text-muted-foreground">Aplicar para</label>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {([
                 { value: 'Todos os representantes', label: 'Todos' },
                 { value: 'Por região', label: 'Por região' },
                 { value: 'Por representante', label: 'Por representante' },
+                { value: 'Por clientes', label: 'Por clientes' },
               ] as { value: Scope; label: string }[]).map(opt => (
                 <button
                   key={opt.value}
@@ -648,10 +655,11 @@ export function SteeringBriefing() {
           </div>
 
           {form.scope !== 'Todos os representantes' && (() => {
-            const list = form.scope === 'Por região' ? REGIONS : REPRESENTATIVES;
+            const list = form.scope === 'Por região' ? REGIONS : form.scope === 'Por representante' ? REPRESENTATIVES : CLIENTS;
             const scopeFiltered = list.filter(item =>
               item.toLowerCase().includes(scopeSearch.toLowerCase())
             );
+            const pluralLabel = form.scope === 'Por região' ? 'regiões' : form.scope === 'Por representante' ? 'representantes' : 'clientes';
             const toggleItem = (item: string) => {
               const next = selectedScopeItems.includes(item)
                 ? selectedScopeItems.filter(i => i !== item)
@@ -661,13 +669,15 @@ export function SteeringBriefing() {
                 ? ''
                 : next.length === 1
                   ? `${next[0]}`
-                  : `${next[0]} +${next.length - 1} ${form.scope === 'Por região' ? 'regiões' : 'representantes'}`;
+                  : `${next[0]} +${next.length - 1} ${pluralLabel}`;
               setForm(f => ({ ...f, scopeDetail: detail }));
             };
+            const selectLabel = form.scope === 'Por região' ? 'Selecionar regiões' : form.scope === 'Por representante' ? 'Selecionar representantes' : 'Selecionar clientes';
+            const searchPlaceholder = form.scope === 'Por região' ? 'Buscar região...' : form.scope === 'Por representante' ? 'Buscar representante...' : 'Buscar cliente...';
             return (
               <div className="space-y-2">
                 <label className="text-xs text-muted-foreground">
-                  {form.scope === 'Por região' ? 'Selecionar regiões' : 'Selecionar representantes'}
+                  {selectLabel}
                 </label>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" strokeWidth={1.5} />
@@ -675,7 +685,7 @@ export function SteeringBriefing() {
                     type="text"
                     value={scopeSearch}
                     onChange={e => setScopeSearch(e.target.value)}
-                    placeholder={form.scope === 'Por região' ? 'Buscar região...' : 'Buscar representante...'}
+                    placeholder={searchPlaceholder}
                     className="w-full pl-8 pr-3 py-2 text-sm bg-secondary border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                   />
                 </div>
@@ -719,9 +729,8 @@ export function SteeringBriefing() {
           {/* Header */}
           <div className="px-5 py-4 border-b border-border">
             <div className="flex items-center gap-2">
-              <Target className="w-4 h-4 text-primary" strokeWidth={1.5} />
+              <Target className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
               <span className="text-sm font-semibold text-foreground">Estimativa de alcance</span>
-              <Info className="w-3.5 h-3.5 text-muted-foreground ml-auto cursor-help" strokeWidth={1.5} />
             </div>
             <p className="text-xs text-muted-foreground mt-1">Projeção baseada em instruções semelhantes anteriores.</p>
           </div>
@@ -771,18 +780,12 @@ export function SteeringBriefing() {
           </div>
 
           {/* Footer */}
-          <div className="px-5 py-3 border-t border-border flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5">
-              <BarChart2 className="w-4 h-4 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
-              <div>
-                <div className="text-xs font-medium text-foreground">Baseado no histórico dos últimos 90 dias</div>
-                <div className="text-[11px] text-muted-foreground">Instruções com contexto e público semelhantes</div>
-              </div>
+          <div className="px-5 py-3 border-t border-border flex items-center gap-2.5">
+            <BarChart2 className="w-4 h-4 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
+            <div>
+              <div className="text-xs font-medium text-foreground">Baseado no histórico dos últimos 90 dias</div>
+              <div className="text-[11px] text-muted-foreground">Instruções com contexto e público semelhantes</div>
             </div>
-            <button className="flex items-center gap-1 text-xs font-medium text-primary hover:underline flex-shrink-0">
-              Ver detalhes
-              <ChevronRight className="w-3.5 h-3.5" strokeWidth={1.5} />
-            </button>
           </div>
         </div>
       </div>
