@@ -11,10 +11,10 @@
   --popover: #FFFFFF;
   --popover-foreground: #1A2332;
 
-  /* Navy Blue - Primary */
-  --primary: #1E3A5F;
+  /* Beira Rio Red - Primary */
+  --primary: #BE1520;
   --primary-foreground: #FFFFFF;
-  --primary-hover: #2C4E75;
+  --primary-hover: #A01019;
 
   /* Blue Tones - AI and Highlights */
   --ai-accent: #3B82F6;
@@ -56,10 +56,10 @@
   /* Sidebar */
   --sidebar: #FFFFFF;
   --sidebar-foreground: #334155;
-  --sidebar-primary: #1E3A5F;
+  --sidebar-primary: #BE1520;
   --sidebar-primary-foreground: #FFFFFF;
   --sidebar-accent: #F8FAFC;
-  --sidebar-accent-foreground: #1E3A5F;
+  --sidebar-accent-foreground: #BE1520;
   --sidebar-border: #E2E8F0;
   --sidebar-ring: #94A3B8;
 }

@@ -1,4 +1,5 @@
 import { Outlet, NavLink } from 'react-router';
+import logo from '../../imports/logo-beira-rio-icon-D1u5pVGi.png';
 import {
   LayoutDashboard,
   Users,
@@ -47,13 +48,11 @@ export function Layout() {
       <aside className="w-64 bg-sidebar border-r border-sidebar-border flex flex-col">
         {/* Logo */}
         <div className="h-16 flex items-center px-6 border-b border-sidebar-border">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-semibold">PR</span>
-            </div>
+          <div className="flex items-center gap-2.5">
+            <img src={logo} alt="Beira Rio" className="w-8 h-8 object-contain flex-shrink-0" />
             <div>
-              <div className="font-semibold text-sidebar-foreground">Pace Route</div>
-              <div className="text-xs text-muted-foreground">Manager</div>
+              <div className="font-semibold text-sidebar-foreground leading-tight">Calçados Beira Rio</div>
+              <div className="text-[11px] text-muted-foreground leading-tight">Gestor estratégico de Rotas</div>
             </div>
           </div>
         </div>

@@ -633,28 +633,10 @@ export function OccurrenceDetail() {
                 </div>
                 <div className="grid grid-cols-10 gap-2 mb-4">
                   {[...Array(30)].map((_, i) => (
-                    <div
-                      key={i}
-                      className={`h-8 rounded-lg ${
-                        i % 5 === 0 ? 'bg-success-light' : i % 3 === 0 ? 'bg-warning-light' : 'bg-secondary'
-                      }`}
-                    ></div>
+                    null
                   ))}
                 </div>
-                <div className="flex items-center gap-6 text-sm mb-8">
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-lg bg-success-light"></div>
-                    <span>Cobertura boa</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-lg bg-warning-light"></div>
-                    <span>Cobertura baixa</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-lg bg-secondary"></div>
-                    <span>Sem dado</span>
-                  </div>
-                </div>
+                
                 <div className="p-5 bg-warning-light/40 border border-warning/30 rounded-xl flex items-start gap-3">
                   <AlertCircle className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" strokeWidth={1.5} />
                   <p className="text-sm text-warning-foreground leading-relaxed">

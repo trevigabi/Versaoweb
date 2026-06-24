@@ -50,13 +50,13 @@ export default function App() {
           <Route path="form-builder/:id" element={<FormEditor />} />
           <Route path="campaigns" element={<Campaigns />} />
           <Route path="settings" element={<Settings />} />
-          <Route path="steering" element={<CommercialSteering />} />
-          <Route path="steering/route" element={<SteeringRoute />} />
+          <Route path="steering" element={<Navigate to="/direcionamento" replace />} />
+          <Route path="steering/route" element={<Navigate to="/direcionamento" replace />} />
+          <Route path="steering/briefing" element={<Navigate to="/direcionamento" replace />} />
           <Route path="direcionamento" element={<SteeringRoute />} />
           <Route path="direcionamento/nova" element={<SteeringRuleEditor />} />
           <Route path="direcionamento/:id" element={<SteeringRuleEditor />} />
           <Route path="steering/priority" element={<SteeringPriority />} />
-          <Route path="steering/briefing" element={<SteeringBriefing />} />
           <Route path="steering/missions" element={<SteeringMissions />} />
         </Route>
       </Routes>

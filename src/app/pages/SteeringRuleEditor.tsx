@@ -3,43 +3,52 @@ import { useNavigate, Link } from 'react-router';
 import {
   TrendingUp, RefreshCw, DollarSign, Map, Settings2,
   Users2, CreditCard, BarChart2, Gem,
-  ChevronDown, ChevronUp, ArrowRight, ArrowLeft, Calendar, ChevronLeft, ChevronRight, X,
+  ChevronDown, ChevronUp, ArrowRight, ArrowLeft, Calendar,
+  ChevronLeft, ChevronRight, X, Sparkles, Eye, AlignLeft,
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetTitle } from '../components/ui/sheet';
 import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
 import type { LucideIcon } from 'lucide-react';
 
+// ── Types ─────────────────────────────────────────────────────────────────────
+
 type DimensionLevel = 'Alta' | 'Média' | 'Baixa';
 type PeriodView = 'dia' | 'semana' | 'mes';
 type ClientType = 'alto' | 'churn' | 'colecao' | 'outros';
+type EditorTab = 'direcionamento' | 'briefing';
 
 interface DimensionWeight { pct: number; level: DimensionLevel; }
 interface ImpactProfile { label: string; description: string; pct: number; positive: boolean; color: string; }
-interface ClientRow {
-  name: string;
-  type: ClientType;
-  city: string;
-  lastVisit: string;
-  score: number;
-  ticket: string;
-  tag: string;
-}
+interface ClientRow { name: string; type: ClientType; city: string; lastVisit: string; score: number; ticket: string; tag: string; }
+interface SimProfile { label: string; clients: number; pct: number; color: string; }
+interface WeekProjection { week: string; alto: number; churn: number; colecao: number; outros: number; }
+interface RevenueScenario { label: string; value: string; pct: number; color: string; bg: string; }
+interface PrevComparison { metric: string; before: string; after: string; delta: string; positive: boolean; }
 
 // ── Static data ───────────────────────────────────────────────────────────────
 
 const MODES: { id: string; label: string; description: string; icon: LucideIcon }[] = [
   { id: 'Crescimento',   label: 'Crescimento',   description: 'Aumentar vendas e explorar oportunidades', icon: TrendingUp },
   { id: 'Recuperação',   label: 'Recuperação',   description: 'Recuperar clientes e reativar carteira',   icon: RefreshCw },
-  { id: 'Coleção',       label: 'Coleção',       description: 'Impulsionar coleção nova e mix',           icon: Gem },
+  { id: 'Coleção',       label: 'Marca',         description: 'Impulsionar marcas específicas na carteira', icon: Gem },
   { id: 'Rentabilidade', label: 'Rentabilidade', description: 'Aumentar ticket e melhorar margem',        icon: DollarSign },
   { id: 'Cobertura',     label: 'Cobertura',     description: 'Aumentar presença territorial',            icon: Map },
-  { id: 'Personalizado', label: 'Personalizado', description: 'Definir minha própria estratégia',         icon: Settings2 },
+  { id: 'Personalizado', label: '',               description: 'Crie sua própria estratégia do zero',     icon: Settings2 },
 ];
+
+const MODE_STYLE: Record<string, { bg: string; text: string }> = {
+  Crescimento:   { bg: '#E6F1FB', text: '#185FA5' },
+  Recuperação:   { bg: '#EAF3DE', text: '#3B6D11' },
+  Coleção:       { bg: '#F3EEFF', text: '#7C3AED' },
+  Rentabilidade: { bg: '#FAEEDA', text: '#854F0B' },
+  Cobertura:     { bg: '#E0F7FA', text: '#0E7490' },
+  Personalizado: { bg: '#F3F4F6', text: '#6B7280' },
+};
 
 const DIMENSIONS: { id: string; label: string; description: string; icon: LucideIcon; color: string }[] = [
   { id: 'retencao',    label: 'Retenção de carteira',  description: 'Foco em evitar churn e recuperar clientes',        icon: Users2,    color: '#3B6D11' },
   { id: 'performance', label: 'Performance comercial', description: 'Foco em aumentar vendas e ticket médio',            icon: BarChart2,  color: '#185FA5' },
-  { id: 'mix',         label: 'Mix e coleção',         description: 'Foco em coleção nova, mix e cross-sell',            icon: Gem,        color: '#7C3AED' },
+  { id: 'mix',         label: 'Marca',                 description: 'Priorizar marcas específicas na carteira de clientes', icon: Gem,        color: '#7C3AED' },
   { id: 'credito',     label: 'Crédito e risco',       description: 'Foco em inadimplência e saúde financeira',          icon: CreditCard, color: '#B45309' },
   { id: 'cobertura',   label: 'Cobertura territorial', description: 'Foco em frequência de visita e áreas descobertas', icon: Map,        color: '#0E7490' },
 ];
@@ -47,9 +56,9 @@ const DIMENSIONS: { id: string; label: string; description: string; icon: Lucide
 const CRITERIA_DETAIL: Record<string, string[]> = {
   retencao:    ['Risco de inativação', 'Cliente reativável', 'NPS baixo na última visita'],
   performance: ['Maior ticket histórico', 'Probabilidade alta de fechamento', 'Queda de volume no último ciclo'],
-  mix:         ['Mix gap — categoria não explorada', 'Nova coleção não apresentada'],
+  mix:         ['Marcas selecionadas com meta de presença', 'Clientes que nunca compraram a marca', 'Clientes com compra abaixo do potencial'],
   credito:     ['Limite disponível alto', 'Inadimplência recente'],
-  cobertura:   ['Região pouco visitada no mês', 'Cliente sem visita há mais de 30 dias'],
+  cobertura:   ['Regiões selecionadas com meta de cobertura', 'Clientes sem visita no período definido'],
 };
 
 const DEFAULT_WEIGHTS: Record<string, DimensionWeight> = {
@@ -68,40 +77,40 @@ const MODE_WEIGHTS: Record<string, Record<string, DimensionWeight>> = {
 
 const MODE_IMPACT: Record<string, ImpactProfile[]> = {
   Crescimento:   [
-    { label: 'Clientes com potencial de coleção nova', description: 'Maior chance de compra da nova coleção',       pct: 38, positive: true,  color: '#185FA5' },
-    { label: 'Clientes com risco de churn',            description: 'Clientes com sinais de perda de compra',       pct: 24, positive: true,  color: '#3B6D11' },
-    { label: 'Clientes com maior ticket potencial',    description: 'Histórico e perfil de maior volume',           pct: 18, positive: true,  color: '#3B6D11' },
-    { label: 'Clientes inadimplentes',                 description: 'Serão menos priorizados nas rotas',            pct: 12, positive: false, color: '#B45309' },
+    { label: 'Clientes com potencial de coleção nova', description: 'Maior chance de compra da nova coleção',    pct: 38, positive: true,  color: '#185FA5' },
+    { label: 'Clientes com risco de churn',            description: 'Clientes com sinais de perda de compra',    pct: 24, positive: true,  color: '#3B6D11' },
+    { label: 'Clientes com maior ticket potencial',    description: 'Histórico e perfil de maior volume',        pct: 18, positive: true,  color: '#3B6D11' },
+    { label: 'Clientes inadimplentes',                 description: 'Serão menos priorizados nas rotas',         pct: 12, positive: false, color: '#B45309' },
   ],
   Recuperação:   [
-    { label: 'Clientes em risco de inativação',        description: 'Próximos da janela de inatividade',            pct: 45, positive: true,  color: '#3B6D11' },
-    { label: 'Clientes inativos reativáveis',          description: 'Histórico de alto faturamento',                pct: 32, positive: true,  color: '#3B6D11' },
-    { label: 'Clientes com NPS baixo',                 description: 'Insatisfação registrada recentemente',         pct: 22, positive: true,  color: '#B45309' },
-    { label: 'Novos clientes sem histórico',           description: 'Priorizados apenas em cobertura básica',       pct: 15, positive: false, color: '#6B7280' },
+    { label: 'Clientes em risco de inativação',        description: 'Próximos da janela de inatividade',         pct: 45, positive: true,  color: '#3B6D11' },
+    { label: 'Clientes inativos reativáveis',          description: 'Histórico de alto faturamento',             pct: 32, positive: true,  color: '#3B6D11' },
+    { label: 'Clientes com NPS baixo',                 description: 'Insatisfação registrada recentemente',      pct: 22, positive: true,  color: '#B45309' },
+    { label: 'Novos clientes sem histórico',           description: 'Priorizados apenas em cobertura básica',    pct: 15, positive: false, color: '#6B7280' },
   ],
   Rentabilidade: [
-    { label: 'Clientes com maior margem',              description: 'Alto ticket e baixo risco de crédito',         pct: 42, positive: true,  color: '#3B6D11' },
-    { label: 'Clientes com limite disponível',         description: 'Crédito liberado para novos pedidos',          pct: 28, positive: true,  color: '#185FA5' },
-    { label: 'Clientes em risco financeiro',           description: 'Pagamentos em atraso nos últimos 60 dias',     pct: 18, positive: false, color: '#B45309' },
-    { label: 'Clientes de baixo volume histórico',     description: 'Pedidos abaixo da média da carteira',          pct: 14, positive: false, color: '#6B7280' },
+    { label: 'Clientes com maior margem',              description: 'Alto ticket e baixo risco de crédito',      pct: 42, positive: true,  color: '#3B6D11' },
+    { label: 'Clientes com limite disponível',         description: 'Crédito liberado para novos pedidos',       pct: 28, positive: true,  color: '#185FA5' },
+    { label: 'Clientes em risco financeiro',           description: 'Pagamentos em atraso nos últimos 60 dias',  pct: 18, positive: false, color: '#B45309' },
+    { label: 'Clientes de baixo volume histórico',     description: 'Pedidos abaixo da média da carteira',       pct: 14, positive: false, color: '#6B7280' },
   ],
   Cobertura:     [
-    { label: 'Regiões com baixa cobertura',            description: 'Menos de 30% de cobertura no ciclo',           pct: 48, positive: true,  color: '#0E7490' },
-    { label: 'Clientes sem visita há 30+ dias',        description: 'Fora da frequência esperada de visita',        pct: 35, positive: true,  color: '#3B6D11' },
-    { label: 'Clientes de alto ticket',                description: 'Reduzidos em prol da cobertura',               pct: 20, positive: false, color: '#6B7280' },
-    { label: 'Clientes já na frequência ideal',        description: 'Mantidos na rotina atual',                     pct: 12, positive: false, color: '#6B7280' },
+    { label: 'Regiões com baixa cobertura',            description: 'Menos de 30% de cobertura no ciclo',        pct: 48, positive: true,  color: '#0E7490' },
+    { label: 'Clientes sem visita há 30+ dias',        description: 'Fora da frequência esperada de visita',     pct: 35, positive: true,  color: '#3B6D11' },
+    { label: 'Clientes de alto ticket',                description: 'Reduzidos em prol da cobertura',            pct: 20, positive: false, color: '#6B7280' },
+    { label: 'Clientes já na frequência ideal',        description: 'Mantidos na rotina atual',                  pct: 12, positive: false, color: '#6B7280' },
   ],
   Coleção:       [
-    { label: 'Sem apresentação da coleção atual',      description: 'Ainda não receberam a coleção atual',          pct: 52, positive: true,  color: '#7C3AED' },
-    { label: 'Clientes com gap de mix',                description: 'Nunca compraram determinada linha',            pct: 30, positive: true,  color: '#7C3AED' },
-    { label: 'Clientes inadimplentes',                 description: 'Apresentação da coleção postergada',           pct: 16, positive: false, color: '#B45309' },
-    { label: 'Clientes já atualizados',                description: 'Já receberam apresentação completa',           pct: 10, positive: false, color: '#6B7280' },
+    { label: 'Sem apresentação da coleção atual',      description: 'Ainda não receberam a coleção atual',       pct: 52, positive: true,  color: '#7C3AED' },
+    { label: 'Clientes com gap de mix',                description: 'Nunca compraram determinada linha',         pct: 30, positive: true,  color: '#7C3AED' },
+    { label: 'Clientes inadimplentes',                 description: 'Apresentação da coleção postergada',        pct: 16, positive: false, color: '#B45309' },
+    { label: 'Clientes já atualizados',                description: 'Já receberam apresentação completa',        pct: 10, positive: false, color: '#6B7280' },
   ],
   Personalizado: [
-    { label: 'Clientes priorizados pela configuração', description: 'Baseado nos pesos definidos manualmente',      pct: 30, positive: true,  color: '#185FA5' },
-    { label: 'Clientes de alta atenção',               description: 'Indicadores de risco ou oportunidade',        pct: 25, positive: true,  color: '#3B6D11' },
-    { label: 'Clientes de manutenção',                 description: 'Frequência reduzida temporariamente',         pct: 15, positive: false, color: '#6B7280' },
-    { label: 'Clientes sem critério definido',         description: 'Aguardando configuração mais específica',     pct: 10, positive: false, color: '#6B7280' },
+    { label: 'Clientes priorizados pela configuração', description: 'Baseado nos pesos definidos manualmente',   pct: 30, positive: true,  color: '#185FA5' },
+    { label: 'Clientes de alta atenção',               description: 'Indicadores de risco ou oportunidade',     pct: 25, positive: true,  color: '#3B6D11' },
+    { label: 'Clientes de manutenção',                 description: 'Frequência reduzida temporariamente',      pct: 15, positive: false, color: '#6B7280' },
+    { label: 'Clientes sem critério definido',         description: 'Aguardando configuração mais específica',  pct: 10, positive: false, color: '#6B7280' },
   ],
 };
 
@@ -112,190 +121,84 @@ const CLIENT_TYPE_STYLE: Record<ClientType, { bg: string; text: string; label: s
   outros:  { bg: '#F3F4F6', text: '#6B7280', label: 'Padrão' },
 };
 
-// ── Simulation detail data ────────────────────────────────────────────────────
-
-interface SimProfile { label: string; clients: number; pct: number; color: string; }
-interface WeekProjection { week: string; alto: number; churn: number; colecao: number; outros: number; }
-interface RevenueScenario { label: string; value: string; pct: number; color: string; bg: string; }
-interface PrevComparison { metric: string; before: string; after: string; delta: string; positive: boolean; }
-
 const SIM_PROFILES: Record<string, SimProfile[]> = {
-  Crescimento: [
-    { label: 'Alto potencial',    clients: 312, pct: 38, color: '#3B6D11' },
-    { label: 'Risco de churn',    clients: 196, pct: 24, color: '#A32D2D' },
-    { label: 'Pot. coleção',      clients: 148, pct: 18, color: '#185FA5' },
-    { label: 'Padrão',            clients: 164, pct: 20, color: '#6B7280' },
-  ],
-  Recuperação: [
-    { label: 'Risco de inativação', clients: 368, pct: 45, color: '#A32D2D' },
-    { label: 'Inativos reativáveis',clients: 261, pct: 32, color: '#B45309' },
-    { label: 'NPS baixo',           clients: 180, pct: 22, color: '#7C3AED' },
-    { label: 'Padrão',              clients: 11,  pct:  1, color: '#6B7280' },
-  ],
-  Rentabilidade: [
-    { label: 'Maior margem',      clients: 344, pct: 42, color: '#3B6D11' },
-    { label: 'Limite disponível', clients: 229, pct: 28, color: '#185FA5' },
-    { label: 'Alt. propensão',    clients: 164, pct: 20, color: '#0E7490' },
-    { label: 'Padrão',            clients: 82,  pct: 10, color: '#6B7280' },
-  ],
-  Cobertura: [
-    { label: 'Baixa cobertura',   clients: 393, pct: 48, color: '#0E7490' },
-    { label: 'Sem visita 30d+',   clients: 286, pct: 35, color: '#3B6D11' },
-    { label: 'Pot. inexplorado',  clients: 90,  pct: 11, color: '#185FA5' },
-    { label: 'Padrão',            clients: 49,  pct:  6, color: '#6B7280' },
-  ],
-  Coleção: [
-    { label: 'Sem coleção atual', clients: 426, pct: 52, color: '#7C3AED' },
-    { label: 'Gap de mix',        clients: 245, pct: 30, color: '#B45309' },
-    { label: 'Maior ticket',      clients: 98,  pct: 12, color: '#3B6D11' },
-    { label: 'Padrão',            clients: 49,  pct:  6, color: '#6B7280' },
-  ],
-  Personalizado: [
-    { label: 'Priorizados config', clients: 245, pct: 30, color: '#185FA5' },
-    { label: 'Alta atenção',       clients: 204, pct: 25, color: '#3B6D11' },
-    { label: 'Oportunidade',       clients: 163, pct: 20, color: '#7C3AED' },
-    { label: 'Padrão',             clients: 206, pct: 25, color: '#6B7280' },
-  ],
+  Crescimento:   [{ label: 'Alto potencial', clients: 312, pct: 38, color: '#3B6D11' }, { label: 'Risco de churn', clients: 196, pct: 24, color: '#A32D2D' }, { label: 'Pot. coleção', clients: 148, pct: 18, color: '#185FA5' }, { label: 'Padrão', clients: 164, pct: 20, color: '#6B7280' }],
+  Recuperação:   [{ label: 'Risco de inativação', clients: 368, pct: 45, color: '#A32D2D' }, { label: 'Inativos reativáveis', clients: 261, pct: 32, color: '#B45309' }, { label: 'NPS baixo', clients: 180, pct: 22, color: '#7C3AED' }, { label: 'Padrão', clients: 11, pct: 1, color: '#6B7280' }],
+  Rentabilidade: [{ label: 'Maior margem', clients: 344, pct: 42, color: '#3B6D11' }, { label: 'Limite disponível', clients: 229, pct: 28, color: '#185FA5' }, { label: 'Alt. propensão', clients: 164, pct: 20, color: '#0E7490' }, { label: 'Padrão', clients: 82, pct: 10, color: '#6B7280' }],
+  Cobertura:     [{ label: 'Baixa cobertura', clients: 393, pct: 48, color: '#0E7490' }, { label: 'Sem visita 30d+', clients: 286, pct: 35, color: '#3B6D11' }, { label: 'Pot. inexplorado', clients: 90, pct: 11, color: '#185FA5' }, { label: 'Padrão', clients: 49, pct: 6, color: '#6B7280' }],
+  Coleção:       [{ label: 'Sem coleção atual', clients: 426, pct: 52, color: '#7C3AED' }, { label: 'Gap de mix', clients: 245, pct: 30, color: '#B45309' }, { label: 'Maior ticket', clients: 98, pct: 12, color: '#3B6D11' }, { label: 'Padrão', clients: 49, pct: 6, color: '#6B7280' }],
+  Personalizado: [{ label: 'Priorizados config', clients: 245, pct: 30, color: '#185FA5' }, { label: 'Alta atenção', clients: 204, pct: 25, color: '#3B6D11' }, { label: 'Oportunidade', clients: 163, pct: 20, color: '#7C3AED' }, { label: 'Padrão', clients: 206, pct: 25, color: '#6B7280' }],
 };
 
 const WEEK_PROJECTIONS: Record<string, WeekProjection[]> = {
-  Crescimento: [
-    { week: 'Sem. 1', alto: 48, churn: 32, colecao: 28, outros: 18 },
-    { week: 'Sem. 2', alto: 52, churn: 30, colecao: 34, outros: 14 },
-    { week: 'Sem. 3', alto: 44, churn: 28, colecao: 30, outros: 20 },
-    { week: 'Sem. 4', alto: 56, churn: 34, colecao: 26, outros: 12 },
-  ],
-  Recuperação: [
-    { week: 'Sem. 1', alto: 20, churn: 62, colecao: 10, outros: 8 },
-    { week: 'Sem. 2', alto: 18, churn: 68, colecao: 8,  outros: 6 },
-    { week: 'Sem. 3', alto: 22, churn: 58, colecao: 12, outros: 8 },
-    { week: 'Sem. 4', alto: 16, churn: 72, colecao: 6,  outros: 6 },
-  ],
-  Rentabilidade: [
-    { week: 'Sem. 1', alto: 68, churn: 10, colecao: 24, outros: 10 },
-    { week: 'Sem. 2', alto: 72, churn: 8,  colecao: 22, outros: 8  },
-    { week: 'Sem. 3', alto: 64, churn: 12, colecao: 20, outros: 12 },
-    { week: 'Sem. 4', alto: 76, churn: 6,  colecao: 26, outros: 6  },
-  ],
-  Cobertura: [
-    { week: 'Sem. 1', alto: 14, churn: 18, colecao: 12, outros: 72 },
-    { week: 'Sem. 2', alto: 16, churn: 16, colecao: 14, outros: 68 },
-    { week: 'Sem. 3', alto: 12, churn: 20, colecao: 10, outros: 74 },
-    { week: 'Sem. 4', alto: 18, churn: 14, colecao: 16, outros: 66 },
-  ],
-  Coleção: [
-    { week: 'Sem. 1', alto: 22, churn: 14, colecao: 72, outros: 8  },
-    { week: 'Sem. 2', alto: 20, churn: 12, colecao: 78, outros: 6  },
-    { week: 'Sem. 3', alto: 24, churn: 16, colecao: 68, outros: 10 },
-    { week: 'Sem. 4', alto: 18, churn: 10, colecao: 82, outros: 6  },
-  ],
-  Personalizado: [
-    { week: 'Sem. 1', alto: 36, churn: 24, colecao: 20, outros: 26 },
-    { week: 'Sem. 2', alto: 38, churn: 22, colecao: 22, outros: 24 },
-    { week: 'Sem. 3', alto: 34, churn: 26, colecao: 18, outros: 28 },
-    { week: 'Sem. 4', alto: 40, churn: 20, colecao: 24, outros: 22 },
-  ],
+  Crescimento:   [{ week: 'Sem. 1', alto: 48, churn: 32, colecao: 28, outros: 18 }, { week: 'Sem. 2', alto: 52, churn: 30, colecao: 34, outros: 14 }, { week: 'Sem. 3', alto: 44, churn: 28, colecao: 30, outros: 20 }, { week: 'Sem. 4', alto: 56, churn: 34, colecao: 26, outros: 12 }],
+  Recuperação:   [{ week: 'Sem. 1', alto: 20, churn: 62, colecao: 10, outros: 8 }, { week: 'Sem. 2', alto: 18, churn: 68, colecao: 8, outros: 6 }, { week: 'Sem. 3', alto: 22, churn: 58, colecao: 12, outros: 8 }, { week: 'Sem. 4', alto: 16, churn: 72, colecao: 6, outros: 6 }],
+  Rentabilidade: [{ week: 'Sem. 1', alto: 68, churn: 10, colecao: 24, outros: 10 }, { week: 'Sem. 2', alto: 72, churn: 8, colecao: 22, outros: 8 }, { week: 'Sem. 3', alto: 64, churn: 12, colecao: 20, outros: 12 }, { week: 'Sem. 4', alto: 76, churn: 6, colecao: 26, outros: 6 }],
+  Cobertura:     [{ week: 'Sem. 1', alto: 14, churn: 18, colecao: 12, outros: 72 }, { week: 'Sem. 2', alto: 16, churn: 16, colecao: 14, outros: 68 }, { week: 'Sem. 3', alto: 12, churn: 20, colecao: 10, outros: 74 }, { week: 'Sem. 4', alto: 18, churn: 14, colecao: 16, outros: 66 }],
+  Coleção:       [{ week: 'Sem. 1', alto: 22, churn: 14, colecao: 72, outros: 8 }, { week: 'Sem. 2', alto: 20, churn: 12, colecao: 78, outros: 6 }, { week: 'Sem. 3', alto: 24, churn: 16, colecao: 68, outros: 10 }, { week: 'Sem. 4', alto: 18, churn: 10, colecao: 82, outros: 6 }],
+  Personalizado: [{ week: 'Sem. 1', alto: 36, churn: 24, colecao: 20, outros: 26 }, { week: 'Sem. 2', alto: 38, churn: 22, colecao: 22, outros: 24 }, { week: 'Sem. 3', alto: 34, churn: 26, colecao: 18, outros: 28 }, { week: 'Sem. 4', alto: 40, churn: 20, colecao: 24, outros: 22 }],
 };
 
 const REVENUE_SCENARIOS: Record<string, RevenueScenario[]> = {
-  Crescimento:   [
-    { label: 'Otimista',   value: 'R$ 1,24M', pct: 112, color: '#3B6D11', bg: '#EAF3DE' },
-    { label: 'Realista',   value: 'R$ 1,08M', pct: 98,  color: '#185FA5', bg: '#E6F1FB' },
-    { label: 'Pessimista', value: 'R$ 890k',  pct: 81,  color: '#B45309', bg: '#FAEEDA' },
-  ],
-  Recuperação:   [
-    { label: 'Otimista',   value: 'R$ 1,10M', pct: 100, color: '#3B6D11', bg: '#EAF3DE' },
-    { label: 'Realista',   value: 'R$ 950k',  pct: 86,  color: '#185FA5', bg: '#E6F1FB' },
-    { label: 'Pessimista', value: 'R$ 780k',  pct: 71,  color: '#B45309', bg: '#FAEEDA' },
-  ],
-  Rentabilidade: [
-    { label: 'Otimista',   value: 'R$ 1,38M', pct: 125, color: '#3B6D11', bg: '#EAF3DE' },
-    { label: 'Realista',   value: 'R$ 1,18M', pct: 107, color: '#185FA5', bg: '#E6F1FB' },
-    { label: 'Pessimista', value: 'R$ 960k',  pct: 87,  color: '#B45309', bg: '#FAEEDA' },
-  ],
-  Cobertura:     [
-    { label: 'Otimista',   value: 'R$ 1,05M', pct: 95,  color: '#3B6D11', bg: '#EAF3DE' },
-    { label: 'Realista',   value: 'R$ 920k',  pct: 83,  color: '#185FA5', bg: '#E6F1FB' },
-    { label: 'Pessimista', value: 'R$ 760k',  pct: 69,  color: '#B45309', bg: '#FAEEDA' },
-  ],
-  Coleção:       [
-    { label: 'Otimista',   value: 'R$ 1,30M', pct: 118, color: '#3B6D11', bg: '#EAF3DE' },
-    { label: 'Realista',   value: 'R$ 1,12M', pct: 101, color: '#185FA5', bg: '#E6F1FB' },
-    { label: 'Pessimista', value: 'R$ 900k',  pct: 82,  color: '#B45309', bg: '#FAEEDA' },
-  ],
-  Personalizado: [
-    { label: 'Otimista',   value: 'R$ 1,15M', pct: 104, color: '#3B6D11', bg: '#EAF3DE' },
-    { label: 'Realista',   value: 'R$ 1,00M', pct: 91,  color: '#185FA5', bg: '#E6F1FB' },
-    { label: 'Pessimista', value: 'R$ 820k',  pct: 74,  color: '#B45309', bg: '#FAEEDA' },
-  ],
+  Crescimento:   [{ label: 'Otimista', value: 'R$ 1,24M', pct: 112, color: '#3B6D11', bg: '#EAF3DE' }, { label: 'Realista', value: 'R$ 1,08M', pct: 98, color: '#185FA5', bg: '#E6F1FB' }, { label: 'Pessimista', value: 'R$ 890k', pct: 81, color: '#B45309', bg: '#FAEEDA' }],
+  Recuperação:   [{ label: 'Otimista', value: 'R$ 1,10M', pct: 100, color: '#3B6D11', bg: '#EAF3DE' }, { label: 'Realista', value: 'R$ 950k', pct: 86, color: '#185FA5', bg: '#E6F1FB' }, { label: 'Pessimista', value: 'R$ 780k', pct: 71, color: '#B45309', bg: '#FAEEDA' }],
+  Rentabilidade: [{ label: 'Otimista', value: 'R$ 1,38M', pct: 125, color: '#3B6D11', bg: '#EAF3DE' }, { label: 'Realista', value: 'R$ 1,18M', pct: 107, color: '#185FA5', bg: '#E6F1FB' }, { label: 'Pessimista', value: 'R$ 960k', pct: 87, color: '#B45309', bg: '#FAEEDA' }],
+  Cobertura:     [{ label: 'Otimista', value: 'R$ 1,05M', pct: 95, color: '#3B6D11', bg: '#EAF3DE' }, { label: 'Realista', value: 'R$ 920k', pct: 83, color: '#185FA5', bg: '#E6F1FB' }, { label: 'Pessimista', value: 'R$ 760k', pct: 69, color: '#B45309', bg: '#FAEEDA' }],
+  Coleção:       [{ label: 'Otimista', value: 'R$ 1,30M', pct: 118, color: '#3B6D11', bg: '#EAF3DE' }, { label: 'Realista', value: 'R$ 1,12M', pct: 101, color: '#185FA5', bg: '#E6F1FB' }, { label: 'Pessimista', value: 'R$ 900k', pct: 82, color: '#B45309', bg: '#FAEEDA' }],
+  Personalizado: [{ label: 'Otimista', value: 'R$ 1,15M', pct: 104, color: '#3B6D11', bg: '#EAF3DE' }, { label: 'Realista', value: 'R$ 1,00M', pct: 91, color: '#185FA5', bg: '#E6F1FB' }, { label: 'Pessimista', value: 'R$ 820k', pct: 74, color: '#B45309', bg: '#FAEEDA' }],
 };
 
 const PREV_COMPARISON: Record<string, PrevComparison[]> = {
-  Crescimento:   [
-    { metric: 'Clientes priorizados',   before: '420',      after: '586',      delta: '+40%',  positive: true  },
-    { metric: 'Visitas estimadas/sem.', before: '126',      after: '170',      delta: '+35%',  positive: true  },
-    { metric: 'Ticket médio esperado',  before: 'R$ 3.200', after: 'R$ 4.100', delta: '+28%',  positive: true  },
-    { metric: 'Clientes de alto risco', before: '86',       after: '44',       delta: '-49%',  positive: true  },
-  ],
-  Recuperação:   [
-    { metric: 'Clientes em risco',       before: '142', after: '368', delta: '+159%', positive: true  },
-    { metric: 'Reativações estimadas',   before: '18',  after: '42',  delta: '+133%', positive: true  },
-    { metric: 'Ticket médio esperado',   before: 'R$ 3.200', after: 'R$ 2.600', delta: '-19%', positive: false },
-    { metric: 'Novos clientes visitados',before: '64',  after: '11',  delta: '-83%',  positive: false },
-  ],
-  Rentabilidade: [
-    { metric: 'Ticket médio esperado',  before: 'R$ 3.200', after: 'R$ 5.800', delta: '+81%',  positive: true  },
-    { metric: 'Clientes alta margem',   before: '186',      after: '344',      delta: '+85%',  positive: true  },
-    { metric: 'Exposição inadimplência',before: 'R$ 124k',  after: 'R$ 48k',   delta: '-61%',  positive: true  },
-    { metric: 'Cobertura territorial',  before: '78%',      after: '52%',      delta: '-26pp', positive: false },
-  ],
-  Cobertura:     [
-    { metric: 'Áreas cobertas',         before: '34',  after: '61',  delta: '+79%',  positive: true  },
-    { metric: 'Clientes sem visita 30d',before: '286', after: '94',  delta: '-67%',  positive: true  },
-    { metric: 'Ticket médio esperado',  before: 'R$ 3.200', after: 'R$ 2.100', delta: '-34%', positive: false },
-    { metric: 'Clientes alto potencial',before: '186', after: '114', delta: '-39%',  positive: false },
-  ],
-  Coleção:       [
-    { metric: 'Apres. de coleção/sem.', before: '48',  after: '126', delta: '+163%', positive: true  },
-    { metric: 'Mix gap coberto',        before: '22%', after: '61%', delta: '+39pp', positive: true  },
-    { metric: 'Ticket médio esperado',  before: 'R$ 3.200', after: 'R$ 4.600', delta: '+44%', positive: true  },
-    { metric: 'Clientes em risco atend.',before:'86',  after: '28',  delta: '-67%',  positive: false },
-  ],
-  Personalizado: [
-    { metric: 'Clientes priorizados',   before: '420', after: '449', delta: '+7%',   positive: true  },
-    { metric: 'Visitas estimadas/sem.', before: '126', after: '134', delta: '+6%',   positive: true  },
-    { metric: 'Ticket médio esperado',  before: 'R$ 3.200', after: 'R$ 3.400', delta: '+6%', positive: true },
-    { metric: 'Cobertura territorial',  before: '78%', after: '74%', delta: '-4pp',  positive: false },
-  ],
+  Crescimento:   [{ metric: 'Clientes priorizados', before: '420', after: '586', delta: '+40%', positive: true }, { metric: 'Visitas estimadas/sem.', before: '126', after: '170', delta: '+35%', positive: true }, { metric: 'Ticket médio esperado', before: 'R$ 3.200', after: 'R$ 4.100', delta: '+28%', positive: true }, { metric: 'Clientes de alto risco', before: '86', after: '44', delta: '-49%', positive: true }],
+  Recuperação:   [{ metric: 'Clientes em risco', before: '142', after: '368', delta: '+159%', positive: true }, { metric: 'Reativações estimadas', before: '18', after: '42', delta: '+133%', positive: true }, { metric: 'Ticket médio esperado', before: 'R$ 3.200', after: 'R$ 2.600', delta: '-19%', positive: false }, { metric: 'Novos clientes visitados', before: '64', after: '11', delta: '-83%', positive: false }],
+  Rentabilidade: [{ metric: 'Ticket médio esperado', before: 'R$ 3.200', after: 'R$ 5.800', delta: '+81%', positive: true }, { metric: 'Clientes alta margem', before: '186', after: '344', delta: '+85%', positive: true }, { metric: 'Exposição inadimplência', before: 'R$ 124k', after: 'R$ 48k', delta: '-61%', positive: true }, { metric: 'Cobertura territorial', before: '78%', after: '52%', delta: '-26pp', positive: false }],
+  Cobertura:     [{ metric: 'Áreas cobertas', before: '34', after: '61', delta: '+79%', positive: true }, { metric: 'Clientes sem visita 30d', before: '286', after: '94', delta: '-67%', positive: true }, { metric: 'Ticket médio esperado', before: 'R$ 3.200', after: 'R$ 2.100', delta: '-34%', positive: false }, { metric: 'Clientes alto potencial', before: '186', after: '114', delta: '-39%', positive: false }],
+  Coleção:       [{ metric: 'Apres. de coleção/sem.', before: '48', after: '126', delta: '+163%', positive: true }, { metric: 'Mix gap coberto', before: '22%', after: '61%', delta: '+39pp', positive: true }, { metric: 'Ticket médio esperado', before: 'R$ 3.200', after: 'R$ 4.600', delta: '+44%', positive: true }, { metric: 'Clientes em risco atend.', before: '86', after: '28', delta: '-67%', positive: false }],
+  Personalizado: [{ metric: 'Clientes priorizados', before: '420', after: '449', delta: '+7%', positive: true }, { metric: 'Visitas estimadas/sem.', before: '126', after: '134', delta: '+6%', positive: true }, { metric: 'Ticket médio esperado', before: 'R$ 3.200', after: 'R$ 3.400', delta: '+6%', positive: true }, { metric: 'Cobertura territorial', before: '78%', after: '74%', delta: '-4pp', positive: false }],
 };
 
-// ── Base client pool — same clients, different order before/after
 const BASE_CLIENTS: ClientRow[] = [
-  { name: 'Calçados Bom Pé',      type: 'outros',  city: 'Campinas',     lastVisit: '12 dias',  score: 61, ticket: 'R$ 2.100', tag: 'Padrão' },
-  { name: 'Moda Premium Ltda',     type: 'alto',    city: 'São Paulo',    lastVisit: '5 dias',   score: 88, ticket: 'R$ 8.400', tag: 'Alto potencial' },
-  { name: 'Casa do Sapato',        type: 'outros',  city: 'Santos',       lastVisit: '18 dias',  score: 54, ticket: 'R$ 1.800', tag: 'Padrão' },
-  { name: 'Risco de Perda — João', type: 'churn',   city: 'Ribeirão',     lastVisit: '38 dias',  score: 79, ticket: 'R$ 4.200', tag: 'Risco de churn' },
-  { name: 'Atacado Norte',         type: 'outros',  city: 'Sorocaba',     lastVisit: '7 dias',   score: 58, ticket: 'R$ 1.500', tag: 'Padrão' },
-  { name: 'Sapatos & Moda',        type: 'alto',    city: 'São Paulo',    lastVisit: '3 dias',   score: 92, ticket: 'R$ 9.200', tag: 'Alto potencial' },
-  { name: 'Boutique do Calçado',   type: 'colecao', city: 'Jundiaí',      lastVisit: '14 dias',  score: 83, ticket: 'R$ 5.600', tag: 'Pot. coleção' },
-  { name: 'Loja Infantil Pezinho', type: 'outros',  city: 'Campinas',     lastVisit: '22 dias',  score: 45, ticket: 'R$ 900',  tag: 'Padrão' },
+  { name: 'Calçados Bom Pé',      type: 'outros',  city: 'Campinas',  lastVisit: '12 dias', score: 61, ticket: 'R$ 2.100', tag: 'Padrão' },
+  { name: 'Moda Premium Ltda',     type: 'alto',    city: 'São Paulo', lastVisit: '5 dias',  score: 88, ticket: 'R$ 8.400', tag: 'Alto potencial' },
+  { name: 'Casa do Sapato',        type: 'outros',  city: 'Santos',    lastVisit: '18 dias', score: 54, ticket: 'R$ 1.800', tag: 'Padrão' },
+  { name: 'Risco de Perda — João', type: 'churn',   city: 'Ribeirão',  lastVisit: '38 dias', score: 79, ticket: 'R$ 4.200', tag: 'Risco de churn' },
+  { name: 'Atacado Norte',         type: 'outros',  city: 'Sorocaba',  lastVisit: '7 dias',  score: 58, ticket: 'R$ 1.500', tag: 'Padrão' },
+  { name: 'Sapatos & Moda',        type: 'alto',    city: 'São Paulo', lastVisit: '3 dias',  score: 92, ticket: 'R$ 9.200', tag: 'Alto potencial' },
+  { name: 'Boutique do Calçado',   type: 'colecao', city: 'Jundiaí',   lastVisit: '14 dias', score: 83, ticket: 'R$ 5.600', tag: 'Pot. coleção' },
+  { name: 'Loja Infantil Pezinho', type: 'outros',  city: 'Campinas',  lastVisit: '22 dias', score: 45, ticket: 'R$ 900',  tag: 'Padrão' },
 ];
 
-// Orders by mode (indices into BASE_CLIENTS)
 const BEFORE_ORDER = [0, 1, 2, 3, 4, 5, 6, 7];
 const AFTER_ORDER_BY_MODE: Record<string, number[]> = {
-  Crescimento:   [5, 1, 6, 3, 0, 2, 4, 7],
-  Recuperação:   [3, 4, 1, 5, 7, 6, 0, 2],
-  Rentabilidade: [5, 1, 6, 0, 3, 2, 4, 7],
-  Cobertura:     [7, 2, 0, 4, 3, 6, 1, 5],
-  Coleção:       [6, 5, 1, 3, 0, 7, 2, 4],
-  Personalizado: [1, 5, 3, 6, 0, 2, 4, 7],
+  Crescimento: [5,1,6,3,0,2,4,7], Recuperação: [3,4,1,5,7,6,0,2],
+  Rentabilidade: [5,1,6,0,3,2,4,7], Cobertura: [7,2,0,4,3,6,1,5],
+  Coleção: [6,5,1,3,0,7,2,4], Personalizado: [1,5,3,6,0,2,4,7],
 };
 
-// Period labels
-const PERIOD_DAYS   = ['26/ago', '27/ago', '28/ago', '29/ago', '02/set', '03/set', '04/set', '05/set'];
-const PERIOD_WEEKS  = ['Sem. 1 (26/ago)', 'Sem. 2 (02/set)', 'Sem. 3 (09/set)', 'Sem. 4 (16/set)', 'Sem. 5 (23/set)', 'Sem. 6 (30/set)'];
-const PERIOD_MONTHS = ['Agosto 2026', 'Setembro 2026', 'Outubro 2026'];
+// ── Briefing padrão por estratégia ───────────────────────────────────────────
+
+const BRIEFING_DEFAULTS: Record<string, string> = {
+  Crescimento:
+    'Priorize os clientes com maior potencial de compra identificados pela IA. Aborde oportunidades de ampliação de mix e aumento de ticket. Reforce as condições comerciais vigentes e explore clientes que não compram há mais de 30 dias mas têm histórico positivo.',
+  Recuperação:
+    'Foque nos clientes em risco de inativação e nos inativos com potencial de reativação. Aborde com empatia, sem pressão — o objetivo é retomar o relacionamento. Registre o motivo da ausência e ofereça condições especiais de retorno quando disponíveis.',
+  Rentabilidade:
+    'Priorize clientes com maior margem e limite de crédito disponível. Evite oferecer descontos desnecessários — o foco é aumentar o ticket médio e melhorar a qualidade do pedido. Atenção especial a clientes com histórico de alto faturamento que reduziram o volume recentemente.',
+  Cobertura:
+    'O objetivo desta visita é garantir presença nas regiões com menor cobertura no ciclo. Priorize clientes que ainda não foram visitados no mês, especialmente os de médio e alto potencial. Registre o resultado de cada visita para atualizar a cobertura em tempo real.',
+  Coleção:
+    'Foque na apresentação das marcas priorizadas neste ciclo. Identifique clientes que ainda não conhecem os produtos selecionados ou que compraram abaixo do potencial. Apresente lookbook, condições de lançamento e prazo de entrega. Registre o interesse e próxima ação ao final de cada visita.',
+  Personalizado: '',
+};
+
+// ── Marca & Cobertura options ─────────────────────────────────────────────────
+
+const AVAILABLE_BRANDS = ['Beira Rio', 'Moleca', 'Vizzano', 'Modare', 'Molekinha', 'Molekinho', 'Actvitta', 'BR Sport'];
+const AVAILABLE_REGIONS = ['Sul', 'Sudeste', 'Nordeste', 'Norte', 'Centro-Oeste', 'São Paulo', 'Rio de Janeiro', 'Minas Gerais'];
+
+const PERIOD_DAYS   = ['26/ago','27/ago','28/ago','29/ago','02/set','03/set','04/set','05/set'];
+const PERIOD_WEEKS  = ['Sem. 1 (26/ago)','Sem. 2 (02/set)','Sem. 3 (09/set)','Sem. 4 (16/set)','Sem. 5 (23/set)','Sem. 6 (30/set)'];
+const PERIOD_MONTHS = ['Agosto 2026','Setembro 2026','Outubro 2026'];
 
 const LEVEL_STYLES: Record<DimensionLevel, React.CSSProperties> = {
   Alta:  { backgroundColor: '#E6F1FB', color: '#185FA5' },
@@ -337,12 +240,7 @@ function ClientList({ clients, highlight }: { clients: ClientRow[]; highlight?: 
               <div className="text-[10px] text-muted-foreground">{c.city} · {c.lastVisit}</div>
             </div>
             <div className="flex items-center gap-1.5 flex-shrink-0">
-              <span
-                className="text-[10px] px-1.5 py-0.5 rounded font-medium"
-                style={{ backgroundColor: style.bg, color: style.text }}
-              >
-                {style.label}
-              </span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded font-medium" style={{ backgroundColor: style.bg, color: style.text }}>{style.label}</span>
               <span className="text-[10px] text-muted-foreground tabular-nums w-14 text-right">{c.ticket}</span>
             </div>
           </div>
@@ -356,21 +254,50 @@ function ClientList({ clients, highlight }: { clients: ClientRow[]; highlight?: 
 
 export function SteeringRuleEditor() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState('Crescimento');
-  const [weights, setWeights] = useState<Record<string, DimensionWeight>>(() => ({ ...MODE_WEIGHTS.Crescimento }));
-  const [showCriteria, setShowCriteria] = useState(false);
-  const [showSim, setShowSim] = useState(false);
-  const [isActive, setIsActive] = useState(true);
-  const [startDate, setStartDate] = useState('2026-08-26');
-  const [endDate, setEndDate] = useState('2026-10-10');
+
+  // Shared state
+  const [mode, setMode]             = useState('Crescimento');
+  const [strategyName, setStrategyName] = useState('');
+const [isActive, setIsActive]     = useState(true);
+  const [startDate, setStartDate]   = useState('2026-08-26');
+  const [endDate, setEndDate]       = useState('2026-10-10');
   const [datePopoverOpen, setDatePopoverOpen] = useState(false);
+
+  // Tab state
+  const [activeTab, setActiveTab]   = useState<EditorTab>('direcionamento');
+  const [editingCardId, setEditingCardId] = useState<string | null>(null);
+  // Nomes editáveis — pré-populados pelo sistema com base no período; customizáveis pela organização
+  const [modeLabels, setModeLabels] = useState<Record<string, string>>(() =>
+    Object.fromEntries(MODES.map(m => [m.id, m.label]))
+  );
+
+
+  // Direcionamento state
+  const [weights, setWeights]       = useState<Record<string, DimensionWeight>>(() => ({ ...MODE_WEIGHTS.Crescimento }));
+  const [showCriteria, setShowCriteria] = useState(false);
+  const [showSim, setShowSim]       = useState(false);
   const [periodView, setPeriodView] = useState<PeriodView>('semana');
-  const [periodIdx, setPeriodIdx] = useState(0);
+  const [periodIdx, setPeriodIdx]   = useState(0);
+  const [expandedDim, setExpandedDim] = useState<string | null>(null);
+
+  // Marca config — exemplo com todas as marcas pré-selecionadas
+  const [selectedBrands, setSelectedBrands] = useState<string[]>([...AVAILABLE_BRANDS]);
+
+  // Cobertura config — exemplo com apenas algumas regiões selecionadas
+  const [selectedRegions, setSelectedRegions] = useState<string[]>(['Sul', 'São Paulo', 'Rio de Janeiro']);
+
+  const toggleBrand = (b: string) => setSelectedBrands(prev => prev.includes(b) ? prev.filter(x => x !== b) : [...prev, b]);
+  const toggleRegion = (r: string) => setSelectedRegions(prev => prev.includes(r) ? prev.filter(x => x !== r) : [...prev, r]);
+  const toggleExpanded = (id: string) => setExpandedDim(prev => prev === id ? null : id);
+
+  // Briefing state — pré-populado conforme a estratégia selecionada
+  const [briefingText, setBriefingText] = useState(() => BRIEFING_DEFAULTS['Crescimento'] ?? '');
+  const [briefingStatus, setBriefingStatus] = useState<'Ativo' | 'Rascunho'>('Rascunho');
 
   const handleModeSelect = (modeId: string) => {
     setMode(modeId);
     setWeights({ ...MODE_WEIGHTS[modeId] ?? DEFAULT_WEIGHTS });
-
+    setBriefingText(BRIEFING_DEFAULTS[modeId] ?? '');
   };
   const handleSlider = (dimId: string, newPct: number) => {
     setWeights((prev) => redistributePcts(prev, dimId, newPct));
@@ -384,6 +311,8 @@ export function SteeringRuleEditor() {
   const totalPct = Object.values(weights).reduce((s, w) => s + w.pct, 0);
   const impact = MODE_IMPACT[mode] ?? MODE_IMPACT.Personalizado;
   const currentMode = MODES.find((m) => m.id === mode);
+  const modeStyle = MODE_STYLE[mode] ?? MODE_STYLE.Personalizado;
+  const ModeIcon = currentMode?.icon ?? Settings2;
 
   const afterOrder = AFTER_ORDER_BY_MODE[mode] ?? AFTER_ORDER_BY_MODE.Personalizado;
   const beforeClients = BEFORE_ORDER.map((i) => BASE_CLIENTS[i]);
@@ -392,380 +321,510 @@ export function SteeringRuleEditor() {
   const periodLabels = periodView === 'dia' ? PERIOD_DAYS : periodView === 'semana' ? PERIOD_WEEKS : PERIOD_MONTHS;
   const maxIdx = periodLabels.length - 1;
 
+  const briefingComplete = briefingText.trim().length > 20;
+  const dateLabel = startDate && endDate
+    ? `${new Date(startDate+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} – ${new Date(endDate+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'})}`
+    : 'Definir período';
+
   return (
     <div className="p-8 space-y-6 max-w-[1200px]">
 
-      {/* Header */}
+      {/* ── Header ───────────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-start gap-4 justify-between">
-        <div>
-          <Link
-            to="/direcionamento"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-2"
-          >
+        <div className="flex-1 min-w-0">
+          <Link to="/direcionamento" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-3">
             <ArrowLeft className="w-4 h-4" strokeWidth={1.5} />
             Voltar para Direcionamento
           </Link>
+          <input
+            type="text"
+            value={strategyName}
+            onChange={e => setStrategyName(e.target.value)}
+            placeholder="Nome da estratégia..."
+            className="text-xl font-semibold bg-transparent border-0 border-b border-transparent hover:border-border focus:border-primary focus:outline-none text-foreground placeholder:text-muted-foreground/50 w-full pb-0.5 transition-colors"
+          />
         </div>
-
         <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
+          {/* Vigência chip */}
           <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
             <PopoverTrigger asChild>
               <button className="flex items-center gap-2 px-3 py-2 bg-card border border-border rounded-lg text-xs hover:bg-secondary transition-colors">
                 <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isActive ? 'bg-green-500' : 'bg-muted-foreground'}`} />
-                <span className="font-medium text-foreground whitespace-nowrap">
-                  {isActive ? 'Direcionamento ativo' : 'Inativo'}
-                </span>
-                {isActive && (
-                  <span className="text-muted-foreground hidden sm:inline">
-                    {new Date(startDate + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }).replace('/', '/')} – {new Date(endDate + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
-                  </span>
-                )}
+                <span className="font-medium text-foreground whitespace-nowrap">{isActive ? 'Ativo' : 'Inativo'}</span>
+                <span className="text-muted-foreground hidden sm:inline">{dateLabel}</span>
                 <Calendar className="w-3 h-3 text-muted-foreground" strokeWidth={1.5} />
               </button>
             </PopoverTrigger>
             <PopoverContent align="end" className="w-72 p-0 overflow-hidden">
-              {/* Date range */}
               <div className="px-4 py-3 space-y-3">
                 <div className="text-xs font-semibold text-foreground">Período de vigência</div>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className="text-[11px] text-muted-foreground block mb-1">Início</label>
-                    <input
-                      type="date"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                      className="w-full text-xs border border-border rounded-lg px-2.5 py-1.5 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                    />
+                    <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full text-xs border border-border rounded-lg px-2.5 py-1.5 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary" />
                   </div>
                   <div>
                     <label className="text-[11px] text-muted-foreground block mb-1">Fim</label>
-                    <input
-                      type="date"
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
-                      className="w-full text-xs border border-border rounded-lg px-2.5 py-1.5 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                    />
+                    <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full text-xs border border-border rounded-lg px-2.5 py-1.5 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary" />
                   </div>
                 </div>
-                <button
-                  onClick={() => setDatePopoverOpen(false)}
-                  className="w-full py-1.5 text-xs font-medium bg-primary text-primary-foreground rounded-lg transition-colors"
-                >
-                  Confirmar período
-                </button>
+                <button onClick={() => setDatePopoverOpen(false)} className="w-full py-1.5 text-xs font-medium text-white rounded-lg" style={{ backgroundColor: '#185FA5' }}>Confirmar período</button>
               </div>
-
-              {/* Divider + inactivate */}
               <div className="border-t border-border px-4 py-3">
                 <div className="text-[11px] text-muted-foreground mb-2">Ação rápida</div>
                 {isActive ? (
-                  <button
-                    onClick={() => { setIsActive(false); setDatePopoverOpen(false); }}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-xs rounded-lg border border-border hover:bg-red-50 hover:border-red-200 transition-colors text-red-600"
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" />
-                    Inativar direcionamento agora
+                  <button onClick={() => { setIsActive(false); setDatePopoverOpen(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs rounded-lg border border-border hover:bg-red-50 hover:border-red-200 transition-colors text-red-600">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" /> Inativar agora
                   </button>
                 ) : (
-                  <button
-                    onClick={() => { setIsActive(true); setDatePopoverOpen(false); }}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-xs rounded-lg border border-border hover:bg-green-50 hover:border-green-200 transition-colors text-green-700"
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 flex-shrink-0" />
-                    Reativar direcionamento
+                  <button onClick={() => { setIsActive(true); setDatePopoverOpen(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs rounded-lg border border-border hover:bg-green-50 hover:border-green-200 transition-colors text-green-700">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 flex-shrink-0" /> Reativar
                   </button>
                 )}
               </div>
             </PopoverContent>
           </Popover>
-          <button
-            onClick={() => navigate('/direcionamento')}
-            className="px-3 py-2 text-xs border border-border rounded-lg hover:bg-secondary transition-colors text-foreground"
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={() => navigate('/direcionamento')}
-            className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium bg-primary text-primary-foreground rounded-lg transition-colors whitespace-nowrap"
-          >
-            Salvar direcionamento
-          </button>
+
+          <button onClick={() => navigate('/direcionamento')} className="px-3 py-2 text-xs border border-border rounded-lg hover:bg-secondary transition-colors text-foreground">Cancelar</button>
+          <button onClick={() => navigate('/direcionamento')} className="px-3 py-2 text-xs font-medium text-white rounded-lg transition-colors" style={{ backgroundColor: '#185FA5' }}>Salvar estratégia</button>
         </div>
       </div>
 
-      {/* Section 1: Mode cards */}
+      {/* ── 1. Mode cards ──────────────────────────────────────────────────── */}
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-foreground">1. Qual o foco principal deste ciclo?</h2>
+        <h2 className="text-sm font-semibold text-foreground">1. Qual o foco principal desta estratégia?</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
           {MODES.map((m) => {
             const Icon = m.icon;
             const active = mode === m.id;
+            const isEditingLabel = editingCardId === m.id;
+            const label = modeLabels[m.id] ?? m.label;
+            const isCustom = m.id === 'Personalizado';
+
+            // ── Card "+" para estratégia personalizada ──
+            if (isCustom) {
+              return (
+                <div key={m.id} className="relative group">
+                  <div
+                    onClick={() => { handleModeSelect(m.id); setEditingCardId('Personalizado'); }}
+                    className="w-full flex flex-col gap-2 p-3 rounded-xl border text-left transition-all cursor-pointer"
+                    style={active
+                      ? { borderColor: '#185FA5', backgroundColor: '#E6F1FB' }
+                      : { borderColor: 'var(--border)', borderStyle: 'dashed', backgroundColor: 'var(--card)' }
+                    }
+                  >
+                    <div
+                      className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0"
+                      style={{ backgroundColor: active ? '#185FA5' : 'var(--secondary)' }}
+                    >
+                      {active
+                        ? <Icon className="w-3.5 h-3.5" strokeWidth={1.5} style={{ color: '#fff' }} />
+                        : <span className="text-base font-light leading-none" style={{ color: 'var(--muted-foreground)' }}>+</span>
+                      }
+                    </div>
+                    {active ? (
+                      <input
+                        type="text"
+                        value={label}
+                        autoFocus={isEditingLabel}
+                        placeholder="Nome da estratégia..."
+                        onChange={e => setModeLabels(prev => ({ ...prev, Personalizado: e.target.value }))}
+                        onBlur={() => setEditingCardId(null)}
+                        onKeyDown={e => e.key === 'Enter' && setEditingCardId(null)}
+                        onClick={e => e.stopPropagation()}
+                        className="w-full text-[11px] font-semibold bg-transparent border-0 border-b focus:outline-none pb-0.5 leading-snug"
+                        style={{ borderColor: '#185FA580', color: '#0C447C' }}
+                      />
+                    ) : (
+                      <span className="text-[11px] font-medium leading-snug text-muted-foreground">
+                        Nova estratégia
+                      </span>
+                    )}
+                  </div>
+                  {!active && (
+                    <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                      <div className="bg-foreground text-background text-[11px] leading-relaxed rounded-lg px-3 py-2 shadow-lg max-w-[180px] text-center" style={{ whiteSpace: 'normal' }}>{m.description}</div>
+                      <div className="w-2 h-2 bg-foreground rotate-45 mx-auto -mt-1" />
+                    </div>
+                  )}
+                </div>
+              );
+            }
+
+            // ── Cards normais ──
             return (
               <div key={m.id} className="relative group">
-                <button
-                  onClick={() => handleModeSelect(m.id)}
-                  className="w-full flex flex-col gap-2 p-3 rounded-xl border text-left transition-all hover:border-blue-300"
-                  style={active
-                    ? { borderColor: '#185FA5', backgroundColor: '#E6F1FB' }
-                    : { borderColor: 'var(--border)', backgroundColor: 'var(--card)' }
-                  }
+                <div
+                  onClick={() => { handleModeSelect(m.id); if (!isEditingLabel) setEditingCardId(null); }}
+                  className="w-full flex flex-col gap-2 p-3 rounded-xl border text-left transition-all hover:border-blue-300 cursor-pointer"
+                  style={active ? { borderColor: '#185FA5', backgroundColor: '#E6F1FB' } : { borderColor: 'var(--border)', backgroundColor: 'var(--card)' }}
                 >
-                  <div
-                    className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0"
-                    style={{ backgroundColor: active ? '#185FA5' : 'var(--secondary)' }}
-                  >
+                  <div className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0" style={{ backgroundColor: active ? '#185FA5' : 'var(--secondary)' }}>
                     <Icon className="w-3.5 h-3.5" strokeWidth={1.5} style={{ color: active ? '#fff' : 'var(--muted-foreground)' }} />
                   </div>
-                  <div className="text-xs font-semibold leading-snug" style={{ color: active ? '#0C447C' : 'var(--foreground)' }}>
-                    {m.label}
-                  </div>
-                </button>
-                {/* Tooltip */}
-                <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
-                  <div className="bg-foreground text-background text-[11px] leading-relaxed rounded-lg px-3 py-2 whitespace-nowrap shadow-lg max-w-[180px] text-center" style={{ whiteSpace: 'normal' }}>
-                    {m.description}
-                  </div>
-                  <div className="w-2 h-2 bg-foreground rotate-45 mx-auto -mt-1" />
+                  {isEditingLabel ? (
+                    <input
+                      type="text"
+                      value={label}
+                      autoFocus
+                      onChange={e => setModeLabels(prev => ({ ...prev, [m.id]: e.target.value }))}
+                      onBlur={() => setEditingCardId(null)}
+                      onKeyDown={e => e.key === 'Enter' && setEditingCardId(null)}
+                      onClick={e => e.stopPropagation()}
+                      className="w-full text-[11px] font-semibold bg-transparent border-0 border-b focus:outline-none pb-0.5 leading-snug"
+                      style={{ borderColor: active ? '#185FA580' : 'var(--border)', color: active ? '#0C447C' : 'var(--foreground)' }}
+                    />
+                  ) : (
+                    <div className="flex items-start justify-between gap-0.5 min-w-0">
+                      <span className="text-[11px] font-semibold leading-snug break-words min-w-0" style={{ color: active ? '#0C447C' : 'var(--foreground)' }}>
+                        {label}
+                      </span>
+                      <button
+                        onClick={e => { e.stopPropagation(); handleModeSelect(m.id); setEditingCardId(m.id); }}
+                        className="opacity-0 group-hover:opacity-60 hover:!opacity-100 flex-shrink-0 mt-0.5 transition-opacity"
+                        title="Renomear"
+                      >
+                        <svg className="w-2.5 h-2.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: active ? '#185FA5' : 'var(--muted-foreground)' }}>
+                          <path d="M8.5 1.5l2 2L4 10H2V8L8.5 1.5z" />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
                 </div>
+                {!isEditingLabel && (
+                  <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                    <div className="bg-foreground text-background text-[11px] leading-relaxed rounded-lg px-3 py-2 shadow-lg max-w-[180px] text-center" style={{ whiteSpace: 'normal' }}>{m.description}</div>
+                    <div className="w-2 h-2 bg-foreground rotate-45 mx-auto -mt-1" />
+                  </div>
+                )}
               </div>
             );
           })}
         </div>
       </section>
 
-      {/* Sections 2 + 3 */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-5">
-
-        {/* Section 2: Sliders */}
-        <section className="space-y-3">
-          <div className="flex items-start justify-between gap-3">
-            <h2 className="text-sm font-semibold text-foreground">2. Ajuste as alavancas estratégicas</h2>
-            <span
-              className="text-[11px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
-              style={totalPct === 100
-                ? { backgroundColor: '#EAF3DE', color: '#3B6D11' }
-                : { backgroundColor: '#FCEBEB', color: '#A32D2D' }
-              }
+      {/* ── 2. Tabs ────────────────────────────────────────────────────────── */}
+      <div className="border-b border-border">
+        <nav className="flex gap-1">
+          {[
+            { id: 'direcionamento' as EditorTab, label: 'Direcionamento', desc: 'Pesos e alavancas estratégicas' },
+            { id: 'briefing'       as EditorTab, label: 'Briefing',       desc: briefingComplete ? 'Instrução configurada' : 'Instrução contextual' },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex flex-col px-4 pb-3 pt-2 text-sm font-medium transition-colors relative text-left ${
+                activeTab === tab.id ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
+              }`}
             >
-              {totalPct}%
-            </span>
-          </div>
+              <span>{tab.label}</span>
+              <span className="text-[11px] font-normal text-muted-foreground">{tab.desc}</span>
+            </button>
+          ))}
+        </nav>
+      </div>
 
-          <div className="bg-card border border-border rounded-xl overflow-hidden divide-y divide-border">
-            {DIMENSIONS.map((dim) => {
-              const w = weights[dim.id] ?? { pct: 20, level: 'Média' as DimensionLevel };
-              const Icon = dim.icon;
-              const fillPct = Math.min((w.pct / 60) * 100, 100);
-              return (
-                <div key={dim.id} className="px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-7 h-7 rounded-md bg-secondary flex items-center justify-center flex-shrink-0">
-                      <Icon className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2 mb-1.5">
-                        <span className="text-xs font-medium text-foreground truncate">{dim.label}</span>
-                        <div className="flex items-center gap-1.5 flex-shrink-0">
-                          <span className="text-xs font-semibold text-foreground w-8 text-right tabular-nums">{w.pct}%</span>
-                          <select
-                            value={w.level}
-                            onChange={(e) => handleLevel(dim.id, e.target.value as DimensionLevel)}
-                            className="text-[10px] px-1.5 py-0.5 rounded-md border-0 cursor-pointer font-medium focus:outline-none"
-                            style={LEVEL_STYLES[w.level]}
-                          >
-                            <option value="Alta">Alta</option>
-                            <option value="Média">Média</option>
-                            <option value="Baixa">Baixa</option>
-                          </select>
+      {/* ── Tab: Direcionamento ────────────────────────────────────────────── */}
+      {activeTab === 'direcionamento' && (
+        <div className="space-y-6">
+          {/* Sections 2 + 3 */}
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-5">
+            {/* Sliders */}
+            <section className="space-y-3">
+              <div className="flex items-start justify-between gap-3">
+                <h2 className="text-sm font-semibold text-foreground">2. Ajuste as alavancas estratégicas</h2>
+                <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
+                  style={totalPct === 100 ? { backgroundColor: '#EAF3DE', color: '#3B6D11' } : { backgroundColor: '#FCEBEB', color: '#A32D2D' }}>
+                  {totalPct}%
+                </span>
+              </div>
+              <div className="bg-card border border-border rounded-xl overflow-hidden divide-y divide-border">
+                {DIMENSIONS.map((dim) => {
+                  const w = weights[dim.id] ?? { pct: 20, level: 'Média' as DimensionLevel };
+                  const Icon = dim.icon;
+                  const fillPct = Math.min((w.pct / 60) * 100, 100);
+                  const isExpandable = dim.id === 'mix' || dim.id === 'cobertura';
+                  const isExpanded = expandedDim === dim.id;
+                  const isDisabled = (dim.id === 'mix' && selectedBrands.length === 0) || (dim.id === 'cobertura' && selectedRegions.length === 0);
+
+                  return (
+                    <div key={dim.id}>
+                      <div className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-7 h-7 rounded-md bg-secondary flex items-center justify-center flex-shrink-0">
+                            <Icon className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-2 mb-1.5">
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <span className="text-xs font-medium text-foreground truncate">{dim.label}</span>
+                                {isExpandable && (
+                                  <button
+                                    onClick={() => toggleExpanded(dim.id)}
+                                    className="flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded font-medium transition-colors flex-shrink-0"
+                                    style={isExpanded
+                                      ? { backgroundColor: dim.color + '18', color: dim.color }
+                                      : { backgroundColor: 'var(--secondary)', color: 'var(--muted-foreground)' }
+                                    }
+                                  >
+                                    {dim.id === 'mix'
+                                      ? (selectedBrands.length > 0 ? `${selectedBrands.length} marca${selectedBrands.length > 1 ? 's' : ''}` : 'Selecionar')
+                                      : (selectedRegions.length > 0 ? `${selectedRegions.length} região${selectedRegions.length > 1 ? 'ões' : ''}` : 'Selecionar')
+                                    }
+                                    {isExpanded ? <ChevronUp className="w-2.5 h-2.5 ml-0.5" strokeWidth={2} /> : <ChevronDown className="w-2.5 h-2.5 ml-0.5" strokeWidth={2} />}
+                                  </button>
+                                )}
+                              </div>
+                              <span className={`text-xs font-semibold tabular-nums flex-shrink-0 ${isDisabled ? 'text-muted-foreground/40' : 'text-foreground'}`}>{w.pct}%</span>
+                            </div>
+                            <input type="range" min={0} max={60} value={w.pct}
+                              disabled={isDisabled}
+                              onChange={(e) => handleSlider(dim.id, Number(e.target.value))}
+                              className={`w-full h-1 rounded-full appearance-none ${isDisabled ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'}`}
+                              style={{ accentColor: dim.color, background: isDisabled
+                                ? 'var(--border)'
+                                : `linear-gradient(to right, ${dim.color} 0%, ${dim.color} ${fillPct}%, var(--border) ${fillPct}%, var(--border) 100%)` }} />
+                          </div>
                         </div>
                       </div>
-                      <input
-                        type="range" min={0} max={60} value={w.pct}
-                        onChange={(e) => handleSlider(dim.id, Number(e.target.value))}
-                        className="w-full h-1 rounded-full appearance-none cursor-pointer"
-                        style={{
-                          accentColor: dim.color,
-                          background: `linear-gradient(to right, ${dim.color} 0%, ${dim.color} ${fillPct}%, var(--border) ${fillPct}%, var(--border) 100%)`,
-                        }}
-                      />
+
+                      {/* ── Painel expansível: Marca ── */}
+                      {isExpanded && dim.id === 'mix' && (
+                        <div className="px-4 pb-4 pt-1 border-t border-border bg-secondary/20 space-y-3">
+                          <div className="text-[11px] text-muted-foreground">Selecione as marcas que devem ser priorizadas na rota. O percentual acima define o peso desta alavanca.</div>
+                          <div className="flex flex-wrap gap-1.5">
+                            {AVAILABLE_BRANDS.map((brand) => {
+                              const active = selectedBrands.includes(brand);
+                              return (
+                                <button
+                                  key={brand}
+                                  onClick={() => toggleBrand(brand)}
+                                  className="px-2.5 py-1 text-[11px] font-medium rounded-full border transition-all"
+                                  style={active
+                                    ? { backgroundColor: dim.color + '18', color: dim.color, borderColor: dim.color + '60' }
+                                    : { backgroundColor: 'var(--card)', color: 'var(--muted-foreground)', borderColor: 'var(--border)' }
+                                  }
+                                >
+                                  {brand}
+                                </button>
+                              );
+                            })}
+                          </div>
+                          {selectedBrands.length === 0 && (
+                            <p className="text-[11px] text-muted-foreground/60 italic">Nenhuma marca selecionada — todos os clientes serão considerados.</p>
+                          )}
+                        </div>
+                      )}
+
+                      {/* ── Painel expansível: Cobertura territorial ── */}
+                      {isExpanded && dim.id === 'cobertura' && (
+                        <div className="px-4 pb-4 pt-1 border-t border-border bg-secondary/20 space-y-3">
+                          <div className="text-[11px] text-muted-foreground">Selecione as regiões alvo e defina a meta de cobertura. Apenas clientes nessas regiões serão priorizados por esta alavanca.</div>
+                          <div className="flex flex-wrap gap-1.5">
+                            {AVAILABLE_REGIONS.map((region) => {
+                              const active = selectedRegions.includes(region);
+                              return (
+                                <button
+                                  key={region}
+                                  onClick={() => toggleRegion(region)}
+                                  className="px-2.5 py-1 text-[11px] font-medium rounded-full border transition-all"
+                                  style={active
+                                    ? { backgroundColor: dim.color + '18', color: dim.color, borderColor: dim.color + '60' }
+                                    : { backgroundColor: 'var(--card)', color: 'var(--muted-foreground)', borderColor: 'var(--border)' }
+                                  }
+                                >
+                                  {region}
+                                </button>
+                              );
+                            })}
+                          </div>
+                          {selectedRegions.length === 0 && (
+                            <p className="text-[11px] text-muted-foreground/60 italic">Nenhuma região selecionada — a cobertura se aplica a toda a carteira.</p>
+                          )}
+                        </div>
+                      )}
                     </div>
-                  </div>
+                  );
+                })}
+              </div>
+              <button onClick={() => setShowCriteria(v => !v)} className="flex items-center gap-1 text-xs transition-colors" style={{ color: '#185FA5' }}>
+                {showCriteria ? <ChevronUp className="w-3 h-3" strokeWidth={1.5} /> : <ChevronDown className="w-3 h-3" strokeWidth={1.5} />}
+                Ver critérios utilizados em cada grupo
+              </button>
+              {showCriteria && (
+                <div className="p-3 rounded-xl border border-border bg-secondary/30 space-y-2">
+                  {DIMENSIONS.map((dim) => (
+                    <div key={dim.id} className="flex gap-2">
+                      <span className="text-[11px] font-semibold flex-shrink-0 w-28 leading-relaxed" style={{ color: dim.color }}>{dim.label}</span>
+                      <span className="text-[11px] text-muted-foreground leading-relaxed">{CRITERIA_DETAIL[dim.id].join(' · ')}</span>
+                    </div>
+                  ))}
                 </div>
-              );
-            })}
-          </div>
+              )}
+            </section>
 
-          <button
-            onClick={() => setShowCriteria((v) => !v)}
-            className="flex items-center gap-1 text-xs transition-colors"
-            style={{ color: '#185FA5' }}
-          >
-            {showCriteria ? <ChevronUp className="w-3 h-3" strokeWidth={1.5} /> : <ChevronDown className="w-3 h-3" strokeWidth={1.5} />}
-            Ver critérios utilizados em cada grupo
-          </button>
-
-          {showCriteria && (
-            <div className="p-3 rounded-xl border border-border bg-secondary/30 space-y-2">
-              {DIMENSIONS.map((dim) => (
-                <div key={dim.id} className="flex gap-2">
-                  <span className="text-[11px] font-semibold flex-shrink-0 w-28 leading-relaxed" style={{ color: dim.color }}>
-                    {dim.label}
-                  </span>
-                  <span className="text-[11px] text-muted-foreground leading-relaxed">
-                    {CRITERIA_DETAIL[dim.id].join(' · ')}
-                  </span>
+            {/* Impact */}
+            <section className="space-y-3">
+              <h2 className="text-sm font-semibold text-foreground">3. Impacto previsto com esta configuração</h2>
+              <div className="bg-card border border-border rounded-xl p-4 space-y-2.5">
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ backgroundColor: '#EAF3DE' }}>
+                  <TrendingUp className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#3B6D11' }} strokeWidth={1.5} />
+                  <span className="text-[11px] font-medium" style={{ color: '#3B6D11' }}>A IA irá priorizar clientes com este perfil:</span>
                 </div>
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* Section 3: Impact */}
-        <section className="space-y-3">
-          <div>
-            <h2 className="text-sm font-semibold text-foreground">3. Impacto previsto com esta configuração</h2>
-            <p className="text-xs text-muted-foreground mt-0.5">Simulação baseada nos dados dos últimos 90 dias.</p>
-          </div>
-
-          <div className="bg-card border border-border rounded-xl p-4 space-y-2.5">
-            <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ backgroundColor: '#EAF3DE' }}>
-              <TrendingUp className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#3B6D11' }} strokeWidth={1.5} />
-              <span className="text-[11px] font-medium" style={{ color: '#3B6D11' }}>A IA irá priorizar clientes com este perfil:</span>
-            </div>
-
-            <div className="divide-y divide-border">
-              {impact.map((item, i) => (
-                <div key={i} className="flex items-center gap-2.5 py-2">
-                  <div className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0" style={{ backgroundColor: item.color + '18' }}>
-                    <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: item.color }} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs font-medium text-foreground leading-snug">{item.label}</div>
-                    <div className="text-[10px] text-muted-foreground mt-0.5">{item.description}</div>
-                  </div>
-                  <span className="text-xs font-semibold flex-shrink-0 tabular-nums" style={{ color: item.positive ? '#3B6D11' : '#A32D2D' }}>
-                    {item.positive ? '+' : '-'}{item.pct}%
-                  </span>
+                <div className="divide-y divide-border">
+                  {impact.map((item, i) => (
+                    <div key={i} className="flex items-center gap-2.5 py-2">
+                      <div className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0" style={{ backgroundColor: item.color + '18' }}>
+                        <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: item.color }} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-medium text-foreground leading-snug">{item.label}</div>
+                        <div className="text-[10px] text-muted-foreground mt-0.5">{item.description}</div>
+                      </div>
+                      <span className="text-xs font-semibold flex-shrink-0 tabular-nums" style={{ color: item.positive ? '#3B6D11' : '#A32D2D' }}>
+                        {item.positive ? '+' : '-'}{item.pct}%
+                      </span>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-
-            <button
-              onClick={() => setShowSim(true)}
-              className="flex items-center gap-1 text-xs transition-colors pt-0.5 hover:opacity-70"
-              style={{ color: '#185FA5' }}
-            >
-              Ver detalhes da simulação
-              <ArrowRight className="w-3 h-3" strokeWidth={1.5} />
-            </button>
-          </div>
-        </section>
-      </div>
-
-      {/* Section 4: Before / After client lists */}
-      <section className="space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <h2 className="text-sm font-semibold text-foreground">4. Como isso se traduz na rota do representante</h2>
-          </div>
-
-          {/* Period controls */}
-          <div className="flex items-center gap-2 flex-shrink-0">
-            {/* View toggle */}
-            <div className="flex items-center bg-secondary rounded-lg p-0.5 text-xs">
-              {(['dia', 'semana', 'mes'] as PeriodView[]).map((v) => (
-                <button
-                  key={v}
-                  onClick={() => { setPeriodView(v); setPeriodIdx(0); }}
-                  className="px-2.5 py-1 rounded-md transition-colors font-medium capitalize"
-                  style={periodView === v
-                    ? { backgroundColor: 'var(--card)', color: 'var(--foreground)' }
-                    : { color: 'var(--muted-foreground)' }
-                  }
-                >
-                  {v === 'mes' ? 'mês' : v}
+                <button onClick={() => setShowSim(true)} className="flex items-center gap-1 text-xs transition-colors pt-0.5 hover:opacity-70" style={{ color: '#185FA5' }}>
+                  Ver detalhes da simulação <ArrowRight className="w-3 h-3" strokeWidth={1.5} />
                 </button>
-              ))}
-            </div>
-            {/* Period navigator */}
-            <div className="flex items-center gap-1 bg-card border border-border rounded-lg px-2 py-1.5">
-              <button
-                onClick={() => setPeriodIdx((i) => Math.max(0, i - 1))}
-                disabled={periodIdx === 0}
-                className="text-muted-foreground disabled:opacity-30 hover:text-foreground transition-colors"
-              >
-                <ChevronLeft className="w-3.5 h-3.5" strokeWidth={1.5} />
-              </button>
-              <span className="text-xs font-medium text-foreground whitespace-nowrap min-w-[110px] text-center">
-                {periodLabels[periodIdx]}
-              </span>
-              <button
-                onClick={() => setPeriodIdx((i) => Math.min(maxIdx, i + 1))}
-                disabled={periodIdx === maxIdx}
-                className="text-muted-foreground disabled:opacity-30 hover:text-foreground transition-colors"
-              >
-                <ChevronRight className="w-3.5 h-3.5" strokeWidth={1.5} />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* Before */}
-          <div className="bg-card border border-border rounded-xl overflow-hidden">
-            <div className="px-4 py-3 border-b border-border bg-secondary/30">
-              <div className="text-xs font-semibold text-muted-foreground">Antes do direcionamento</div>
-              <div className="text-[11px] text-muted-foreground mt-0.5">Ordem baseada apenas no score de IA</div>
-            </div>
-            <div className="px-3 py-2">
-              <ClientList clients={beforeClients} />
-            </div>
-          </div>
-
-          {/* After */}
-          <div className="bg-card border rounded-xl overflow-hidden" style={{ borderColor: '#185FA5' + '40' }}>
-            <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: '#185FA5' + '30', backgroundColor: '#E6F1FB' + '60' }}>
-              <div>
-                <div className="text-xs font-semibold" style={{ color: '#0C447C' }}>Com direcionamento — {currentMode?.label}</div>
-                <div className="text-[11px] mt-0.5" style={{ color: '#185FA5' }}>Reordenado pela estratégia selecionada</div>
               </div>
-              <div className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#185FA5' }}>
-                <TrendingUp className="w-3 h-3 text-white" strokeWidth={2} />
+            </section>
+          </div>
+
+          {/* Section 4: Before/After */}
+          <section className="space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <h2 className="text-sm font-semibold text-foreground">4. Como isso se traduz na rota do representante</h2>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <div className="flex items-center bg-secondary rounded-lg p-0.5 text-xs">
+                  {(['dia','semana','mes'] as PeriodView[]).map((v) => (
+                    <button key={v} onClick={() => { setPeriodView(v); setPeriodIdx(0); }}
+                      className="px-2.5 py-1 rounded-md transition-colors font-medium capitalize"
+                      style={periodView === v ? { backgroundColor: 'var(--card)', color: 'var(--foreground)' } : { color: 'var(--muted-foreground)' }}>
+                      {v === 'mes' ? 'mês' : v}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex items-center gap-1 bg-card border border-border rounded-lg px-2 py-1.5">
+                  <button onClick={() => setPeriodIdx(i => Math.max(0, i-1))} disabled={periodIdx === 0} className="text-muted-foreground disabled:opacity-30 hover:text-foreground transition-colors">
+                    <ChevronLeft className="w-3.5 h-3.5" strokeWidth={1.5} />
+                  </button>
+                  <span className="text-xs font-medium text-foreground whitespace-nowrap min-w-[110px] text-center">{periodLabels[periodIdx]}</span>
+                  <button onClick={() => setPeriodIdx(i => Math.min(maxIdx, i+1))} disabled={periodIdx === maxIdx} className="text-muted-foreground disabled:opacity-30 hover:text-foreground transition-colors">
+                    <ChevronRight className="w-3.5 h-3.5" strokeWidth={1.5} />
+                  </button>
+                </div>
               </div>
             </div>
-            <div className="px-3 py-2">
-              <ClientList clients={afterClients} highlight />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="bg-card border border-border rounded-xl overflow-hidden">
+                <div className="px-4 py-3 border-b border-border bg-secondary/30">
+                  <div className="text-xs font-semibold text-muted-foreground">Antes do direcionamento</div>
+                  <div className="text-[11px] text-muted-foreground mt-0.5">Ordem baseada apenas no score de IA</div>
+                </div>
+                <div className="px-3 py-2"><ClientList clients={beforeClients} /></div>
+              </div>
+              <div className="bg-card border rounded-xl overflow-hidden" style={{ borderColor: '#185FA5' + '40' }}>
+                <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: '#185FA5' + '30', backgroundColor: '#E6F1FB' + '60' }}>
+                  <div>
+                    <div className="text-xs font-semibold" style={{ color: '#0C447C' }}>Com direcionamento — {currentMode?.label}</div>
+                    <div className="text-[11px] mt-0.5" style={{ color: '#185FA5' }}>Reordenado pela estratégia selecionada</div>
+                  </div>
+                  <div className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#185FA5' }}>
+                    <TrendingUp className="w-3 h-3 text-white" strokeWidth={2} />
+                  </div>
+                </div>
+                <div className="px-3 py-2"><ClientList clients={afterClients} highlight /></div>
+              </div>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {/* ── Tab: Briefing ──────────────────────────────────────────────────── */}
+      {activeTab === 'briefing' && (
+        <div className="space-y-5">
+
+          {/* Top: instrução + prévia lado a lado */}
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-5 items-start">
+
+            {/* Left: instrução */}
+            <div className="bg-card border border-border rounded-lg p-6 space-y-4">
+              <div className="flex items-center gap-2">
+                <AlignLeft className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
+                <h2 className="text-sm font-semibold text-foreground">Instrução contextual</h2>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Escreva o contexto que a IA deve incorporar ao briefing exibido ao representante antes de cada visita.
+              </p>
+              <textarea
+                rows={6}
+                value={briefingText}
+                onChange={e => setBriefingText(e.target.value.slice(0, 500))}
+                placeholder={`Ex: Apresentar a estratégia de ${mode.toLowerCase()} como prioridade nas visitas...`}
+                className="w-full px-3 py-2 bg-secondary border-0 rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+              />
+              <div className="text-[11px] text-muted-foreground">{briefingText.length}/500 caracteres</div>
+            </div>
+
+            {/* Right: prévia */}
+            <div className="bg-card border border-border rounded-lg overflow-hidden">
+              <div className="px-5 py-3 border-b border-border flex items-center gap-2">
+                <Eye className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Prévia — como o rep verá</span>
+              </div>
+              <div className="p-5 space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded flex items-center justify-center flex-shrink-0" style={{ backgroundColor: modeStyle.bg }}>
+                    <ModeIcon className="w-3.5 h-3.5" strokeWidth={1.5} style={{ color: modeStyle.text }} />
+                  </div>
+                  <span className="text-xs font-semibold text-foreground">{strategyName || 'Nome da estratégia'}</span>
+                </div>
+                <div className="bg-secondary rounded-lg p-3">
+                  <div className="flex items-start gap-2">
+                    <Sparkles className="w-3.5 h-3.5 text-ai-accent flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+                    <p className="text-xs text-foreground leading-relaxed">
+                      {briefingText || 'O briefing gerado pela IA será exibido aqui com base no contexto que você definir acima.'}
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+
+          {/* Bottom: estimativa de alcance — largura total */}
+          <div className="bg-card border border-border rounded-lg p-5 space-y-4">
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Estimativa de alcance</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="bg-secondary rounded-lg p-4 text-center">
+                <div className="text-2xl font-semibold text-foreground">38</div>
+                <div className="text-xs text-muted-foreground mt-0.5">Representantes</div>
+              </div>
+              <div className="bg-secondary rounded-lg p-4 text-center">
+                <div className="text-2xl font-semibold text-foreground">~699</div>
+                <div className="text-xs text-muted-foreground mt-0.5">Visitas/semana</div>
+              </div>
+              <div className="sm:col-span-2 flex flex-col justify-center space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">Aderência média esperada</span>
+                  <span className="font-semibold text-foreground">65%</span>
+                </div>
+                <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
+                  <div className="h-full bg-primary rounded-full" style={{ width: '65%' }} />
+                </div>
+                <p className="text-[11px] text-muted-foreground">Baseado em instruções similares anteriores.</p>
+              </div>
+            </div>
+          </div>
+
         </div>
+      )}
 
-      </section>
 
-      {/* Summary row */}
-      <div className="bg-card border border-border rounded-xl p-4">
-        <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">Foco principal</span>
-            <span className="text-xs font-medium text-foreground">{currentMode?.label ?? '—'}</span>
-          </div>
-          <div className="h-4 w-px bg-border hidden sm:block" />
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">Vigência</span>
-            <span className="text-xs font-medium text-foreground">26/08 – 10/10/2026</span>
-          </div>
-          <div className="h-4 w-px bg-border hidden sm:block" />
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">Última atualização</span>
-            <span className="text-xs font-medium text-foreground">26/08/2026 às 14:32 · Gustavo Sales</span>
-          </div>
-          <button className="ml-auto flex items-center gap-1.5 text-xs border border-border px-3 py-1.5 rounded-lg hover:bg-secondary transition-colors text-foreground">
-            <Calendar className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
-            Histórico
-          </button>
-        </div>
-      </div>
-
-      {/* ── Simulation detail sheet ──────────────────────────────────────── */}
+      {/* ── Simulation Sheet ──────────────────────────────────────────────── */}
       <Sheet open={showSim} onOpenChange={setShowSim}>
         <SheetContent side="right" className="w-full sm:max-w-[520px] overflow-y-auto p-0">
           <div className="flex items-center justify-between px-6 py-4 border-b border-border sticky top-0 bg-card z-10">
@@ -777,10 +836,8 @@ export function SteeringRuleEditor() {
               <X className="w-4 h-4" strokeWidth={1.5} />
             </button>
           </div>
-
           <div className="px-6 py-5 space-y-7">
-
-            {/* 1. Distribuição por perfil */}
+            {/* 1. Distribuição */}
             <section className="space-y-3">
               <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Distribuição de clientes por perfil</h3>
               <div className="space-y-2.5">
@@ -788,7 +845,7 @@ export function SteeringRuleEditor() {
                   <div key={p.label}>
                     <div className="flex items-center justify-between mb-1 text-xs">
                       <div className="flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: p.color }} />
+                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
                         <span className="font-medium text-foreground">{p.label}</span>
                       </div>
                       <div className="flex items-center gap-3 text-muted-foreground tabular-nums">
@@ -797,16 +854,14 @@ export function SteeringRuleEditor() {
                       </div>
                     </div>
                     <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
-                      <div className="h-full rounded-full transition-all duration-500" style={{ width: `${p.pct}%`, backgroundColor: p.color }} />
+                      <div className="h-full rounded-full" style={{ width: `${p.pct}%`, backgroundColor: p.color }} />
                     </div>
                   </div>
                 ))}
               </div>
             </section>
-
             <div className="h-px bg-border" />
-
-            {/* 2. Projeção de visitas por semana */}
+            {/* 2. Projeção */}
             <section className="space-y-3">
               <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Projeção de visitas por semana</h3>
               <div className="rounded-xl border border-border overflow-hidden">
@@ -839,13 +894,10 @@ export function SteeringRuleEditor() {
                 </table>
               </div>
             </section>
-
             <div className="h-px bg-border" />
-
-            {/* 3. Impacto estimado em receita */}
+            {/* 3. Receita */}
             <section className="space-y-3">
               <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Impacto estimado em receita</h3>
-              <p className="text-xs text-muted-foreground -mt-1">Baseado no ticket médio histórico e taxa de conversão por perfil.</p>
               <div className="space-y-2">
                 {(REVENUE_SCENARIOS[mode] ?? REVENUE_SCENARIOS.Personalizado).map((s) => (
                   <div key={s.label} className="flex items-center gap-3 p-3 rounded-xl" style={{ backgroundColor: s.bg }}>
@@ -864,10 +916,8 @@ export function SteeringRuleEditor() {
                 ))}
               </div>
             </section>
-
             <div className="h-px bg-border" />
-
-            {/* 4. Comparativo com configuração anterior */}
+            {/* 4. Comparativo */}
             <section className="space-y-3">
               <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Comparativo com configuração anterior</h3>
               <div className="rounded-xl border border-border overflow-hidden">
@@ -886,9 +936,7 @@ export function SteeringRuleEditor() {
                         <td className="px-3 py-2.5 text-foreground">{row.metric}</td>
                         <td className="px-3 py-2.5 text-right tabular-nums text-muted-foreground">{row.before}</td>
                         <td className="px-3 py-2.5 text-right tabular-nums font-medium text-foreground">{row.after}</td>
-                        <td className="px-3 py-2.5 text-right tabular-nums font-semibold" style={{ color: row.positive ? '#3B6D11' : '#A32D2D' }}>
-                          {row.delta}
-                        </td>
+                        <td className="px-3 py-2.5 text-right tabular-nums font-semibold" style={{ color: row.positive ? '#3B6D11' : '#A32D2D' }}>{row.delta}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -896,7 +944,6 @@ export function SteeringRuleEditor() {
               </div>
               <p className="text-[11px] text-muted-foreground">Configuração anterior: Rentabilidade · 01/06 – 25/08/2026</p>
             </section>
-
           </div>
         </SheetContent>
       </Sheet>

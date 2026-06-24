@@ -7,16 +7,9 @@ const modules = [
   {
     icon: Route,
     name: 'Replanejamento estratégico',
-    description: 'Defina as prioridades que irão influenciar automaticamente a ordem das rotas recomendadas para os representantes.',
-    badge: '3 regras ativas',
+    description: 'Gerencie estratégias que unificam direcionamento de rotas e briefing contextual para cada representante.',
+    badge: '4 estratégias ativas',
     href: '/direcionamento',
-  },
-  {
-    icon: Brain,
-    name: 'Briefing estratégico',
-    description: 'Instruções contextuais exibidas ao representante',
-    badge: '1 instrução ativa',
-    href: '/steering/briefing',
   },
 ];
 
