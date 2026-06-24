@@ -1,13 +1,31 @@
+import { useState } from 'react';
 import { Link, useParams } from 'react-router';
-import { ArrowLeft, X, Flag, FileText, MessageSquare, Check, AlertCircle } from 'lucide-react';
+import { ArrowLeft, X, Flag, FileText, MessageSquare, Check, AlertCircle, ChevronRight, MapPin, Clock, User, Calendar, Send, RefreshCw } from 'lucide-react';
 
-// Mock data - in real app, this would come from API based on ID
+const stopsData = [
+  { id: 1, client: 'Supermercado Rondon', status: 'visited', time: '08:15 (35 min)', address: 'Av. Brasil, 1500 - Centro', type: 'Venda Ativa', notes: 'Check-in e check-out validados via GPS com sucesso.' },
+  { id: 2, client: 'Mercearia Silva & Santos', status: 'visited', time: '09:30 (22 min)', address: 'Rua Alagoas, 422 - Bairro Alto', type: 'Reposição de Gôndola', notes: 'Visita executada perfeitamente no período da manhã.' },
+  { id: 3, client: 'Hortifruti Pomar Verde', status: 'missed', time: 'Planejado: 10:45', address: 'Av. das Nações, 89 - Jd. Europa', type: 'Venda Ativa', notes: 'Ausência de justificativa. Rota foi quebrada a partir deste ponto.' },
+  { id: 4, client: 'Mini Mercado do Bairro', status: 'missed', time: 'Planejado: 11:30', address: 'Rua Ceará, 105 - Vila Nova', type: 'Cobrança', notes: 'Não visitado. Veículo seguiu rumo oposto ao roteiro.' },
+  { id: 5, client: 'Drogaria Poupa Farma', status: 'missed', time: 'Planejado: 13:00', address: 'Av. Paulista, 3100 - Bela Vista', type: 'Venda Ativa', notes: 'Representante encerrou geolocalização no aplicativo.' },
+  { id: 6, client: 'Panificadora Doce Sabor', status: 'missed', time: 'Planejado: 14:15', address: 'Rua Minas Gerais, 77 - Consolação', type: 'Relacionamento', notes: 'Não visitado devido ao desvio não justificado.' },
+  { id: 7, client: 'Conveniência Posto Central', status: 'missed', time: 'Planejado: 15:30', address: 'Av. 9 de Julho, 450 - Centro', type: 'Venda Ativa', notes: 'Nenhum ponto de geolocalização capturado na área.' },
+  { id: 8, client: 'Atacadão Alimentos S/A', status: 'missed', time: 'Planejado: 16:45', address: 'Av. Marginal Direita, 900 - Industrial', type: 'Venda Ativa', notes: 'Trajeto final totalmente descontinuado pelo operador.' },
+];
+
+const historyData = [
+  { day: 1, status: 'complete', date: '26/05' }, { day: 2, status: 'complete', date: '25/05' }, { day: 3, status: 'incomplete', date: '24/05' }, { day: 4, status: 'complete', date: '23/05' }, { day: 5, status: 'noroute', date: '22/05' }, { day: 6, status: 'noroute', date: '21/05' },
+  { day: 7, status: 'complete', date: '20/05' }, { day: 8, status: 'complete', date: '19/05' }, { day: 9, status: 'complete', date: '18/05' }, { day: 10, status: 'complete', date: '17/05' }, { day: 11, status: 'incomplete', date: '16/05' }, { day: 12, status: 'noroute', date: '15/05' },
+  { day: 13, status: 'complete', date: '14/05' }, { day: 14, status: 'complete', date: '13/05' }, { day: 15, status: 'complete', date: '12/05' }, { day: 16, status: 'complete', date: '11/05' }, { day: 17, status: 'complete', date: '10/05' }, { day: 18, status: 'noroute', date: '09/05' },
+  { day: 19, status: 'complete', date: '08/05' }, { day: 20, status: 'complete', date: '07/05' }, { day: 21, status: 'incomplete', date: '06/05' }, { day: 22, status: 'complete', date: '05/05' }, { day: 23, status: 'complete', date: '04/05' }, { day: 24, status: 'noroute', date: '03/05' },
+  { day: 25, status: 'complete', date: '02/05' }, { day: 26, status: 'complete', date: '01/05' }, { day: 27, status: 'complete', date: '30/04' }, { day: 28, status: 'complete', date: '29/04' }, { day: 29, status: 'complete', date: '28/04' }, { day: 30, status: 'complete', date: '27/04' },
+];
+
 const getOccurrenceData = (id: string) => {
   const occurrences: { [key: string]: any } = {
     '1': {
       type: 'Rota não executada',
       representative: 'João Oliveira',
-      client: '8 clientes',
       date: '27/05/2026',
       severity: 'high',
       planned: 8,
@@ -15,11 +33,7 @@ const getOccurrenceData = (id: string) => {
       notVisited: 6,
       executionRate: 25,
       justification: 'Nenhuma informada',
-      pattern: {
-        incompleteRoutes: 3,
-        executionRate: 71,
-        regionalReps: 2,
-      },
+      pattern: { incompleteRoutes: 3, executionRate: 71, regionalReps: 2 },
     },
     '2': {
       type: 'Visita muito curta',
@@ -35,11 +49,7 @@ const getOccurrenceData = (id: string) => {
         { text: 'Nenhum follow-up criado', detail: 'Sem próxima ação definida', status: 'x' },
         { text: 'Nenhum resultado classificado', detail: 'Visita sem encerramento', status: 'x' },
       ],
-      pattern: {
-        shortVisits: 4,
-        avgShortDuration: '6 min',
-        teamAvg: '38 min',
-      },
+      pattern: { shortVisits: 4, avgShortDuration: '6 min', teamAvg: '38 min' },
     },
     '3': {
       type: 'Baixa atividade',
@@ -50,11 +60,7 @@ const getOccurrenceData = (id: string) => {
       period: 'Semana 22/mai–28/mai',
       visits: 3,
       avgVisits: 8.2,
-      pattern: {
-        consecutiveWeeks: '3ª',
-        clientsNoContact: 8,
-        regionalReps: 0,
-      },
+      pattern: { consecutiveWeeks: '3ª', clientsNoContact: 8, regionalReps: 0 },
     },
     '4': {
       type: 'Cliente crítico sem visita',
@@ -70,11 +76,7 @@ const getOccurrenceData = (id: string) => {
         { text: 'Visita — resultado positivo — há 150 dias', detail: 'Pedido R$ 3.800 — Conforto', status: 'check' },
         { text: 'Ligação — sem retorno — há 180 dias', detail: 'Tentativa de contato sem sucesso', status: 'x' },
       ],
-      pattern: {
-        aiScore: 94,
-        daysUntilInactive: 68,
-        avgTicket: 'R$ 4.500',
-      },
+      pattern: { aiScore: 94, daysUntilInactive: 68, avgTicket: 'R$ 4.500' },
     },
     '5': {
       type: 'Carteira descoberta',
@@ -94,780 +96,602 @@ const getOccurrenceData = (id: string) => {
         { name: 'Moda Norte', days: 62, score: 75, status: 'Risco' },
         { name: 'Casa do Sapato', days: 91, score: 92, status: 'Crítico' },
       ],
-      pattern: {
-        uncoveredPercent: 31,
-        over60Days: 8,
-        teamAvg: 89,
-      },
+      pattern: { uncoveredPercent: 31, over60Days: 8, teamAvg: 89 },
     },
   };
   return occurrences[id] || occurrences['1'];
 };
 
+const resolutionActions = [
+  { id: 'dispense', label: 'Dispensar Ocorrência', description: 'Falso positivo ou justificativa aceitável do gestor.' },
+  { id: 'flag', label: 'Sinalizar para Gestor', description: 'Encaminhar para a fila de feedback do supervisor.' },
+  { id: 'notify', label: 'Notificar Representante', description: 'Dispara um alerta no aplicativo solicitando explicação.' },
+  { id: 'reschedule', label: 'Reagendar Críticos', description: 'Insere clientes não visitados como prioridade máxima amanhã.' },
+];
+
+function RouteTimeline({ occurrence }: { occurrence: any }) {
+  const [selectedStop, setSelectedStop] = useState(3);
+  const [selectedAction, setSelectedAction] = useState<string | null>(null);
+  const [auditNote, setAuditNote] = useState('');
+  const [submitted, setSubmitted] = useState(false);
+  const [validationError, setValidationError] = useState('');
+
+  const stop = stopsData.find(s => s.id === selectedStop)!;
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedAction) { setValidationError('Selecione uma ação final para prosseguir.'); return; }
+    if (!auditNote.trim()) { setValidationError('O preenchimento da observação é obrigatório.'); return; }
+    setValidationError('');
+    setSubmitted(true);
+  };
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Left Column */}
+      <div className="lg:col-span-2 space-y-8">
+
+        {/* Timeline Card */}
+        <div className="bg-card border border-border rounded-xl overflow-hidden">
+          <div className="p-6 border-b border-border flex items-start justify-between gap-4">
+            <div>
+              <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
+                Análise Linear da Rota do Dia
+              </h2>
+              <p className="text-xs text-muted-foreground mt-1">
+                Sequência de visitas do dia. Clique em cada parada para ver o diagnóstico.
+              </p>
+            </div>
+            <div className="flex gap-4 text-xs text-muted-foreground flex-shrink-0">
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-success inline-block"></span> Executada
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-danger inline-block"></span> Não Executada
+              </span>
+            </div>
+          </div>
+
+          <div className="p-6 bg-secondary/30">
+            {/* Horizontal stops */}
+            <div className="relative mb-6">
+              {/* connector line */}
+              <div className="absolute top-5 left-5 right-5 h-px bg-border z-0"></div>
+              {/* progress line (2 of 8) */}
+              <div className="absolute top-5 left-5 h-px bg-success z-0" style={{ width: 'calc(14%)' }}></div>
+
+              <div className="relative z-10 flex justify-between gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: 'thin' }}>
+                {stopsData.map((s) => {
+                  const isSelected = selectedStop === s.id;
+                  const isVisited = s.status === 'visited';
+                  return (
+                    <button
+                      key={s.id}
+                      onClick={() => setSelectedStop(s.id)}
+                      className="flex flex-col items-center min-w-[70px] focus:outline-none"
+                    >
+                      <div
+                        className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white transition-all ${
+                          isVisited ? 'bg-success' : 'bg-danger'
+                        } ${isSelected ? 'ring-2 ring-offset-2 ring-foreground scale-110' : ''}`}
+                      >
+                        {s.id}
+                      </div>
+                      <span className={`text-[10px] font-medium mt-2 truncate w-16 text-center ${isSelected ? 'text-foreground font-semibold' : 'text-muted-foreground'}`}>
+                        {s.client.split(' ')[0]}
+                      </span>
+                      <span className="text-[9px] text-muted-foreground">{isVisited ? s.time.split(' ')[0] : 'Pendente'}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Detail card */}
+            <div className="bg-card border border-border rounded-xl p-5 transition-all">
+              <div className="flex items-start justify-between gap-3 pb-4 mb-4 border-b border-border">
+                <div>
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Parada #{stop.id}</span>
+                  <h3 className="text-base font-semibold text-foreground mt-0.5">{stop.client}</h3>
+                </div>
+                <span className={`flex-shrink-0 text-xs px-2.5 py-1 rounded-full font-semibold flex items-center gap-1.5 ${
+                  stop.status === 'visited'
+                    ? 'bg-success-light text-success-foreground border border-success/20'
+                    : 'bg-danger-light text-danger-foreground border border-danger/20'
+                }`}>
+                  {stop.status === 'visited'
+                    ? <><Check className="w-3 h-3" strokeWidth={2.5} /> Visita Confirmada</>
+                    : <><X className="w-3 h-3" strokeWidth={2.5} /> Não Visitado</>
+                  }
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm mb-4">
+                <div>
+                  <span className="text-xs text-muted-foreground block mb-1">Endereço</span>
+                  <span className="font-medium text-foreground flex items-center gap-1">
+                    <MapPin className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
+                    <span className="truncate">{stop.address}</span>
+                  </span>
+                </div>
+                <div>
+                  <span className="text-xs text-muted-foreground block mb-1">Horário</span>
+                  <span className="font-medium text-foreground flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
+                    {stop.time}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-xs text-muted-foreground block mb-1">Tipo de Tarefa</span>
+                  <span className="font-medium text-foreground">{stop.type}</span>
+                </div>
+              </div>
+
+              <div className="bg-secondary rounded-lg p-3">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1">Auditoria</span>
+                <p className={`text-sm leading-relaxed ${stop.status === 'missed' ? 'text-danger-foreground' : 'text-foreground'}`}>
+                  {stop.notes}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Recurrence Analysis Card */}
+        <div className="bg-card border border-border rounded-xl p-6">
+          <div className="pb-5 mb-6 border-b border-border">
+            <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
+              Análise de Recorrência — Últimos 30 dias
+            </h2>
+            <p className="text-xs text-muted-foreground mt-1">
+              Avalie se o desvio é um caso isolado ou padrão de João Oliveira.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-3 gap-5 mb-6">
+            <div className="bg-secondary rounded-xl p-4">
+              <span className="text-xs font-semibold text-muted-foreground block uppercase tracking-wider mb-1">Desvios Recentes</span>
+              <span className="text-2xl font-bold text-warning block">3 Rotas</span>
+              <span className="text-xs text-warning mt-2 block">Frequência moderada (60d)</span>
+            </div>
+            <div className="bg-secondary rounded-xl p-4">
+              <span className="text-xs font-semibold text-muted-foreground block uppercase tracking-wider mb-1">Taxa de Execução</span>
+              <span className="text-2xl font-bold text-danger block">71% Mês</span>
+              <span className="text-xs text-danger mt-2 block">Abaixo da média (85%)</span>
+            </div>
+            <div className="bg-secondary rounded-xl p-4">
+              <span className="text-xs font-semibold text-muted-foreground block uppercase tracking-wider mb-1">Região</span>
+              <span className="text-2xl font-bold text-foreground block">2 Casos</span>
+              <span className="text-xs text-muted-foreground mt-2 block">Não é padrão regional</span>
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-3">Atividade diária nos últimos 30 dias</span>
+            <div className="bg-secondary rounded-xl p-4">
+              <div className="flex flex-wrap gap-2">
+                {historyData.map((day) => {
+                  const colorClass =
+                    day.status === 'complete' ? 'bg-success' :
+                    day.status === 'incomplete' ? 'bg-warning' :
+                    'bg-border';
+                  const label =
+                    day.status === 'complete' ? 'Execução 100%' :
+                    day.status === 'incomplete' ? 'Desvio de Rota' :
+                    'Sem Rota';
+                  return (
+                    <div key={day.day} className="relative group">
+                      <div className={`w-7 h-7 rounded-md cursor-default flex items-center justify-center text-[10px] font-bold text-white ${colorClass}`}>
+                        {day.day}
+                      </div>
+                      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-foreground text-background text-[10px] py-1 px-2 rounded opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                        {day.date} — {label}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="flex flex-wrap gap-4 mt-4 pt-3 border-t border-border text-xs text-muted-foreground justify-between items-center">
+                <span>30 dias analisados</span>
+                <div className="flex gap-3">
+                  <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-success inline-block"></span> Completa</span>
+                  <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-warning inline-block"></span> Incompleta</span>
+                  <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-border inline-block"></span> Sem Rota</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-4 bg-warning-light/40 border border-warning/30 rounded-xl flex items-start gap-3">
+            <AlertCircle className="w-4 h-4 text-warning flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+            <p className="text-sm text-warning-foreground leading-relaxed">
+              <strong>Insight:</strong> João Oliveira está abaixo da média de execução desde abril de 2026. Outros representantes da mesma região operam acima de 90%. O sistema sugere que este não é um problema operacional — é um desvio individual.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Column — Resolution Panel */}
+      <div className="lg:col-span-1">
+        <div className="bg-card border border-border rounded-xl overflow-hidden sticky top-6">
+          <div className="p-5 border-b border-border bg-foreground text-background">
+            <h2 className="text-sm font-semibold flex items-center gap-2">
+              <Send className="w-4 h-4 opacity-70" strokeWidth={1.5} />
+              Painel de Resolução
+            </h2>
+            <p className="text-xs opacity-50 mt-1">
+              Registre sua observação e aplique uma ação definitiva.
+            </p>
+          </div>
+
+          {!submitted ? (
+            <form onSubmit={handleSubmit} className="p-5 space-y-5">
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                  Observação do Auditor <span className="text-danger">*</span>
+                </label>
+                <textarea
+                  value={auditNote}
+                  onChange={e => setAuditNote(e.target.value)}
+                  placeholder="Ex: Representante finalizou mais cedo por questões pessoais..."
+                  className="w-full min-h-[100px] px-4 py-3 text-sm bg-secondary border border-border rounded-xl focus:ring-2 focus:ring-foreground/20 focus:border-foreground/30 outline-none resize-none placeholder:text-muted-foreground"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                  Ação Final
+                </label>
+                <div className="space-y-2">
+                  {resolutionActions.map((action) => (
+                    <label
+                      key={action.id}
+                      className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${
+                        selectedAction === action.id
+                          ? 'border-foreground bg-secondary ring-1 ring-foreground/10'
+                          : 'border-border hover:border-foreground/30 bg-card'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="resolution-action"
+                        value={action.id}
+                        checked={selectedAction === action.id}
+                        onChange={() => { setSelectedAction(action.id); setValidationError(''); }}
+                        className="mt-0.5 accent-foreground"
+                      />
+                      <div>
+                        <span className="text-sm font-semibold text-foreground block">{action.label}</span>
+                        <span className="text-xs text-muted-foreground mt-0.5 block leading-relaxed">{action.description}</span>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {validationError && (
+                <div className="p-3 bg-danger-light border border-danger/20 text-danger-foreground text-xs rounded-xl font-medium">
+                  {validationError}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                className="w-full bg-foreground hover:opacity-90 text-background py-3 px-4 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2"
+              >
+                <Send className="w-4 h-4" strokeWidth={1.5} />
+                Concluir Auditoria
+              </button>
+            </form>
+          ) : (
+            <div className="p-5 space-y-4">
+              <div className="p-4 bg-success-light border border-success/20 rounded-xl">
+                <p className="font-semibold flex items-center gap-1.5 text-success mb-1">
+                  <Check className="w-4 h-4" strokeWidth={2.5} /> Auditoria Concluída
+                </p>
+                <p className="text-sm text-success-foreground leading-relaxed">
+                  A ocorrência foi atualizada com sucesso. Todos os envolvidos foram notificados.
+                </p>
+              </div>
+              <button
+                onClick={() => { setSubmitted(false); setSelectedAction(null); setAuditNote(''); }}
+                className="w-full py-3 px-4 border border-border text-foreground hover:bg-secondary font-semibold text-sm rounded-xl transition-all flex items-center justify-center gap-2"
+              >
+                <RefreshCw className="w-4 h-4" strokeWidth={1.5} /> Reabrir Auditoria
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function OccurrenceDetail() {
   const { id } = useParams();
   const occurrence = getOccurrenceData(id || '1');
 
-  const severityConfig = {
-    high: { bg: 'bg-danger-light', text: 'text-danger-foreground', label: 'Alta' },
-    medium: { bg: 'bg-warning-light', text: 'text-warning-foreground', label: 'Média' },
-  }[occurrence.severity];
-
   return (
-    <div className="p-8 space-y-10">
-      <Link
-        to="/field-audit"
-        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="w-4 h-4" strokeWidth={1.5} />
-        Voltar para Auditoria
-      </Link>
+    <div className="p-8 space-y-8">
+      {/* Back + breadcrumb */}
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <Link to="/field-audit" className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors">
+          <ArrowLeft className="w-3.5 h-3.5" strokeWidth={1.5} />
+          Auditoria de Campo
+        </Link>
+        <ChevronRight className="w-3 h-3" />
+        <span className="text-danger font-semibold">Desvio Detectado</span>
+      </div>
 
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-5">
         <div>
-          <h1 className="text-3xl font-semibold text-foreground mb-2">{occurrence.type}</h1>
+          <h1 className="text-2xl font-semibold text-foreground">{occurrence.type}</h1>
         </div>
-        <div className="flex gap-3">
-          <button className="px-5 py-3 border border-border rounded-lg text-sm font-medium hover:bg-secondary transition-colors flex items-center gap-2">
-            <X className="w-4 h-4" strokeWidth={1.5} />
-            Dispensar
-          </button>
-          <button className="px-5 py-3 border border-border rounded-lg text-sm font-medium hover:bg-secondary transition-colors flex items-center gap-2">
-            <Flag className="w-4 h-4" strokeWidth={1.5} />
-            Sinalizar
-          </button>
-          <button className="px-5 py-3 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors flex items-center gap-2">
-            <MessageSquare className="w-4 h-4" strokeWidth={1.5} />
-            Contactar
-          </button>
+
+        {/* Summary pills */}
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 bg-secondary border border-border rounded-xl px-5 py-3 text-sm">
+          <div className="flex items-center gap-2">
+            <User className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
+            <span className="text-muted-foreground text-xs">Representante:</span>
+            <span className="font-semibold text-foreground">{occurrence.representative}</span>
+          </div>
+          <div className="w-px h-4 bg-border hidden sm:block"></div>
+          <div className="flex items-center gap-2">
+            <Calendar className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
+            <span className="text-muted-foreground text-xs">Data:</span>
+            <span className="font-semibold text-foreground">{occurrence.date}</span>
+          </div>
+          {occurrence.planned !== undefined && (
+            <>
+              <div className="w-px h-4 bg-border hidden sm:block"></div>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-danger animate-pulse"></span>
+                <span className="text-muted-foreground text-xs">Progresso:</span>
+                <span className="font-bold text-danger">{occurrence.visited} de {occurrence.planned} visitados ({occurrence.executionRate}%)</span>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column - Context Sections */}
-        <div className="lg:col-span-2 space-y-8">
+      {/* Content */}
+      {occurrence.type === 'Rota não executada' && (
+        <RouteTimeline occurrence={occurrence} />
+      )}
 
-          {/* Rota não executada */}
-          {occurrence.type === 'Rota não executada' && (
-            <>
-              <div className="bg-card border border-border rounded-xl p-8">
-                <h3 className="text-xs font-semibold text-muted-foreground mb-8 uppercase tracking-wider">
-                  O que aconteceu — Rota planejada vs. executada
-                </h3>
-                <div className="h-72 bg-gradient-to-br from-success-light/30 to-secondary rounded-xl flex items-center justify-center relative overflow-hidden mb-8">
-                  {/* Map visualization */}
-                  <div className="absolute inset-0 p-12">
-                    {/* Route pins */}
-                    <div className="absolute top-1/4 left-1/4 w-10 h-10 rounded-full bg-success border-2 border-white flex items-center justify-center text-white text-sm font-semibold shadow-lg">1</div>
-                    <div className="absolute top-1/3 left-2/5 w-10 h-10 rounded-full bg-success border-2 border-white flex items-center justify-center text-white text-sm font-semibold shadow-lg">2</div>
-                    <div className="absolute top-2/5 left-1/2 w-10 h-10 rounded-full bg-danger border-2 border-white flex items-center justify-center text-white text-sm font-semibold shadow-lg">3</div>
-                    <div className="absolute bottom-1/3 right-1/3 w-10 h-10 rounded-full bg-danger border-2 border-white flex items-center justify-center text-white text-sm font-semibold shadow-lg">4</div>
-                    <div className="absolute bottom-1/4 right-1/4 w-10 h-10 rounded-full bg-danger border-2 border-white flex items-center justify-center text-white text-sm font-semibold shadow-lg">5</div>
-                    {/* Route lines */}
-                    <svg className="absolute inset-0 w-full h-full">
-                      <path d="M 80 60 L 130 80" stroke="#10B981" strokeWidth="3" fill="none" />
-                      <path d="M 130 80 L 180 100" stroke="#CBD5E1" strokeWidth="2" strokeDasharray="5,5" fill="none" />
-                    </svg>
-                  </div>
-                </div>
-                <div className="flex items-center gap-6 text-sm mb-8">
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-1 bg-border" style={{ borderTop: '2px dashed #94A3B8' }}></div>
-                    <span className="text-muted-foreground">Planejada</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-1 bg-success"></div>
-                    <span className="text-muted-foreground">Executada</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full bg-success"></div>
-                    <span className="text-muted-foreground">Visitado</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full bg-danger"></div>
-                    <span className="text-muted-foreground">Não visitado</span>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="bg-secondary rounded-xl p-6 text-center">
-                    <div className="text-2xl font-semibold text-foreground mb-2">{occurrence.planned} clientes</div>
-                    <div className="text-sm text-muted-foreground">Planejados</div>
-                  </div>
-                  <div className="bg-danger-light rounded-xl p-6 text-center">
-                    <div className="text-2xl font-semibold text-danger mb-2">{occurrence.visited} visitados</div>
-                    <div className="text-sm text-muted-foreground">{occurrence.notVisited} não visitados</div>
-                  </div>
-                </div>
-              </div>
+      {occurrence.type !== 'Rota não executada' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-8">
 
-              <div className="bg-card border border-border rounded-xl p-8">
-                <h3 className="text-xs font-semibold text-muted-foreground mb-8 uppercase tracking-wider">
-                  Contexto — Padrão ou caso isolado?
-                </h3>
-                <div className="grid grid-cols-3 gap-6 mb-8">
-                  <div className="text-center">
-                    <div className="text-3xl font-semibold text-warning mb-2">{occurrence.pattern.incompleteRoutes}</div>
-                    <div className="text-sm text-muted-foreground mb-1">Rotas incompletas últimos 60 dias</div>
-                    <div className="text-xs text-warning font-medium">Frequência moderada</div>
+            {/* Visita muito curta */}
+            {occurrence.type === 'Visita muito curta' && (
+              <>
+                <div className="bg-card border border-border rounded-xl p-6">
+                  <h3 className="text-xs font-semibold text-muted-foreground mb-6 uppercase tracking-wider">
+                    O que aconteceu — Sinais detectados na visita
+                  </h3>
+                  <div className="grid grid-cols-2 gap-5 mb-8">
+                    <div className="bg-danger-light rounded-xl p-5 text-center">
+                      <div className="text-2xl font-semibold text-danger mb-1">{occurrence.duration}</div>
+                      <div className="text-sm text-muted-foreground">Duração detectada</div>
+                    </div>
+                    <div className="bg-secondary rounded-xl p-5 text-center">
+                      <div className="text-2xl font-semibold text-foreground mb-1">{occurrence.avgDuration}</div>
+                      <div className="text-sm text-muted-foreground">Média histórica neste cliente</div>
+                    </div>
                   </div>
-                  <div className="text-center">
-                    <div className="text-3xl font-semibold text-warning mb-2">{occurrence.pattern.executionRate}%</div>
-                    <div className="text-sm text-muted-foreground mb-1">Taxa de execução mês atual</div>
-                    <div className="text-xs text-warning font-medium">Abaixo da média da equipe</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-3xl font-semibold text-foreground mb-2">{occurrence.pattern.regionalReps}</div>
-                    <div className="text-sm text-muted-foreground mb-1">Outros reps mesma situação</div>
-                    <div className="text-xs text-foreground font-medium">Não é padrão regional</div>
-                  </div>
-                </div>
-                <div className="text-xs font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
-                  Atividade nos últimos 30 dias
-                </div>
-                <div className="grid grid-cols-10 gap-2 mb-4">
-                  {[...Array(30)].map((_, i) => (
-                    <div
-                      key={i}
-                      className={`h-8 rounded-lg ${
-                        i % 4 === 0 ? 'bg-success-light' : i % 3 === 0 ? 'bg-warning-light' : 'bg-secondary'
-                      }`}
-                    ></div>
-                  ))}
-                </div>
-                <div className="flex items-center gap-6 text-sm mb-8">
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-lg bg-success-light"></div>
-                    <span className="text-muted-foreground">Rota executada</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-lg bg-warning-light"></div>
-                    <span className="text-muted-foreground">Incompleta</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-lg bg-secondary"></div>
-                    <span className="text-muted-foreground">Sem rota</span>
-                  </div>
-                </div>
-                <div className="p-5 bg-warning-light/40 border border-warning/30 rounded-xl flex items-start gap-3">
-                  <AlertCircle className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" strokeWidth={1.5} />
-                  <p className="text-sm text-warning-foreground leading-relaxed">
-                    João está abaixo da média de execução desde abril. Outros reps da mesma região não apresentam o mesmo padrão — recomendado conversar antes de qualquer ação formal.
-                  </p>
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* Visita muito curta */}
-          {occurrence.type === 'Visita muito curta' && (
-            <>
-              <div className="bg-card border border-border rounded-xl p-8">
-                <h3 className="text-xs font-semibold text-muted-foreground mb-8 uppercase tracking-wider">
-                  O que aconteceu — Sinais detectados na visita
-                </h3>
-                <div className="grid grid-cols-2 gap-6 mb-10">
-                  <div className="bg-danger-light rounded-xl p-6 text-center">
-                    <div className="text-2xl font-semibold text-danger mb-2">{occurrence.duration}</div>
-                    <div className="text-sm text-muted-foreground">Duração detectada</div>
-                  </div>
-                  <div className="bg-secondary rounded-xl p-6 text-center">
-                    <div className="text-2xl font-semibold text-foreground mb-2">{occurrence.avgDuration}</div>
-                    <div className="text-sm text-muted-foreground">Média histórica neste cliente</div>
-                  </div>
-                </div>
-                <div className="text-xs font-semibold text-muted-foreground mb-5 uppercase tracking-wider">
-                  Sinais detectados durante a visita
-                </div>
-                <div className="space-y-5">
-                  {occurrence.signals?.map((signal: any, index: number) => (
-                    <div key={index} className="flex items-start gap-4 p-4 bg-secondary rounded-lg">
-                      <div className={`flex-shrink-0 w-6 h-6 rounded flex items-center justify-center ${
-                        signal.status === 'check' ? 'bg-success-light text-success' : 'bg-danger-light text-danger'
-                      }`}>
-                        {signal.status === 'check' ? <Check className="w-4 h-4" strokeWidth={2} /> : <X className="w-4 h-4" strokeWidth={2} />}
+                  <div className="text-xs font-semibold text-muted-foreground mb-4 uppercase tracking-wider">Sinais detectados</div>
+                  <div className="space-y-3">
+                    {occurrence.signals?.map((signal: any, index: number) => (
+                      <div key={index} className="flex items-start gap-3 p-4 bg-secondary rounded-xl">
+                        <div className={`flex-shrink-0 w-6 h-6 rounded flex items-center justify-center ${signal.status === 'check' ? 'bg-success-light text-success' : 'bg-danger-light text-danger'}`}>
+                          {signal.status === 'check' ? <Check className="w-4 h-4" strokeWidth={2} /> : <X className="w-4 h-4" strokeWidth={2} />}
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium text-foreground">{signal.text}</div>
+                          <div className="text-xs text-muted-foreground mt-0.5">{signal.time ? `${signal.time} — ${signal.detail}` : signal.detail}</div>
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-foreground mb-1">{signal.text}</div>
-                        <div className="text-xs text-muted-foreground">{signal.time ? `${signal.time} — ${signal.detail}` : signal.detail}</div>
+                    ))}
+                  </div>
+                </div>
+                <div className="bg-card border border-border rounded-xl p-6">
+                  <h3 className="text-xs font-semibold text-muted-foreground mb-6 uppercase tracking-wider">Contexto — Padrão ou caso isolado?</h3>
+                  <div className="grid grid-cols-3 gap-5 mb-6">
+                    <div className="text-center"><div className="text-3xl font-bold text-danger mb-1">{occurrence.pattern.shortVisits}</div><div className="text-sm text-muted-foreground mb-1">Visitas muito curtas</div><div className="text-xs text-danger font-medium">Frequência alta</div></div>
+                    <div className="text-center"><div className="text-3xl font-bold text-danger mb-1">{occurrence.pattern.avgShortDuration}</div><div className="text-sm text-muted-foreground mb-1">Duração média</div><div className="text-xs text-danger font-medium">Mínimo histórico</div></div>
+                    <div className="text-center"><div className="text-3xl font-bold text-foreground mb-1">{occurrence.pattern.teamAvg}</div><div className="text-sm text-muted-foreground mb-1">Média geral</div><div className="text-xs text-muted-foreground font-medium">Referência</div></div>
+                  </div>
+                  <div className="p-4 bg-danger-light/40 border border-danger/30 rounded-xl flex items-start gap-3">
+                    <AlertCircle className="w-4 h-4 text-danger flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+                    <p className="text-sm text-danger-foreground leading-relaxed">Maria apresenta frequência crescente de visitas com pouquíssimos sinais registrados. O padrão sugere presença confirmada sem visita completa de fato.</p>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Baixa atividade */}
+            {occurrence.type === 'Baixa atividade' && (
+              <>
+                <div className="bg-card border border-border rounded-xl p-6">
+                  <h3 className="text-xs font-semibold text-muted-foreground mb-6 uppercase tracking-wider">O que aconteceu — Calendário de atividade</h3>
+                  <div className="grid grid-cols-3 gap-5">
+                    <div className="text-center"><div className="text-3xl font-bold text-danger mb-1">{occurrence.visits}</div><div className="text-sm text-muted-foreground">Visitas esta semana</div></div>
+                    <div className="text-center"><div className="text-3xl font-bold text-foreground mb-1">{occurrence.avgVisits}</div><div className="text-sm text-muted-foreground">Média histórica/semana</div></div>
+                    <div className="text-center"><div className="text-3xl font-bold text-danger mb-1">-63%</div><div className="text-sm text-muted-foreground">Vs. média pessoal</div></div>
+                  </div>
+                </div>
+                <div className="bg-card border border-border rounded-xl p-6">
+                  <h3 className="text-xs font-semibold text-muted-foreground mb-6 uppercase tracking-wider">Contexto — Padrão ou caso isolado?</h3>
+                  <div className="grid grid-cols-3 gap-5 mb-6">
+                    <div className="text-center"><div className="text-3xl font-bold text-danger mb-1">{occurrence.pattern.consecutiveWeeks}</div><div className="text-sm text-muted-foreground mb-1">Semana consecutiva</div><div className="text-xs text-danger font-medium">Tendência preocupante</div></div>
+                    <div className="text-center"><div className="text-3xl font-bold text-warning mb-1">{occurrence.pattern.clientsNoContact}</div><div className="text-sm text-muted-foreground mb-1">Clientes sem contato</div><div className="text-xs text-warning font-medium">Carteira em risco</div></div>
+                    <div className="text-center"><div className="text-3xl font-bold text-foreground mb-1">{occurrence.pattern.regionalReps}</div><div className="text-sm text-muted-foreground mb-1">Outros reps com queda</div><div className="text-xs text-muted-foreground font-medium">Não é regional</div></div>
+                  </div>
+                  <div className="p-4 bg-warning-light/40 border border-warning/30 rounded-xl flex items-start gap-3">
+                    <AlertCircle className="w-4 h-4 text-warning flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+                    <p className="text-sm text-warning-foreground leading-relaxed">Queda progressiva nas últimas 3 semanas sem justificativa. Outros representantes da região estão com atividade normal.</p>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Cliente crítico */}
+            {occurrence.type === 'Cliente crítico sem visita' && (
+              <>
+                <div className="bg-card border border-border rounded-xl p-6">
+                  <h3 className="text-xs font-semibold text-muted-foreground mb-6 uppercase tracking-wider">O que aconteceu — Histórico do cliente</h3>
+                  <div className="grid grid-cols-3 gap-5 mb-8">
+                    <div className="bg-danger-light rounded-xl p-5 text-center"><div className="text-2xl font-bold text-danger mb-1">{occurrence.daysWithoutVisit}d</div><div className="text-sm text-muted-foreground">Sem interação</div></div>
+                    <div className="bg-secondary rounded-xl p-5 text-center"><div className="text-2xl font-bold text-foreground mb-1">{occurrence.historicalFreq}d</div><div className="text-sm text-muted-foreground">Frequência histórica</div></div>
+                    <div className="bg-danger-light rounded-xl p-5 text-center"><div className="text-2xl font-bold text-danger mb-1">{occurrence.aiScore}</div><div className="text-sm text-muted-foreground">Score IA</div></div>
+                  </div>
+                  <div className="text-xs font-semibold text-muted-foreground mb-4 uppercase tracking-wider">Últimas interações</div>
+                  <div className="space-y-3">
+                    {occurrence.interactions?.map((interaction: any, index: number) => (
+                      <div key={index} className="flex items-start gap-3 p-4 bg-secondary rounded-xl">
+                        <div className={`flex-shrink-0 w-6 h-6 rounded flex items-center justify-center ${interaction.status === 'check' ? 'bg-success-light text-success' : 'bg-danger-light text-danger'}`}>
+                          {interaction.status === 'check' ? <Check className="w-4 h-4" strokeWidth={2} /> : <X className="w-4 h-4" strokeWidth={2} />}
+                        </div>
+                        <div><div className="text-sm font-medium text-foreground">{interaction.text}</div><div className="text-xs text-muted-foreground mt-0.5">{interaction.detail}</div></div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
+              </>
+            )}
 
-              <div className="bg-card border border-border rounded-xl p-8">
-                <h3 className="text-xs font-semibold text-muted-foreground mb-8 uppercase tracking-wider">
-                  Contexto — Padrão ou caso isolado?
-                </h3>
-                <div className="grid grid-cols-3 gap-6 mb-8">
-                  <div className="text-center">
-                    <div className="text-3xl font-semibold text-danger mb-2">{occurrence.pattern.shortVisits}</div>
-                    <div className="text-sm text-muted-foreground mb-2">Visitas muito curtas</div>
-                    <div className="text-xs text-danger font-medium">Frequência alta</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-3xl font-semibold text-danger mb-2">{occurrence.pattern.avgShortDuration}</div>
-                    <div className="text-sm text-muted-foreground mb-2">Duração média</div>
-                    <div className="text-xs text-danger font-medium">Mínimo histórico</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-3xl font-semibold text-foreground mb-2">{occurrence.pattern.teamAvg}</div>
-                    <div className="text-sm text-muted-foreground mb-2">Média geral</div>
-                    <div className="text-xs text-foreground font-medium">Referência normal</div>
-                  </div>
-                </div>
-                <div className="text-xs font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
-                  Atividade nos últimos 30 dias
-                </div>
-                <div className="grid grid-cols-10 gap-2 mb-4">
-                  {[...Array(30)].map((_, i) => (
-                    <div
-                      key={i}
-                      className={`h-8 rounded-lg ${
-                        i % 3 === 0 ? 'bg-danger-light' : i % 4 === 0 ? 'bg-warning-light' : 'bg-success-light'
-                      }`}
-                    ></div>
-                  ))}
-                </div>
-                <div className="flex items-center gap-6 text-sm mb-8">
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-lg bg-success-light"></div>
-                    <span className="text-muted-foreground">Visita normal</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-lg bg-danger-light"></div>
-                    <span className="text-muted-foreground">Visita curta</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-lg bg-secondary"></div>
-                    <span className="text-muted-foreground">Sem registro</span>
-                  </div>
-                </div>
-                <div className="p-5 bg-danger-light/40 border border-danger/30 rounded-xl flex items-start gap-3">
-                  <AlertCircle className="w-5 h-5 text-danger flex-shrink-0 mt-0.5" strokeWidth={1.5} />
-                  <p className="text-sm text-danger-foreground leading-relaxed">
-                    Maria apresenta frequência crescente de visitas com pouquíssimos sinais registrados. O padrão sugere que a presença está sendo confirmada sem que a visita esteja de fato acontecendo de forma completa.
-                  </p>
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* Baixa atividade */}
-          {occurrence.type === 'Baixa atividade' && (
-            <>
-              <div className="bg-card border border-border rounded-xl p-8">
-                <h3 className="text-xs font-semibold text-muted-foreground mb-8 uppercase tracking-wider">
-                  O que aconteceu — Calendário de atividade
-                </h3>
-                <div className="grid grid-cols-7 gap-3 mb-8">
-                  {['S', 'T', 'Q', 'Q', 'S', 'S', 'D'].map((day, i) => (
-                    <div key={i} className="text-center">
-                      <div className="text-xs text-muted-foreground mb-3 font-medium">{day}</div>
-                      <div className={`aspect-square rounded-xl ${
-                        i % 3 === 0 ? 'bg-danger-light' : i % 2 === 0 ? 'bg-warning-light' : 'bg-success-light'
-                      }`}></div>
-                    </div>
-                  ))}
-                </div>
-                <div className="flex items-center gap-6 text-sm mb-10">
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-lg bg-success-light"></div>
-                    <span>Atividade normal</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-lg bg-warning-light"></div>
-                    <span>Baixa atividade</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-lg bg-danger-light"></div>
-                    <span>Sem registro</span>
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 gap-6">
-                  <div className="text-center">
-                    <div className="text-3xl font-semibold text-danger mb-2">{occurrence.visits}</div>
-                    <div className="text-sm text-muted-foreground">Visitas esta semana</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-3xl font-semibold text-foreground mb-2">{occurrence.avgVisits}</div>
-                    <div className="text-sm text-muted-foreground">Média histórica/semana</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-3xl font-semibold text-danger mb-2">-63%</div>
-                    <div className="text-sm text-muted-foreground">Vs. média pessoal</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-card border border-border rounded-xl p-8">
-                <h3 className="text-xs font-semibold text-muted-foreground mb-8 uppercase tracking-wider">
-                  Contexto — Padrão ou caso isolado?
-                </h3>
-                <div className="grid grid-cols-3 gap-6 mb-8">
-                  <div className="text-center">
-                    <div className="text-3xl font-semibold text-danger mb-2">{occurrence.pattern.consecutiveWeeks}</div>
-                    <div className="text-sm text-muted-foreground mb-2">Semana consecutiva</div>
-                    <div className="text-xs text-danger font-medium">Tendência preocupante</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-3xl font-semibold text-warning mb-2">{occurrence.pattern.clientsNoContact}</div>
-                    <div className="text-sm text-muted-foreground mb-2">Clientes sem contato</div>
-                    <div className="text-xs text-warning font-medium">Carteira em risco</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-3xl font-semibold text-foreground mb-2">{occurrence.pattern.regionalReps}</div>
-                    <div className="text-sm text-muted-foreground mb-2">Outros reps com queda</div>
-                    <div className="text-xs text-foreground font-medium">Não é regional</div>
-                  </div>
-                </div>
-                <div className="text-xs font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
-                  Atividade nos últimos 30 dias
-                </div>
-                <div className="grid grid-cols-10 gap-2 mb-4">
-                  {[...Array(30)].map((_, i) => (
-                    <div
-                      key={i}
-                      className={`h-8 rounded-lg ${
-                        i < 10 ? 'bg-success-light' : i < 20 ? 'bg-warning-light' : 'bg-danger-light'
-                      }`}
-                    ></div>
-                  ))}
-                </div>
-                <div className="flex items-center gap-6 text-sm mb-8">
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-lg bg-success-light"></div>
-                    <span>Semana normal</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-lg bg-warning-light"></div>
-                    <span>Semana fraca</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-lg bg-secondary"></div>
-                    <span>Fim de semana</span>
-                  </div>
-                </div>
-                <div className="p-5 bg-warning-light/40 border border-warning/30 rounded-xl flex items-start gap-3">
-                  <AlertCircle className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" strokeWidth={1.5} />
-                  <p className="text-sm text-warning-foreground leading-relaxed">
-                    Queda progressiva nas últimas 3 semanas sem justificativa registrada. Outros representantes da região estão com atividade normal. Recomendado verificar se há alguma situação pessoal antes de qualquer ação operacional.
-                  </p>
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* Cliente crítico sem visita */}
-          {occurrence.type === 'Cliente crítico sem visita' && (
-            <>
-              <div className="bg-card border border-border rounded-xl p-8">
-                <h3 className="text-xs font-semibold text-muted-foreground mb-8 uppercase tracking-wider">
-                  O que aconteceu — Histórico do cliente
-                </h3>
-                <div className="grid grid-cols-3 gap-6 mb-10">
-                  <div className="bg-danger-light rounded-xl p-6 text-center">
-                    <div className="text-2xl font-semibold text-danger mb-2">{occurrence.daysWithoutVisit} dias</div>
-                    <div className="text-sm text-muted-foreground">Sem interação detectada</div>
-                  </div>
-                  <div className="bg-secondary rounded-xl p-6 text-center">
-                    <div className="text-2xl font-semibold text-foreground mb-2">{occurrence.historicalFreq} dias</div>
-                    <div className="text-sm text-muted-foreground">Frequência histórica</div>
-                  </div>
-                  <div className="bg-danger-light rounded-xl p-6 text-center">
-                    <div className="text-2xl font-semibold text-danger mb-2">{occurrence.aiScore}</div>
-                    <div className="text-sm text-muted-foreground">Score IA — alta propensão</div>
-                  </div>
-                </div>
-                <div className="text-xs font-semibold text-muted-foreground mb-5 uppercase tracking-wider">
-                  Últimas interações registradas
-                </div>
-                <div className="space-y-5">
-                  {occurrence.interactions?.map((interaction: any, index: number) => (
-                    <div key={index} className="flex items-start gap-4 p-4 bg-secondary rounded-lg">
-                      <div className={`flex-shrink-0 w-6 h-6 rounded flex items-center justify-center ${
-                        interaction.status === 'check' ? 'bg-success-light text-success' : 'bg-danger-light text-danger'
-                      }`}>
-                        {interaction.status === 'check' ? <Check className="w-4 h-4" strokeWidth={2} /> : <X className="w-4 h-4" strokeWidth={2} />}
+            {/* Carteira descoberta */}
+            {occurrence.type === 'Carteira descoberta' && (
+              <>
+                <div className="bg-card border border-border rounded-xl p-6">
+                  <h3 className="text-xs font-semibold text-muted-foreground mb-6 uppercase tracking-wider">O que aconteceu — Distribuição de cobertura</h3>
+                  <div className="space-y-5 mb-8">
+                    {[
+                      { label: 'Com contato recente (até 30 dias)', ...occurrence.coverage.recent, color: 'bg-success' },
+                      { label: 'Sem contato há 31–60 dias', ...occurrence.coverage.medium, color: 'bg-warning' },
+                      { label: 'Sem contato há mais de 60 dias', ...occurrence.coverage.old, color: 'bg-danger' },
+                    ].map((item, i) => (
+                      <div key={i}>
+                        <div className="flex items-center justify-between mb-2 text-sm">
+                          <span className="text-muted-foreground">{item.label}</span>
+                          <span className="font-semibold text-foreground">{item.clients} clientes — {item.percent}%</span>
+                        </div>
+                        <div className="h-3 bg-secondary rounded-full overflow-hidden">
+                          <div className={`h-full ${item.color} rounded-full transition-all`} style={{ width: `${item.percent}%` }}></div>
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-foreground mb-1">{interaction.text}</div>
-                        <div className="text-xs text-muted-foreground">{interaction.detail}</div>
+                    ))}
+                  </div>
+                  <div className="text-xs font-semibold text-muted-foreground mb-4 uppercase tracking-wider">Clientes prioritários sem cobertura</div>
+                  <div className="space-y-3">
+                    {occurrence.priorityClients?.map((client: any, index: number) => (
+                      <div key={index} className="flex items-center justify-between p-4 bg-secondary rounded-xl">
+                        <span className="text-sm font-medium text-foreground">{client.name}</span>
+                        <div className="flex items-center gap-4 text-sm">
+                          <span className="text-muted-foreground">{client.days}d sem visita</span>
+                          <span className="font-semibold text-foreground">Score {client.score}</span>
+                          <span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${client.status === 'Crítico' ? 'bg-danger-light text-danger-foreground' : 'bg-warning-light text-warning-foreground'}`}>{client.status}</span>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-card border border-border rounded-xl p-8">
-                <h3 className="text-xs font-semibold text-muted-foreground mb-8 uppercase tracking-wider">
-                  Contexto — Padrão ou caso isolado?
-                </h3>
-                <div className="grid grid-cols-3 gap-6 mb-8">
-                  <div className="text-center">
-                    <div className="text-3xl font-semibold text-danger mb-2">{occurrence.pattern.aiScore}</div>
-                    <div className="text-sm text-muted-foreground mb-2">Score IA de propensão</div>
-                    <div className="text-xs text-danger font-medium">Alta probabilidade</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-3xl font-semibold text-danger mb-2">{occurrence.pattern.daysUntilInactive} dias</div>
-                    <div className="text-sm text-muted-foreground mb-2">Até inativação por janela</div>
-                    <div className="text-xs text-danger font-medium">Urgente</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-3xl font-semibold text-success mb-2">{occurrence.pattern.avgTicket}</div>
-                    <div className="text-sm text-muted-foreground mb-2">Ticket médio histórico</div>
-                    <div className="text-xs text-success font-medium">Cliente valioso</div>
+                    ))}
                   </div>
                 </div>
-                <div className="text-xs font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
-                  Atividade nos últimos 30 dias
-                </div>
-                <div className="grid grid-cols-10 gap-2 mb-4">
-                  {[...Array(30)].map((_, i) => (
-                    <div key={i} className="h-8 rounded-lg bg-danger-light"></div>
-                  ))}
-                </div>
-                <div className="flex items-center gap-6 text-sm mb-8">
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-lg bg-success-light"></div>
-                    <span>Interação registrada</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-lg bg-danger-light"></div>
-                    <span>Sem interação</span>
-                  </div>
-                </div>
-                <div className="p-5 bg-ai-accent-light border border-ai-accent/30 rounded-xl flex items-start gap-3">
-                  <AlertCircle className="w-5 h-5 text-ai-accent flex-shrink-0 mt-0.5" strokeWidth={1.5} />
-                  <p className="text-sm text-foreground leading-relaxed">
-                    Cliente com score 94 e histórico sólido de compras. A ausência prolongada combinada com a alta propensão indica oportunidade real de recompra. Prioridade alta para a próxima rota do representante.
-                  </p>
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* Carteira descoberta */}
-          {occurrence.type === 'Carteira descoberta' && (
-            <>
-              <div className="bg-card border border-border rounded-xl p-8">
-                <h3 className="text-xs font-semibold text-muted-foreground mb-8 uppercase tracking-wider">
-                  O que aconteceu — Distribuição de cobertura
-                </h3>
-                <div className="space-y-6 mb-10">
-                  <div>
-                    <div className="flex items-center justify-between mb-3 text-sm">
-                      <span className="text-muted-foreground">Com contato recente (até 30 dias)</span>
-                      <span className="font-semibold text-foreground">{occurrence.coverage.recent.clients} clientes — {occurrence.coverage.recent.percent}%</span>
-                    </div>
-                    <div className="h-4 bg-secondary rounded-full overflow-hidden">
-                      <div className="h-full bg-success rounded-full" style={{ width: `${occurrence.coverage.recent.percent}%` }}></div>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex items-center justify-between mb-3 text-sm">
-                      <span className="text-muted-foreground">Sem contato há 31-60 dias</span>
-                      <span className="font-semibold text-foreground">{occurrence.coverage.medium.clients} clientes — {occurrence.coverage.medium.percent}%</span>
-                    </div>
-                    <div className="h-4 bg-secondary rounded-full overflow-hidden">
-                      <div className="h-full bg-warning rounded-full" style={{ width: `${occurrence.coverage.medium.percent}%` }}></div>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex items-center justify-between mb-3 text-sm">
-                      <span className="text-muted-foreground">Sem contato há mais de 60 dias</span>
-                      <span className="font-semibold text-foreground">{occurrence.coverage.old.clients} clientes — {occurrence.coverage.old.percent}%</span>
-                    </div>
-                    <div className="h-4 bg-secondary rounded-full overflow-hidden">
-                      <div className="h-full bg-danger rounded-full" style={{ width: `${occurrence.coverage.old.percent}%` }}></div>
-                    </div>
-                  </div>
-                </div>
-                <div className="text-xs font-semibold text-muted-foreground mb-5 uppercase tracking-wider">
-                  Clientes prioritários sem cobertura
-                </div>
-                <div className="space-y-3">
-                  {occurrence.priorityClients?.map((client: any, index: number) => (
-                    <div key={index} className="flex items-center justify-between p-4 bg-secondary rounded-xl">
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-foreground">{client.name}</div>
-                      </div>
-                      <div className="flex items-center gap-6 text-sm">
-                        <span className="text-muted-foreground">{client.days} dias sem visita</span>
-                        <span className="text-foreground font-semibold">Score {client.score}</span>
-                        <span className={`px-3 py-1.5 rounded-lg font-medium ${
-                          client.status === 'Crítico' ? 'bg-danger-light text-danger-foreground' : 'bg-warning-light text-warning-foreground'
-                        }`}>{client.status}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-card border border-border rounded-xl p-8">
-                <h3 className="text-xs font-semibold text-muted-foreground mb-8 uppercase tracking-wider">
-                  Contexto — Padrão ou caso isolado?
-                </h3>
-                <div className="grid grid-cols-3 gap-6 mb-8">
-                  <div className="text-center">
-                    <div className="text-3xl font-semibold text-danger mb-2">{occurrence.pattern.uncoveredPercent}%</div>
-                    <div className="text-sm text-muted-foreground mb-2">Carteira sem cobertura últimos 45 dias</div>
-                    <div className="text-xs text-danger font-medium">Abaixo da meta (15%)</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-3xl font-semibold text-danger mb-2">{occurrence.pattern.over60Days}</div>
-                    <div className="text-sm text-muted-foreground mb-2">Clientes há mais de 60 dias sem visita</div>
-                    <div className="text-xs text-danger font-medium">Risco alto</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-3xl font-semibold text-success mb-2">{occurrence.pattern.teamAvg}%</div>
-                    <div className="text-sm text-muted-foreground mb-2">Média da equipe no mesmo período</div>
-                    <div className="text-xs text-success font-medium">Referência normal</div>
-                  </div>
-                </div>
-                <div className="text-xs font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
-                  Atividade nos últimos 30 dias
-                </div>
-                <div className="grid grid-cols-10 gap-2 mb-4">
-                  {[...Array(30)].map((_, i) => (
-                    null
-                  ))}
-                </div>
-                
-                <div className="p-5 bg-warning-light/40 border border-warning/30 rounded-xl flex items-start gap-3">
-                  <AlertCircle className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" strokeWidth={1.5} />
-                  <p className="text-sm text-warning-foreground leading-relaxed">
-                    Carlos está concentrando visitas nos mesmos clientes e deixando uma parte relevante da carteira descoberta. 3 clientes de alto score já estão há mais de 60 dias sem nenhum contato detectado.
-                  </p>
-                </div>
-              </div>
-            </>
-          )}
-
-        </div>
-
-        {/* Right Column - Sidebar */}
-        <div className="space-y-8">
-          <div className="bg-card border border-border rounded-xl p-8">
-            <h3 className="text-xs font-semibold text-muted-foreground mb-6 uppercase tracking-wider">Resumo</h3>
-            <div className="space-y-4 text-sm">
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Representante</span>
-                <span className="font-medium text-foreground">{occurrence.representative}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Data</span>
-                <span className="font-medium text-foreground">{occurrence.date}</span>
-              </div>
-              {occurrence.planned !== undefined && (
-                <>
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Planejados</span>
-                    <span className="font-medium text-foreground">{occurrence.planned} clientes</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Visitados</span>
-                    <span className="font-medium text-danger">{occurrence.visited} ({occurrence.executionRate}%)</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Não visitados</span>
-                    <span className="font-medium text-foreground">{occurrence.notVisited}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Justificativa</span>
-                    <span className="font-medium text-foreground">{occurrence.justification}</span>
-                  </div>
-                </>
-              )}
-              {occurrence.client && occurrence.client !== '---' && !occurrence.planned && (
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Cliente</span>
-                  <span className="font-medium text-foreground">{occurrence.client}</span>
-                </div>
-              )}
-              {occurrence.territory && (
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Território</span>
-                  <span className="font-medium text-foreground">{occurrence.territory}</span>
-                </div>
-              )}
-              {occurrence.period && (
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Período</span>
-                  <span className="font-medium text-foreground">{occurrence.period}</span>
-                </div>
-              )}
-              {occurrence.daysWithoutVisit && (
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Sem visita há</span>
-                  <span className="font-medium text-danger">{occurrence.daysWithoutVisit} dias</span>
-                </div>
-              )}
-              {occurrence.totalClients && (
-                <>
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Total da carteira</span>
-                    <span className="font-medium text-foreground">{occurrence.totalClients} clientes</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Sem cobertura</span>
-                    <span className="font-medium text-danger">{occurrence.uncovered} clientes (31%)</span>
-                  </div>
-                </>
-              )}
-            </div>
+              </>
+            )}
           </div>
 
-          <div className="bg-card border border-border rounded-xl p-8">
-            <h3 className="text-xs font-semibold text-muted-foreground mb-6 uppercase tracking-wider">Ações Disponíveis</h3>
-            <div className="space-y-4">
-              {occurrence.type === 'Rota não executada' && (
-                <>
-                  <button className="w-full flex items-start gap-4 p-4 border border-border rounded-xl text-left hover:bg-secondary transition-colors">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Check className="w-5 h-5 text-primary" strokeWidth={1.5} />
-                    </div>
-                    <div className="flex-1">
-                      <div className="text-sm font-medium text-foreground mb-1">Dispensar ocorrência</div>
-                      <div className="text-xs text-muted-foreground leading-relaxed">Falso positivo ou contexto já conhecido.</div>
-                    </div>
-                  </button>
-                  <button className="w-full flex items-start gap-4 p-4 border border-border rounded-xl text-left hover:bg-secondary transition-colors">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Flag className="w-5 h-5 text-primary" strokeWidth={1.5} />
-                    </div>
-                    <div className="flex-1">
-                      <div className="text-sm font-medium text-foreground mb-1">Sinalizar para acompanhamento</div>
-                      <div className="text-xs text-muted-foreground leading-relaxed">Fica na fila do gestor para revisão futura.</div>
-                    </div>
-                  </button>
-                  <button className="w-full flex items-start gap-4 p-4 border border-border rounded-xl text-left hover:bg-secondary transition-colors">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Flag className="w-5 h-5 text-primary" strokeWidth={1.5} />
-                    </div>
-                    <div className="flex-1">
-                      <div className="text-sm font-medium text-foreground mb-1">Reagendar clientes críticos</div>
-                      <div className="text-xs text-muted-foreground leading-relaxed">Incluir clientes de alto risco na próxima rota.</div>
-                    </div>
-                  </button>
-                  <button className="w-full flex items-start gap-4 p-4 border border-border rounded-xl text-left hover:bg-secondary transition-colors">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <MessageSquare className="w-5 h-5 text-primary" strokeWidth={1.5} />
-                    </div>
-                    <div className="flex-1">
-                      <div className="text-sm font-medium text-foreground mb-1">Contactar representante</div>
-                      <div className="text-xs text-muted-foreground leading-relaxed">Conversa direta — sem expor o contexto.</div>
-                    </div>
-                  </button>
-                </>
-              )}
-              {occurrence.type === 'Cliente crítico sem visita' && (
-                <>
-                  <button className="w-full flex items-start gap-4 p-4 border border-border rounded-xl text-left hover:bg-secondary transition-colors">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Flag className="w-5 h-5 text-primary" strokeWidth={1.5} />
-                    </div>
-                    <div className="flex-1">
-                      <div className="text-sm font-medium text-foreground mb-1">Incluir na próxima rota</div>
-                      <div className="text-xs text-muted-foreground leading-relaxed">Prioridade alta — cliente de alto valor.</div>
-                    </div>
-                  </button>
-                  <button className="w-full flex items-start gap-4 p-4 border border-border rounded-xl text-left hover:bg-secondary transition-colors">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Flag className="w-5 h-5 text-primary" strokeWidth={1.5} />
-                    </div>
-                    <div className="flex-1">
-                      <div className="text-sm font-medium text-foreground mb-1">Sinalizar como urgente</div>
-                      <div className="text-xs text-muted-foreground leading-relaxed">Garantir visita antes da janela de inativação.</div>
-                    </div>
-                  </button>
-                </>
-              )}
-              {occurrence.type === 'Visita muito curta' && (
-                <>
-                  <button className="w-full flex items-start gap-4 p-4 border border-border rounded-xl text-left hover:bg-secondary transition-colors">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Check className="w-5 h-5 text-primary" strokeWidth={1.5} />
-                    </div>
-                    <div className="flex-1">
-                      <div className="text-sm font-medium text-foreground mb-1">Dispensar ocorrência</div>
-                      <div className="text-xs text-muted-foreground leading-relaxed">Contexto externo pode justificar a brevidade.</div>
-                    </div>
-                  </button>
-                  <button className="w-full flex items-start gap-4 p-4 border border-border rounded-xl text-left hover:bg-secondary transition-colors">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Flag className="w-5 h-5 text-primary" strokeWidth={1.5} />
-                    </div>
-                    <div className="flex-1">
-                      <div className="text-sm font-medium text-foreground mb-1">Sinalizar para acompanhamento</div>
-                      <div className="text-xs text-muted-foreground leading-relaxed">Monitorar se padrão se repete neste cliente.</div>
-                    </div>
-                  </button>
-                </>
-              )}
-              {occurrence.type === 'Carteira descoberta' && (
-                <button className="w-full flex items-start gap-4 p-4 border border-border rounded-xl text-left hover:bg-secondary transition-colors">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Flag className="w-5 h-5 text-primary" strokeWidth={1.5} />
+          {/* Right Column — simple actions sidebar */}
+          <div className="space-y-6">
+            <div className="bg-card border border-border rounded-xl p-6">
+              <h3 className="text-xs font-semibold text-muted-foreground mb-5 uppercase tracking-wider">Resumo</h3>
+              <div className="space-y-4 text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Representante</span>
+                  <span className="font-medium text-foreground">{occurrence.representative}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Data</span>
+                  <span className="font-medium text-foreground">{occurrence.date}</span>
+                </div>
+                {occurrence.client && occurrence.client !== '---' && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Cliente</span>
+                    <span className="font-medium text-foreground">{occurrence.client}</span>
                   </div>
-                  <div className="flex-1">
-                    <div className="text-sm font-medium text-foreground mb-1">Sugerir rota de recuperação</div>
-                    <div className="text-xs text-muted-foreground leading-relaxed">Priorizar clientes descobertos na próxima semana.</div>
+                )}
+                {occurrence.territory && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Território</span>
+                    <span className="font-medium text-foreground">{occurrence.territory}</span>
                   </div>
+                )}
+                {occurrence.period && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Período</span>
+                    <span className="font-medium text-foreground">{occurrence.period}</span>
+                  </div>
+                )}
+                {occurrence.daysWithoutVisit && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Sem visita há</span>
+                    <span className="font-medium text-danger">{occurrence.daysWithoutVisit} dias</span>
+                  </div>
+                )}
+                {occurrence.totalClients && (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Total da carteira</span>
+                      <span className="font-medium text-foreground">{occurrence.totalClients} clientes</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Sem cobertura</span>
+                      <span className="font-medium text-danger">{occurrence.uncovered} clientes (31%)</span>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div className="bg-card border border-border rounded-xl p-6">
+              <h3 className="text-xs font-semibold text-muted-foreground mb-5 uppercase tracking-wider">Ações</h3>
+              <div className="space-y-3">
+                <button className="w-full flex items-start gap-3 p-4 border border-border rounded-xl text-left hover:bg-secondary transition-colors">
+                  <X className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+                  <div><div className="text-sm font-medium text-foreground">Dispensar</div><div className="text-xs text-muted-foreground mt-0.5">Falso positivo ou contexto já conhecido.</div></div>
                 </button>
-              )}
-              <button className="w-full flex items-start gap-4 p-4 border border-border rounded-xl text-left hover:bg-secondary transition-colors">
-                <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <MessageSquare className="w-5 h-5 text-primary" strokeWidth={1.5} />
-                </div>
-                <div className="flex-1">
-                  <div className="text-sm font-medium text-foreground mb-1">Contactar representante</div>
-                  <div className="text-xs text-muted-foreground leading-relaxed">
-                    {occurrence.type === 'Visita muito curta' ? 'Verificar o que aconteceu sem expor auditoria.' :
-                     occurrence.type === 'Baixa atividade' ? 'Verificar contexto pessoal antes de agir.' :
-                     'Alertar sobre a oportunidade identificada.'}
-                  </div>
-                </div>
-              </button>
-              <button className="w-full flex items-start gap-4 p-4 border border-border rounded-xl text-left hover:bg-secondary transition-colors">
-                <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <FileText className="w-5 h-5 text-primary" strokeWidth={1.5} />
-                </div>
-                <div className="flex-1">
-                  <div className="text-sm font-medium text-foreground mb-1">
-                    {occurrence.type === 'Cliente crítico sem visita' ? 'Ver ficha completa' : 'Ver histórico completo'}
-                  </div>
-                  <div className="text-xs text-muted-foreground leading-relaxed">
-                    {occurrence.type === 'Cliente crítico sem visita' ? 'Histórico detalhado do cliente.' :
-                     occurrence.type === 'Visita muito curta' ? 'Acessar todas as visitas a este cliente.' :
-                     occurrence.type === 'Carteira descoberta' ? 'Visualizar distribuição geográfica.' :
-                     'Detalhes completos do histórico.'}
-                  </div>
-                </div>
-              </button>
+                <button className="w-full flex items-start gap-3 p-4 border border-border rounded-xl text-left hover:bg-secondary transition-colors">
+                  <Flag className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+                  <div><div className="text-sm font-medium text-foreground">Sinalizar</div><div className="text-xs text-muted-foreground mt-0.5">Fica na fila do gestor para revisão.</div></div>
+                </button>
+                <button className="w-full flex items-start gap-3 p-4 border border-border rounded-xl text-left hover:bg-secondary transition-colors">
+                  <MessageSquare className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+                  <div><div className="text-sm font-medium text-foreground">Contactar representante</div><div className="text-xs text-muted-foreground mt-0.5">Conversa direta sem expor o contexto.</div></div>
+                </button>
+                <button className="w-full flex items-start gap-3 p-4 border border-border rounded-xl text-left hover:bg-secondary transition-colors">
+                  <FileText className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+                  <div><div className="text-sm font-medium text-foreground">Ver histórico completo</div><div className="text-xs text-muted-foreground mt-0.5">Detalhes de todas as ocorrências.</div></div>
+                </button>
+              </div>
             </div>
-          </div>
 
-          <div className="bg-card border border-border rounded-xl p-8">
-            <h3 className="text-xs font-semibold text-muted-foreground mb-6 uppercase tracking-wider">Nota Interna</h3>
-            <textarea
-              placeholder="Adicione contexto que o sistema não capturou..."
-              className="w-full px-4 py-4 bg-secondary border-0 rounded-xl text-sm resize-none leading-relaxed"
-              rows={5}
-            />
-            <div className="text-xs text-muted-foreground mt-3 leading-relaxed">
-              Visível apenas para gestores
+            <div className="bg-card border border-border rounded-xl p-6">
+              <h3 className="text-xs font-semibold text-muted-foreground mb-4 uppercase tracking-wider">Nota Interna</h3>
+              <textarea
+                placeholder="Adicione contexto que o sistema não capturou..."
+                className="w-full px-4 py-3 bg-secondary border-0 rounded-xl text-sm resize-none"
+                rows={4}
+              />
+              <button className="mt-3 w-full px-4 py-2.5 bg-secondary rounded-xl text-sm font-medium hover:bg-accent transition-colors flex items-center justify-center gap-2">
+                <FileText className="w-4 h-4" strokeWidth={1.5} /> Salvar
+              </button>
             </div>
-            <button className="mt-5 w-full px-4 py-3 bg-secondary rounded-xl text-sm font-medium hover:bg-accent transition-colors flex items-center justify-center gap-2">
-              <FileText className="w-4 h-4" strokeWidth={1.5} />
-              Salvar
-            </button>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
