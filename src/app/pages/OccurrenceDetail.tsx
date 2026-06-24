@@ -109,12 +109,110 @@ const resolutionActions = [
   { id: 'reschedule', label: 'Reagendar Críticos', description: 'Insere clientes não visitados como prioridade máxima amanhã.' },
 ];
 
-function RouteTimeline({ occurrence }: { occurrence: any }) {
-  const [selectedStop, setSelectedStop] = useState(3);
+function ResolutionPanel() {
   const [selectedAction, setSelectedAction] = useState<string | null>(null);
   const [auditNote, setAuditNote] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [validationError, setValidationError] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedAction) { setValidationError('Selecione uma ação final para prosseguir.'); return; }
+    if (!auditNote.trim()) { setValidationError('O preenchimento da observação é obrigatório.'); return; }
+    setValidationError('');
+    setSubmitted(true);
+  };
+
+  return (
+    <div className="bg-card border border-border rounded-xl overflow-hidden sticky top-6">
+      <div className="p-5 border-b border-border bg-foreground text-background">
+        <h2 className="text-sm font-semibold flex items-center gap-2">
+          <Send className="w-4 h-4 opacity-70" strokeWidth={1.5} />
+          Painel de Resolução
+        </h2>
+        <p className="text-xs opacity-50 mt-1">Registre sua observação e aplique uma ação definitiva.</p>
+      </div>
+
+      {!submitted ? (
+        <form onSubmit={handleSubmit} className="p-5 space-y-5">
+          <div>
+            <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+              Observação do Auditor <span className="text-danger">*</span>
+            </label>
+            <textarea
+              value={auditNote}
+              onChange={e => setAuditNote(e.target.value)}
+              placeholder="Ex: Representante finalizou mais cedo por questões pessoais..."
+              className="w-full min-h-[100px] px-4 py-3 text-sm bg-secondary border border-border rounded-xl focus:ring-2 focus:ring-foreground/20 focus:border-foreground/30 outline-none resize-none placeholder:text-muted-foreground"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+              Ação Final
+            </label>
+            <div className="space-y-2">
+              {resolutionActions.map((action) => (
+                <label
+                  key={action.id}
+                  className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${
+                    selectedAction === action.id
+                      ? 'border-foreground bg-secondary ring-1 ring-foreground/10'
+                      : 'border-border hover:border-foreground/30 bg-card'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="resolution-action"
+                    value={action.id}
+                    checked={selectedAction === action.id}
+                    onChange={() => { setSelectedAction(action.id); setValidationError(''); }}
+                    className="mt-0.5 accent-foreground"
+                  />
+                  <div>
+                    <span className="text-sm font-semibold text-foreground block">{action.label}</span>
+                    <span className="text-xs text-muted-foreground mt-0.5 block leading-relaxed">{action.description}</span>
+                  </div>
+                </label>
+              ))}
+            </div>
+          </div>
+          {validationError && (
+            <div className="p-3 bg-danger-light border border-danger/20 text-danger-foreground text-xs rounded-xl font-medium">
+              {validationError}
+            </div>
+          )}
+          <button
+            type="submit"
+            className="w-full bg-foreground hover:opacity-90 text-background py-3 px-4 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2"
+          >
+            <Send className="w-4 h-4" strokeWidth={1.5} />
+            Concluir Auditoria
+          </button>
+        </form>
+      ) : (
+        <div className="p-5 space-y-4">
+          <div className="p-4 bg-success-light border border-success/20 rounded-xl">
+            <p className="font-semibold flex items-center gap-1.5 text-success mb-1">
+              <Check className="w-4 h-4" strokeWidth={2.5} /> Auditoria Concluída
+            </p>
+            <p className="text-sm text-success-foreground leading-relaxed">
+              A ocorrência foi atualizada com sucesso. Todos os envolvidos foram notificados.
+            </p>
+          </div>
+          <button
+            onClick={() => { setSubmitted(false); setSelectedAction(null); setAuditNote(''); }}
+            className="w-full py-3 px-4 border border-border text-foreground hover:bg-secondary font-semibold text-sm rounded-xl transition-all flex items-center justify-center gap-2"
+          >
+            <RefreshCw className="w-4 h-4" strokeWidth={1.5} /> Reabrir Auditoria
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function RouteTimeline({ occurrence }: { occurrence: any }) {
+  const [selectedStop, setSelectedStop] = useState(3);
 
   const stop = stopsData.find(s => s.id === selectedStop)!;
 
@@ -315,95 +413,7 @@ function RouteTimeline({ occurrence }: { occurrence: any }) {
 
       {/* Right Column — Resolution Panel */}
       <div className="lg:col-span-1">
-        <div className="bg-card border border-border rounded-xl overflow-hidden sticky top-6">
-          <div className="p-5 border-b border-border bg-foreground text-background">
-            <h2 className="text-sm font-semibold flex items-center gap-2">
-              <Send className="w-4 h-4 opacity-70" strokeWidth={1.5} />
-              Painel de Resolução
-            </h2>
-            <p className="text-xs opacity-50 mt-1">
-              Registre sua observação e aplique uma ação definitiva.
-            </p>
-          </div>
-
-          {!submitted ? (
-            <form onSubmit={handleSubmit} className="p-5 space-y-5">
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                  Observação do Auditor <span className="text-danger">*</span>
-                </label>
-                <textarea
-                  value={auditNote}
-                  onChange={e => setAuditNote(e.target.value)}
-                  placeholder="Ex: Representante finalizou mais cedo por questões pessoais..."
-                  className="w-full min-h-[100px] px-4 py-3 text-sm bg-secondary border border-border rounded-xl focus:ring-2 focus:ring-foreground/20 focus:border-foreground/30 outline-none resize-none placeholder:text-muted-foreground"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-                  Ação Final
-                </label>
-                <div className="space-y-2">
-                  {resolutionActions.map((action) => (
-                    <label
-                      key={action.id}
-                      className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${
-                        selectedAction === action.id
-                          ? 'border-foreground bg-secondary ring-1 ring-foreground/10'
-                          : 'border-border hover:border-foreground/30 bg-card'
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="resolution-action"
-                        value={action.id}
-                        checked={selectedAction === action.id}
-                        onChange={() => { setSelectedAction(action.id); setValidationError(''); }}
-                        className="mt-0.5 accent-foreground"
-                      />
-                      <div>
-                        <span className="text-sm font-semibold text-foreground block">{action.label}</span>
-                        <span className="text-xs text-muted-foreground mt-0.5 block leading-relaxed">{action.description}</span>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {validationError && (
-                <div className="p-3 bg-danger-light border border-danger/20 text-danger-foreground text-xs rounded-xl font-medium">
-                  {validationError}
-                </div>
-              )}
-
-              <button
-                type="submit"
-                className="w-full bg-foreground hover:opacity-90 text-background py-3 px-4 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2"
-              >
-                <Send className="w-4 h-4" strokeWidth={1.5} />
-                Concluir Auditoria
-              </button>
-            </form>
-          ) : (
-            <div className="p-5 space-y-4">
-              <div className="p-4 bg-success-light border border-success/20 rounded-xl">
-                <p className="font-semibold flex items-center gap-1.5 text-success mb-1">
-                  <Check className="w-4 h-4" strokeWidth={2.5} /> Auditoria Concluída
-                </p>
-                <p className="text-sm text-success-foreground leading-relaxed">
-                  A ocorrência foi atualizada com sucesso. Todos os envolvidos foram notificados.
-                </p>
-              </div>
-              <button
-                onClick={() => { setSubmitted(false); setSelectedAction(null); setAuditNote(''); }}
-                className="w-full py-3 px-4 border border-border text-foreground hover:bg-secondary font-semibold text-sm rounded-xl transition-all flex items-center justify-center gap-2"
-              >
-                <RefreshCw className="w-4 h-4" strokeWidth={1.5} /> Reabrir Auditoria
-              </button>
-            </div>
-          )}
-        </div>
+        <ResolutionPanel />
       </div>
     </div>
   );
@@ -465,6 +475,7 @@ export function OccurrenceDetail() {
       {occurrence.type !== 'Rota não executada' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
+
 
             {/* Visita muito curta */}
             {occurrence.type === 'Visita muito curta' && (
@@ -604,91 +615,8 @@ export function OccurrenceDetail() {
             )}
           </div>
 
-          {/* Right Column — simple actions sidebar */}
-          <div className="space-y-6">
-            <div className="bg-card border border-border rounded-xl p-6">
-              <h3 className="text-xs font-semibold text-muted-foreground mb-5 uppercase tracking-wider">Resumo</h3>
-              <div className="space-y-4 text-sm">
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Representante</span>
-                  <span className="font-medium text-foreground">{occurrence.representative}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Data</span>
-                  <span className="font-medium text-foreground">{occurrence.date}</span>
-                </div>
-                {occurrence.client && occurrence.client !== '---' && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Cliente</span>
-                    <span className="font-medium text-foreground">{occurrence.client}</span>
-                  </div>
-                )}
-                {occurrence.territory && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Território</span>
-                    <span className="font-medium text-foreground">{occurrence.territory}</span>
-                  </div>
-                )}
-                {occurrence.period && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Período</span>
-                    <span className="font-medium text-foreground">{occurrence.period}</span>
-                  </div>
-                )}
-                {occurrence.daysWithoutVisit && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Sem visita há</span>
-                    <span className="font-medium text-danger">{occurrence.daysWithoutVisit} dias</span>
-                  </div>
-                )}
-                {occurrence.totalClients && (
-                  <>
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Total da carteira</span>
-                      <span className="font-medium text-foreground">{occurrence.totalClients} clientes</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Sem cobertura</span>
-                      <span className="font-medium text-danger">{occurrence.uncovered} clientes (31%)</span>
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-
-            <div className="bg-card border border-border rounded-xl p-6">
-              <h3 className="text-xs font-semibold text-muted-foreground mb-5 uppercase tracking-wider">Ações</h3>
-              <div className="space-y-3">
-                <button className="w-full flex items-start gap-3 p-4 border border-border rounded-xl text-left hover:bg-secondary transition-colors">
-                  <X className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" strokeWidth={1.5} />
-                  <div><div className="text-sm font-medium text-foreground">Dispensar</div><div className="text-xs text-muted-foreground mt-0.5">Falso positivo ou contexto já conhecido.</div></div>
-                </button>
-                <button className="w-full flex items-start gap-3 p-4 border border-border rounded-xl text-left hover:bg-secondary transition-colors">
-                  <Flag className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" strokeWidth={1.5} />
-                  <div><div className="text-sm font-medium text-foreground">Sinalizar</div><div className="text-xs text-muted-foreground mt-0.5">Fica na fila do gestor para revisão.</div></div>
-                </button>
-                <button className="w-full flex items-start gap-3 p-4 border border-border rounded-xl text-left hover:bg-secondary transition-colors">
-                  <MessageSquare className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" strokeWidth={1.5} />
-                  <div><div className="text-sm font-medium text-foreground">Contactar representante</div><div className="text-xs text-muted-foreground mt-0.5">Conversa direta sem expor o contexto.</div></div>
-                </button>
-                <button className="w-full flex items-start gap-3 p-4 border border-border rounded-xl text-left hover:bg-secondary transition-colors">
-                  <FileText className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" strokeWidth={1.5} />
-                  <div><div className="text-sm font-medium text-foreground">Ver histórico completo</div><div className="text-xs text-muted-foreground mt-0.5">Detalhes de todas as ocorrências.</div></div>
-                </button>
-              </div>
-            </div>
-
-            <div className="bg-card border border-border rounded-xl p-6">
-              <h3 className="text-xs font-semibold text-muted-foreground mb-4 uppercase tracking-wider">Nota Interna</h3>
-              <textarea
-                placeholder="Adicione contexto que o sistema não capturou..."
-                className="w-full px-4 py-3 bg-secondary border-0 rounded-xl text-sm resize-none"
-                rows={4}
-              />
-              <button className="mt-3 w-full px-4 py-2.5 bg-secondary rounded-xl text-sm font-medium hover:bg-accent transition-colors flex items-center justify-center gap-2">
-                <FileText className="w-4 h-4" strokeWidth={1.5} /> Salvar
-              </button>
-            </div>
+          <div className="lg:col-span-1">
+            <ResolutionPanel />
           </div>
         </div>
       )}
