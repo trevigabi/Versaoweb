@@ -253,17 +253,17 @@ function RouteTimeline({ occurrence }: { occurrence: any }) {
           <div className="grid grid-cols-3 gap-5 mb-6">
             <div className="bg-secondary rounded-xl p-4">
               <span className="text-xs font-semibold text-muted-foreground block uppercase tracking-wider mb-1">Desvios Recentes</span>
-              <span className="text-2xl font-bold text-warning block">3 Rotas</span>
+              <span className="text-lg font-bold text-warning block">3 Rotas</span>
               <span className="text-xs text-warning mt-2 block">Frequência moderada (60d)</span>
             </div>
             <div className="bg-secondary rounded-xl p-4">
               <span className="text-xs font-semibold text-muted-foreground block uppercase tracking-wider mb-1">Taxa de Execução</span>
-              <span className="text-2xl font-bold text-danger block">71% Mês</span>
+              <span className="text-lg font-bold text-danger block">71% Mês</span>
               <span className="text-xs text-danger mt-2 block">Abaixo da média (85%)</span>
             </div>
             <div className="bg-secondary rounded-xl p-4">
               <span className="text-xs font-semibold text-muted-foreground block uppercase tracking-wider mb-1">Região</span>
-              <span className="text-2xl font-bold text-foreground block">2 Casos</span>
+              <span className="text-lg font-bold text-foreground block">2 Casos</span>
               <span className="text-xs text-muted-foreground mt-2 block">Não é padrão regional</span>
             </div>
           </div>
