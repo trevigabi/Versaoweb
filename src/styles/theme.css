@@ -4,17 +4,17 @@
   --font-size: 16px;
 
   /* Premium Pace Route Colors */
-  --background: #F8F9FA;
-  --foreground: #1A2332;
+  --background: #F8FAFC;
+  --foreground: #0F172A;
   --card: #FFFFFF;
-  --card-foreground: #1A2332;
+  --card-foreground: #0F172A;
   --popover: #FFFFFF;
-  --popover-foreground: #1A2332;
+  --popover-foreground: #0F172A;
 
   /* Beira Rio Red - Primary */
   --primary: #BE1520;
   --primary-foreground: #FFFFFF;
-  --primary-hover: #A01019;
+  --primary-hover: #930F16;
 
   /* Blue Tones - AI and Highlights */
   --ai-accent: #3B82F6;
@@ -22,7 +22,7 @@
   --ai-foreground: #FFFFFF;
 
   /* Performance Colors */
-  --success: #10B981;
+  --success: #059669;
   --success-light: #D1FAE5;
   --success-foreground: #065F46;
 
@@ -31,12 +31,12 @@
   --warning-foreground: #92400E;
 
   --danger: #EF4444;
-  --danger-light: #FEE2E2;
-  --danger-foreground: #991B1B;
+  --danger-light: #FDF2F2;
+  --danger-foreground: #930F16;
 
   /* Neutrals */
   --secondary: #F1F3F5;
-  --secondary-foreground: #1A2332;
+  --secondary-foreground: #0F172A;
   --muted: #E9ECEF;
   --muted-foreground: #64748B;
   --accent: #E8EBF0;
