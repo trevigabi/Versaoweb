@@ -314,9 +314,9 @@ function SeverityBadge({ severity }: { severity: string }) {
       label: 'Alta',
     },
     medium: {
-      bg: 'bg-warning-light',
-      border: 'border-warning/30',
-      text: 'text-warning-foreground',
+      bg: 'bg-secondary',
+      border: 'border-border',
+      text: 'text-muted-foreground',
       icon: Clock,
       label: 'Média',
     },
@@ -347,8 +347,8 @@ function SeverityBadge({ severity }: { severity: string }) {
 function SeverityBadgeSmall({ severity }: { severity: string }) {
   const config = {
     high: { bg: 'bg-danger-light', text: 'text-danger-foreground', label: 'Alta' },
-    medium: { bg: 'bg-warning-light', text: 'text-warning-foreground', label: 'Média' },
-    low: { bg: 'bg-secondary', text: 'text-foreground', label: 'Baixa' },
+    medium: { bg: 'bg-secondary', text: 'text-muted-foreground', label: 'Média' },
+    low: { bg: 'bg-secondary', text: 'text-muted-foreground', label: 'Baixa' },
   }[severity] || { bg: 'bg-secondary', text: 'text-foreground', label: 'Normal' };
 
   return (
