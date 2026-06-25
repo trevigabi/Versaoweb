@@ -14,29 +14,29 @@ export function Coverage() {
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-card border border-success/30 rounded-lg p-6">
+        <div className="bg-card border border-border rounded-lg p-6">
           <div className="flex items-center gap-3 mb-3">
-            <Target className="w-10 h-10 text-success" strokeWidth={1.5} />
+            <Target className="w-10 h-10 text-muted-foreground" strokeWidth={1.5} />
             <div className="text-sm text-muted-foreground">Cobertura Total</div>
           </div>
           <div className="text-4xl font-semibold text-foreground mb-1">87%</div>
-          <div className="text-sm text-success">+5% vs mês anterior</div>
+          <div className="text-sm text-primary">+5% vs mês anterior</div>
         </div>
         <div className="bg-card border border-border rounded-lg p-6">
           <div className="flex items-center gap-3 mb-3">
-            <TrendingUp className="w-10 h-10 text-primary" strokeWidth={1.5} />
+            <TrendingUp className="w-10 h-10 text-muted-foreground" strokeWidth={1.5} />
             <div className="text-sm text-muted-foreground">Clientes Cobertos</div>
           </div>
           <div className="text-4xl font-semibold text-foreground mb-1">1.623</div>
           <div className="text-sm text-muted-foreground">de 1.847 total</div>
         </div>
-        <div className="bg-card border border-warning/30 rounded-lg p-6">
+        <div className="bg-card border border-border rounded-lg p-6">
           <div className="flex items-center gap-3 mb-3">
-            <AlertCircle className="w-10 h-10 text-warning" strokeWidth={1.5} />
+            <AlertCircle className="w-10 h-10 text-muted-foreground" strokeWidth={1.5} />
             <div className="text-sm text-muted-foreground">Sem Visita 30d+</div>
           </div>
           <div className="text-4xl font-semibold text-foreground mb-1">224</div>
-          <div className="text-sm text-warning">Requer atenção</div>
+          <div className="text-sm text-muted-foreground">Requer atenção</div>
         </div>
       </div>
 
@@ -88,13 +88,7 @@ export function Coverage() {
                     </div>
                     <div className="w-full bg-secondary rounded-full h-2.5 overflow-hidden">
                       <div
-                        className={`h-full ${
-                          item.coverage >= 90
-                            ? 'bg-success'
-                            : item.coverage >= 80
-                            ? 'bg-primary'
-                            : 'bg-warning'
-                        }`}
+                        className="h-full bg-primary"
                         style={{ width: `${item.coverage}%` }}
                       ></div>
                     </div>

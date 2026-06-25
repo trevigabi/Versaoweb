@@ -34,8 +34,8 @@ export function Goals() {
           <div className="text-sm text-muted-foreground mb-2">Meta Total Q2</div>
           <div className="text-3xl font-semibold text-foreground mb-2">R$ 8.5M</div>
           <div className="flex items-center gap-2 text-sm">
-            <div className="w-2 h-2 rounded-full bg-success"></div>
-            <span className="text-success">No ritmo</span>
+            <div className="w-2 h-2 rounded-full bg-primary"></div>
+            <span className="text-muted-foreground">No ritmo</span>
           </div>
         </div>
         <div className="bg-card border border-border rounded-lg p-6">
@@ -45,8 +45,8 @@ export function Goals() {
         </div>
         <div className="bg-card border border-border rounded-lg p-6">
           <div className="text-sm text-muted-foreground mb-2">Projeção</div>
-          <div className="text-3xl font-semibold text-success mb-2">R$ 8.9M</div>
-          <div className="text-sm text-success">+5% acima da meta</div>
+          <div className="text-3xl font-semibold text-foreground mb-2">R$ 8.9M</div>
+          <div className="text-sm text-primary">+5% acima da meta</div>
         </div>
       </div>
 
@@ -59,7 +59,7 @@ export function Goals() {
             {[45, 52, 48, 61, 58, 67, 63, 71, 68, 75, 72, 78, 74, 82, 79, 85, 81, 88, 84, 91, 87, 94, 90, 97, 93, 89, 92, 95, 91, 96].map((value, index) => (
               <div
                 key={index}
-                className="flex-1 bg-ai-accent hover:bg-primary rounded-t transition-all duration-200 cursor-pointer"
+                className="flex-1 bg-primary/70 hover:bg-primary rounded-t transition-all duration-200 cursor-pointer"
                 style={{ height: `${value}%` }}
               ></div>
             ))}
@@ -70,26 +70,26 @@ export function Goals() {
         <div className="bg-card border border-border rounded-lg p-6">
           <h3 className="font-semibold text-foreground mb-6">Cenários</h3>
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-3 bg-success-light/30 rounded-lg">
+            <div className="flex items-center justify-between p-3 bg-secondary rounded-lg">
               <div>
                 <div className="text-xs font-medium text-muted-foreground mb-1">Otimista</div>
                 <div className="text-base font-semibold text-foreground">R$ 1,15M</div>
               </div>
-              <div className="text-xl font-semibold text-success">92%</div>
+              <div className="text-xl font-semibold text-primary">92%</div>
             </div>
-            <div className="flex items-center justify-between p-3 bg-warning-light/30 rounded-lg">
+            <div className="flex items-center justify-between p-3 bg-secondary rounded-lg">
               <div>
                 <div className="text-xs font-medium text-muted-foreground mb-1">Realista</div>
                 <div className="text-base font-semibold text-foreground">R$ 1,08M</div>
               </div>
-              <div className="text-xl font-semibold text-warning">85%</div>
+              <div className="text-xl font-semibold text-foreground">85%</div>
             </div>
-            <div className="flex items-center justify-between p-3 bg-danger-light/30 rounded-lg">
+            <div className="flex items-center justify-between p-3 bg-secondary rounded-lg">
               <div>
                 <div className="text-xs font-medium text-muted-foreground mb-1">Pessimista</div>
                 <div className="text-base font-semibold text-foreground">R$ 980k</div>
               </div>
-              <div className="text-xl font-semibold text-danger">73%</div>
+              <div className="text-xl font-semibold text-muted-foreground">73%</div>
             </div>
           </div>
         </div>
@@ -146,16 +146,7 @@ export function Goals() {
                     </div>
                   </div>
                   <div className="w-full bg-secondary rounded-full h-3 overflow-hidden">
-                    <div
-                      className={`h-full ${
-                        item.progress >= 80
-                          ? 'bg-success'
-                          : item.progress >= 60
-                          ? 'bg-primary'
-                          : 'bg-warning'
-                      }`}
-                      style={{ width: `${item.progress}%` }}
-                    ></div>
+                    <div className="h-full bg-primary" style={{ width: `${item.progress}%` }}></div>
                   </div>
                 </div>
               ))}
