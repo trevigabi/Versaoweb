@@ -37,20 +37,20 @@ const MODES: { id: string; label: string; description: string; icon: LucideIcon 
 ];
 
 const MODE_STYLE: Record<string, { bg: string; text: string }> = {
-  Crescimento:   { bg: '#E6F1FB', text: '#185FA5' },
-  Recuperação:   { bg: '#EAF3DE', text: '#3B6D11' },
-  Coleção:       { bg: '#F3EEFF', text: '#7C3AED' },
-  Rentabilidade: { bg: '#FAEEDA', text: '#854F0B' },
-  Cobertura:     { bg: '#E0F7FA', text: '#0E7490' },
-  Personalizado: { bg: '#F3F4F6', text: '#6B7280' },
+  Crescimento:   { bg: '#F5F5F4', text: '#44403C' },
+  Recuperação:   { bg: '#F5F5F4', text: '#44403C' },
+  Coleção:       { bg: '#F5F5F4', text: '#44403C' },
+  Rentabilidade: { bg: '#F5F5F4', text: '#44403C' },
+  Cobertura:     { bg: '#F5F5F4', text: '#44403C' },
+  Personalizado: { bg: '#F5F5F4', text: '#78716C' },
 };
 
 const DIMENSIONS: { id: string; label: string; description: string; icon: LucideIcon; color: string }[] = [
-  { id: 'retencao',    label: 'Retenção de carteira',  description: 'Foco em evitar churn e recuperar clientes',        icon: Users2,    color: '#3B6D11' },
-  { id: 'performance', label: 'Performance comercial', description: 'Foco em aumentar vendas e ticket médio',            icon: BarChart2,  color: '#185FA5' },
-  { id: 'mix',         label: 'Marca',                 description: 'Priorizar marcas específicas na carteira de clientes', icon: Gem,        color: '#7C3AED' },
-  { id: 'credito',     label: 'Crédito e risco',       description: 'Foco em inadimplência e saúde financeira',          icon: CreditCard, color: '#B45309' },
-  { id: 'cobertura',   label: 'Cobertura territorial', description: 'Foco em frequência de visita e áreas descobertas', icon: Map,        color: '#0E7490' },
+  { id: 'retencao',    label: 'Retenção de carteira',  description: 'Foco em evitar churn e recuperar clientes',           icon: Users2,    color: '#BE1520' },
+  { id: 'performance', label: 'Performance comercial', description: 'Foco em aumentar vendas e ticket médio',               icon: BarChart2,  color: '#BE1520' },
+  { id: 'mix',         label: 'Marca',                 description: 'Priorizar marcas específicas na carteira de clientes', icon: Gem,        color: '#BE1520' },
+  { id: 'credito',     label: 'Crédito e risco',       description: 'Foco em inadimplência e saúde financeira',             icon: CreditCard, color: '#BE1520' },
+  { id: 'cobertura',   label: 'Cobertura territorial', description: 'Foco em frequência de visita e áreas descobertas',    icon: Map,        color: '#BE1520' },
 ];
 
 const CRITERIA_DETAIL: Record<string, string[]> = {
@@ -77,57 +77,57 @@ const MODE_WEIGHTS: Record<string, Record<string, DimensionWeight>> = {
 
 const MODE_IMPACT: Record<string, ImpactProfile[]> = {
   Crescimento:   [
-    { label: 'Clientes com potencial de coleção nova', description: 'Maior chance de compra da nova coleção',    pct: 38, positive: true,  color: '#185FA5' },
-    { label: 'Clientes com risco de churn',            description: 'Clientes com sinais de perda de compra',    pct: 24, positive: true,  color: '#3B6D11' },
-    { label: 'Clientes com maior ticket potencial',    description: 'Histórico e perfil de maior volume',        pct: 18, positive: true,  color: '#3B6D11' },
-    { label: 'Clientes inadimplentes',                 description: 'Serão menos priorizados nas rotas',         pct: 12, positive: false, color: '#B45309' },
+    { label: 'Clientes com potencial de coleção nova', description: 'Maior chance de compra da nova coleção',    pct: 38, positive: true,  color: '#BE1520' },
+    { label: 'Clientes com risco de churn',            description: 'Clientes com sinais de perda de compra',    pct: 24, positive: true,  color: '#BE1520' },
+    { label: 'Clientes com maior ticket potencial',    description: 'Histórico e perfil de maior volume',        pct: 18, positive: true,  color: '#BE1520' },
+    { label: 'Clientes inadimplentes',                 description: 'Serão menos priorizados nas rotas',         pct: 12, positive: false, color: '#78716C' },
   ],
   Recuperação:   [
-    { label: 'Clientes em risco de inativação',        description: 'Próximos da janela de inatividade',         pct: 45, positive: true,  color: '#3B6D11' },
-    { label: 'Clientes inativos reativáveis',          description: 'Histórico de alto faturamento',             pct: 32, positive: true,  color: '#3B6D11' },
-    { label: 'Clientes com NPS baixo',                 description: 'Insatisfação registrada recentemente',      pct: 22, positive: true,  color: '#B45309' },
-    { label: 'Novos clientes sem histórico',           description: 'Priorizados apenas em cobertura básica',    pct: 15, positive: false, color: '#6B7280' },
+    { label: 'Clientes em risco de inativação',        description: 'Próximos da janela de inatividade',         pct: 45, positive: true,  color: '#BE1520' },
+    { label: 'Clientes inativos reativáveis',          description: 'Histórico de alto faturamento',             pct: 32, positive: true,  color: '#BE1520' },
+    { label: 'Clientes com NPS baixo',                 description: 'Insatisfação registrada recentemente',      pct: 22, positive: true,  color: '#BE1520' },
+    { label: 'Novos clientes sem histórico',           description: 'Priorizados apenas em cobertura básica',    pct: 15, positive: false, color: '#78716C' },
   ],
   Rentabilidade: [
-    { label: 'Clientes com maior margem',              description: 'Alto ticket e baixo risco de crédito',      pct: 42, positive: true,  color: '#3B6D11' },
-    { label: 'Clientes com limite disponível',         description: 'Crédito liberado para novos pedidos',       pct: 28, positive: true,  color: '#185FA5' },
-    { label: 'Clientes em risco financeiro',           description: 'Pagamentos em atraso nos últimos 60 dias',  pct: 18, positive: false, color: '#B45309' },
-    { label: 'Clientes de baixo volume histórico',     description: 'Pedidos abaixo da média da carteira',       pct: 14, positive: false, color: '#6B7280' },
+    { label: 'Clientes com maior margem',              description: 'Alto ticket e baixo risco de crédito',      pct: 42, positive: true,  color: '#BE1520' },
+    { label: 'Clientes com limite disponível',         description: 'Crédito liberado para novos pedidos',       pct: 28, positive: true,  color: '#BE1520' },
+    { label: 'Clientes em risco financeiro',           description: 'Pagamentos em atraso nos últimos 60 dias',  pct: 18, positive: false, color: '#78716C' },
+    { label: 'Clientes de baixo volume histórico',     description: 'Pedidos abaixo da média da carteira',       pct: 14, positive: false, color: '#78716C' },
   ],
   Cobertura:     [
-    { label: 'Regiões com baixa cobertura',            description: 'Menos de 30% de cobertura no ciclo',        pct: 48, positive: true,  color: '#0E7490' },
-    { label: 'Clientes sem visita há 30+ dias',        description: 'Fora da frequência esperada de visita',     pct: 35, positive: true,  color: '#3B6D11' },
-    { label: 'Clientes de alto ticket',                description: 'Reduzidos em prol da cobertura',            pct: 20, positive: false, color: '#6B7280' },
-    { label: 'Clientes já na frequência ideal',        description: 'Mantidos na rotina atual',                  pct: 12, positive: false, color: '#6B7280' },
+    { label: 'Regiões com baixa cobertura',            description: 'Menos de 30% de cobertura no ciclo',        pct: 48, positive: true,  color: '#BE1520' },
+    { label: 'Clientes sem visita há 30+ dias',        description: 'Fora da frequência esperada de visita',     pct: 35, positive: true,  color: '#BE1520' },
+    { label: 'Clientes de alto ticket',                description: 'Reduzidos em prol da cobertura',            pct: 20, positive: false, color: '#78716C' },
+    { label: 'Clientes já na frequência ideal',        description: 'Mantidos na rotina atual',                  pct: 12, positive: false, color: '#78716C' },
   ],
   Coleção:       [
-    { label: 'Sem apresentação da coleção atual',      description: 'Ainda não receberam a coleção atual',       pct: 52, positive: true,  color: '#7C3AED' },
-    { label: 'Clientes com gap de mix',                description: 'Nunca compraram determinada linha',         pct: 30, positive: true,  color: '#7C3AED' },
-    { label: 'Clientes inadimplentes',                 description: 'Apresentação da coleção postergada',        pct: 16, positive: false, color: '#B45309' },
-    { label: 'Clientes já atualizados',                description: 'Já receberam apresentação completa',        pct: 10, positive: false, color: '#6B7280' },
+    { label: 'Sem apresentação da coleção atual',      description: 'Ainda não receberam a coleção atual',       pct: 52, positive: true,  color: '#BE1520' },
+    { label: 'Clientes com gap de mix',                description: 'Nunca compraram determinada linha',         pct: 30, positive: true,  color: '#BE1520' },
+    { label: 'Clientes inadimplentes',                 description: 'Apresentação da coleção postergada',        pct: 16, positive: false, color: '#78716C' },
+    { label: 'Clientes já atualizados',                description: 'Já receberam apresentação completa',        pct: 10, positive: false, color: '#78716C' },
   ],
   Personalizado: [
-    { label: 'Clientes priorizados pela configuração', description: 'Baseado nos pesos definidos manualmente',   pct: 30, positive: true,  color: '#185FA5' },
-    { label: 'Clientes de alta atenção',               description: 'Indicadores de risco ou oportunidade',     pct: 25, positive: true,  color: '#3B6D11' },
-    { label: 'Clientes de manutenção',                 description: 'Frequência reduzida temporariamente',      pct: 15, positive: false, color: '#6B7280' },
-    { label: 'Clientes sem critério definido',         description: 'Aguardando configuração mais específica',  pct: 10, positive: false, color: '#6B7280' },
+    { label: 'Clientes priorizados pela configuração', description: 'Baseado nos pesos definidos manualmente',   pct: 30, positive: true,  color: '#BE1520' },
+    { label: 'Clientes de alta atenção',               description: 'Indicadores de risco ou oportunidade',     pct: 25, positive: true,  color: '#BE1520' },
+    { label: 'Clientes de manutenção',                 description: 'Frequência reduzida temporariamente',      pct: 15, positive: false, color: '#78716C' },
+    { label: 'Clientes sem critério definido',         description: 'Aguardando configuração mais específica',  pct: 10, positive: false, color: '#78716C' },
   ],
 };
 
 const CLIENT_TYPE_STYLE: Record<ClientType, { bg: string; text: string; label: string }> = {
-  alto:    { bg: '#EAF3DE', text: '#3B6D11', label: 'Alto potencial' },
-  churn:   { bg: '#FCEBEB', text: '#A32D2D', label: 'Risco de churn' },
-  colecao: { bg: '#E6F1FB', text: '#185FA5', label: 'Pot. coleção' },
-  outros:  { bg: '#F3F4F6', text: '#6B7280', label: 'Padrão' },
+  alto:    { bg: '#FDF2F2', text: '#BE1520', label: 'Alto potencial' },
+  churn:   { bg: '#F5F5F4', text: '#44403C', label: 'Risco de churn' },
+  colecao: { bg: '#F5F5F4', text: '#44403C', label: 'Pot. coleção' },
+  outros:  { bg: '#F5F5F4', text: '#78716C', label: 'Padrão' },
 };
 
 const SIM_PROFILES: Record<string, SimProfile[]> = {
-  Crescimento:   [{ label: 'Alto potencial', clients: 312, pct: 38, color: '#3B6D11' }, { label: 'Risco de churn', clients: 196, pct: 24, color: '#A32D2D' }, { label: 'Pot. coleção', clients: 148, pct: 18, color: '#185FA5' }, { label: 'Padrão', clients: 164, pct: 20, color: '#6B7280' }],
-  Recuperação:   [{ label: 'Risco de inativação', clients: 368, pct: 45, color: '#A32D2D' }, { label: 'Inativos reativáveis', clients: 261, pct: 32, color: '#B45309' }, { label: 'NPS baixo', clients: 180, pct: 22, color: '#7C3AED' }, { label: 'Padrão', clients: 11, pct: 1, color: '#6B7280' }],
-  Rentabilidade: [{ label: 'Maior margem', clients: 344, pct: 42, color: '#3B6D11' }, { label: 'Limite disponível', clients: 229, pct: 28, color: '#185FA5' }, { label: 'Alt. propensão', clients: 164, pct: 20, color: '#0E7490' }, { label: 'Padrão', clients: 82, pct: 10, color: '#6B7280' }],
-  Cobertura:     [{ label: 'Baixa cobertura', clients: 393, pct: 48, color: '#0E7490' }, { label: 'Sem visita 30d+', clients: 286, pct: 35, color: '#3B6D11' }, { label: 'Pot. inexplorado', clients: 90, pct: 11, color: '#185FA5' }, { label: 'Padrão', clients: 49, pct: 6, color: '#6B7280' }],
-  Coleção:       [{ label: 'Sem coleção atual', clients: 426, pct: 52, color: '#7C3AED' }, { label: 'Gap de mix', clients: 245, pct: 30, color: '#B45309' }, { label: 'Maior ticket', clients: 98, pct: 12, color: '#3B6D11' }, { label: 'Padrão', clients: 49, pct: 6, color: '#6B7280' }],
-  Personalizado: [{ label: 'Priorizados config', clients: 245, pct: 30, color: '#185FA5' }, { label: 'Alta atenção', clients: 204, pct: 25, color: '#3B6D11' }, { label: 'Oportunidade', clients: 163, pct: 20, color: '#7C3AED' }, { label: 'Padrão', clients: 206, pct: 25, color: '#6B7280' }],
+  Crescimento:   [{ label: 'Alto potencial', clients: 312, pct: 38, color: '#BE1520' }, { label: 'Risco de churn', clients: 196, pct: 24, color: '#44403C' }, { label: 'Pot. coleção', clients: 148, pct: 18, color: '#44403C' }, { label: 'Padrão', clients: 164, pct: 20, color: '#78716C' }],
+  Recuperação:   [{ label: 'Risco de inativação', clients: 368, pct: 45, color: '#BE1520' }, { label: 'Inativos reativáveis', clients: 261, pct: 32, color: '#44403C' }, { label: 'NPS baixo', clients: 180, pct: 22, color: '#44403C' }, { label: 'Padrão', clients: 11, pct: 1, color: '#78716C' }],
+  Rentabilidade: [{ label: 'Maior margem', clients: 344, pct: 42, color: '#BE1520' }, { label: 'Limite disponível', clients: 229, pct: 28, color: '#44403C' }, { label: 'Alt. propensão', clients: 164, pct: 20, color: '#44403C' }, { label: 'Padrão', clients: 82, pct: 10, color: '#78716C' }],
+  Cobertura:     [{ label: 'Baixa cobertura', clients: 393, pct: 48, color: '#BE1520' }, { label: 'Sem visita 30d+', clients: 286, pct: 35, color: '#44403C' }, { label: 'Pot. inexplorado', clients: 90, pct: 11, color: '#44403C' }, { label: 'Padrão', clients: 49, pct: 6, color: '#78716C' }],
+  Coleção:       [{ label: 'Sem coleção atual', clients: 426, pct: 52, color: '#BE1520' }, { label: 'Gap de mix', clients: 245, pct: 30, color: '#44403C' }, { label: 'Maior ticket', clients: 98, pct: 12, color: '#44403C' }, { label: 'Padrão', clients: 49, pct: 6, color: '#78716C' }],
+  Personalizado: [{ label: 'Priorizados config', clients: 245, pct: 30, color: '#BE1520' }, { label: 'Alta atenção', clients: 204, pct: 25, color: '#44403C' }, { label: 'Oportunidade', clients: 163, pct: 20, color: '#44403C' }, { label: 'Padrão', clients: 206, pct: 25, color: '#78716C' }],
 };
 
 const WEEK_PROJECTIONS: Record<string, WeekProjection[]> = {
@@ -140,12 +140,12 @@ const WEEK_PROJECTIONS: Record<string, WeekProjection[]> = {
 };
 
 const REVENUE_SCENARIOS: Record<string, RevenueScenario[]> = {
-  Crescimento:   [{ label: 'Otimista', value: 'R$ 1,24M', pct: 112, color: '#3B6D11', bg: '#EAF3DE' }, { label: 'Realista', value: 'R$ 1,08M', pct: 98, color: '#185FA5', bg: '#E6F1FB' }, { label: 'Pessimista', value: 'R$ 890k', pct: 81, color: '#B45309', bg: '#FAEEDA' }],
-  Recuperação:   [{ label: 'Otimista', value: 'R$ 1,10M', pct: 100, color: '#3B6D11', bg: '#EAF3DE' }, { label: 'Realista', value: 'R$ 950k', pct: 86, color: '#185FA5', bg: '#E6F1FB' }, { label: 'Pessimista', value: 'R$ 780k', pct: 71, color: '#B45309', bg: '#FAEEDA' }],
-  Rentabilidade: [{ label: 'Otimista', value: 'R$ 1,38M', pct: 125, color: '#3B6D11', bg: '#EAF3DE' }, { label: 'Realista', value: 'R$ 1,18M', pct: 107, color: '#185FA5', bg: '#E6F1FB' }, { label: 'Pessimista', value: 'R$ 960k', pct: 87, color: '#B45309', bg: '#FAEEDA' }],
-  Cobertura:     [{ label: 'Otimista', value: 'R$ 1,05M', pct: 95, color: '#3B6D11', bg: '#EAF3DE' }, { label: 'Realista', value: 'R$ 920k', pct: 83, color: '#185FA5', bg: '#E6F1FB' }, { label: 'Pessimista', value: 'R$ 760k', pct: 69, color: '#B45309', bg: '#FAEEDA' }],
-  Coleção:       [{ label: 'Otimista', value: 'R$ 1,30M', pct: 118, color: '#3B6D11', bg: '#EAF3DE' }, { label: 'Realista', value: 'R$ 1,12M', pct: 101, color: '#185FA5', bg: '#E6F1FB' }, { label: 'Pessimista', value: 'R$ 900k', pct: 82, color: '#B45309', bg: '#FAEEDA' }],
-  Personalizado: [{ label: 'Otimista', value: 'R$ 1,15M', pct: 104, color: '#3B6D11', bg: '#EAF3DE' }, { label: 'Realista', value: 'R$ 1,00M', pct: 91, color: '#185FA5', bg: '#E6F1FB' }, { label: 'Pessimista', value: 'R$ 820k', pct: 74, color: '#B45309', bg: '#FAEEDA' }],
+  Crescimento:   [{ label: 'Otimista', value: 'R$ 1,24M', pct: 112, color: '#BE1520', bg: '#FDF2F2' }, { label: 'Realista', value: 'R$ 1,08M', pct: 98, color: '#44403C', bg: '#F5F5F4' }, { label: 'Pessimista', value: 'R$ 890k', pct: 81, color: '#78716C', bg: '#F5F5F4' }],
+  Recuperação:   [{ label: 'Otimista', value: 'R$ 1,10M', pct: 100, color: '#BE1520', bg: '#FDF2F2' }, { label: 'Realista', value: 'R$ 950k', pct: 86, color: '#44403C', bg: '#F5F5F4' }, { label: 'Pessimista', value: 'R$ 780k', pct: 71, color: '#78716C', bg: '#F5F5F4' }],
+  Rentabilidade: [{ label: 'Otimista', value: 'R$ 1,38M', pct: 125, color: '#BE1520', bg: '#FDF2F2' }, { label: 'Realista', value: 'R$ 1,18M', pct: 107, color: '#44403C', bg: '#F5F5F4' }, { label: 'Pessimista', value: 'R$ 960k', pct: 87, color: '#78716C', bg: '#F5F5F4' }],
+  Cobertura:     [{ label: 'Otimista', value: 'R$ 1,05M', pct: 95, color: '#BE1520', bg: '#FDF2F2' }, { label: 'Realista', value: 'R$ 920k', pct: 83, color: '#44403C', bg: '#F5F5F4' }, { label: 'Pessimista', value: 'R$ 760k', pct: 69, color: '#78716C', bg: '#F5F5F4' }],
+  Coleção:       [{ label: 'Otimista', value: 'R$ 1,30M', pct: 118, color: '#BE1520', bg: '#FDF2F2' }, { label: 'Realista', value: 'R$ 1,12M', pct: 101, color: '#44403C', bg: '#F5F5F4' }, { label: 'Pessimista', value: 'R$ 900k', pct: 82, color: '#78716C', bg: '#F5F5F4' }],
+  Personalizado: [{ label: 'Otimista', value: 'R$ 1,15M', pct: 104, color: '#BE1520', bg: '#FDF2F2' }, { label: 'Realista', value: 'R$ 1,00M', pct: 91, color: '#44403C', bg: '#F5F5F4' }, { label: 'Pessimista', value: 'R$ 820k', pct: 74, color: '#78716C', bg: '#F5F5F4' }],
 };
 
 const PREV_COMPARISON: Record<string, PrevComparison[]> = {
@@ -201,9 +201,9 @@ const PERIOD_WEEKS  = ['Sem. 1 (26/ago)','Sem. 2 (02/set)','Sem. 3 (09/set)','Se
 const PERIOD_MONTHS = ['Agosto 2026','Setembro 2026','Outubro 2026'];
 
 const LEVEL_STYLES: Record<DimensionLevel, React.CSSProperties> = {
-  Alta:  { backgroundColor: '#E6F1FB', color: '#185FA5' },
-  Média: { backgroundColor: '#FAEEDA', color: '#854F0B' },
-  Baixa: { backgroundColor: '#F3F4F6', color: '#6B7280' },
+  Alta:  { backgroundColor: '#FDF2F2', color: '#BE1520' },
+  Média: { backgroundColor: '#F5F5F4', color: '#44403C' },
+  Baixa: { backgroundColor: '#F5F5F4', color: '#78716C' },
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -368,7 +368,7 @@ const [isActive, setIsActive]     = useState(true);
                     <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full text-xs border border-border rounded-lg px-2.5 py-1.5 bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary" />
                   </div>
                 </div>
-                <button onClick={() => setDatePopoverOpen(false)} className="w-full py-1.5 text-xs font-medium text-white rounded-lg" style={{ backgroundColor: '#185FA5' }}>Confirmar período</button>
+                <button onClick={() => setDatePopoverOpen(false)} className="w-full py-1.5 text-xs font-medium text-white rounded-lg bg-primary">Confirmar período</button>
               </div>
               <div className="border-t border-border px-4 py-3">
                 <div className="text-[11px] text-muted-foreground mb-2">Ação rápida</div>
@@ -386,7 +386,7 @@ const [isActive, setIsActive]     = useState(true);
           </Popover>
 
           <button onClick={() => navigate('/direcionamento')} className="px-3 py-2 text-xs border border-border rounded-lg hover:bg-secondary transition-colors text-foreground">Cancelar</button>
-          <button onClick={() => navigate('/direcionamento')} className="px-3 py-2 text-xs font-medium text-white rounded-lg transition-colors" style={{ backgroundColor: '#185FA5' }}>Salvar estratégia</button>
+          <button onClick={() => navigate('/direcionamento')} className="px-3 py-2 text-xs font-medium text-white rounded-lg transition-colors bg-primary hover:bg-primary-hover">Salvar estratégia</button>
         </div>
       </div>
 
@@ -409,13 +409,13 @@ const [isActive, setIsActive]     = useState(true);
                     onClick={() => { handleModeSelect(m.id); setEditingCardId('Personalizado'); }}
                     className="w-full flex flex-col gap-2 p-3 rounded-xl border text-left transition-all cursor-pointer"
                     style={active
-                      ? { borderColor: '#185FA5', backgroundColor: '#E6F1FB' }
+                      ? { borderColor: '#BE1520', backgroundColor: '#FDF2F2' }
                       : { borderColor: 'var(--border)', borderStyle: 'dashed', backgroundColor: 'var(--card)' }
                     }
                   >
                     <div
                       className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0"
-                      style={{ backgroundColor: active ? '#185FA5' : 'var(--secondary)' }}
+                      style={{ backgroundColor: active ? '#BE1520' : 'var(--secondary)' }}
                     >
                       {active
                         ? <Icon className="w-3.5 h-3.5" strokeWidth={1.5} style={{ color: '#fff' }} />
@@ -433,7 +433,7 @@ const [isActive, setIsActive]     = useState(true);
                         onKeyDown={e => e.key === 'Enter' && setEditingCardId(null)}
                         onClick={e => e.stopPropagation()}
                         className="w-full text-[11px] font-semibold bg-transparent border-0 border-b focus:outline-none pb-0.5 leading-snug"
-                        style={{ borderColor: '#185FA580', color: '#0C447C' }}
+                        style={{ borderColor: '#BE152080', color: '#930F16' }}
                       />
                     ) : (
                       <span className="text-[11px] font-medium leading-snug text-muted-foreground">
@@ -456,10 +456,10 @@ const [isActive, setIsActive]     = useState(true);
               <div key={m.id} className="relative group">
                 <div
                   onClick={() => { handleModeSelect(m.id); if (!isEditingLabel) setEditingCardId(null); }}
-                  className="w-full flex flex-col gap-2 p-3 rounded-xl border text-left transition-all hover:border-blue-300 cursor-pointer"
-                  style={active ? { borderColor: '#185FA5', backgroundColor: '#E6F1FB' } : { borderColor: 'var(--border)', backgroundColor: 'var(--card)' }}
+                  className="w-full flex flex-col gap-2 p-3 rounded-xl border text-left transition-all hover:border-border cursor-pointer"
+                  style={active ? { borderColor: '#BE1520', backgroundColor: '#FDF2F2' } : { borderColor: 'var(--border)', backgroundColor: 'var(--card)' }}
                 >
-                  <div className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0" style={{ backgroundColor: active ? '#185FA5' : 'var(--secondary)' }}>
+                  <div className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0" style={{ backgroundColor: active ? '#BE1520' : 'var(--secondary)' }}>
                     <Icon className="w-3.5 h-3.5" strokeWidth={1.5} style={{ color: active ? '#fff' : 'var(--muted-foreground)' }} />
                   </div>
                   {isEditingLabel ? (
@@ -472,11 +472,11 @@ const [isActive, setIsActive]     = useState(true);
                       onKeyDown={e => e.key === 'Enter' && setEditingCardId(null)}
                       onClick={e => e.stopPropagation()}
                       className="w-full text-[11px] font-semibold bg-transparent border-0 border-b focus:outline-none pb-0.5 leading-snug"
-                      style={{ borderColor: active ? '#185FA580' : 'var(--border)', color: active ? '#0C447C' : 'var(--foreground)' }}
+                      style={{ borderColor: active ? '#BE152080' : 'var(--border)', color: active ? '#930F16' : 'var(--foreground)' }}
                     />
                   ) : (
                     <div className="flex items-start justify-between gap-0.5 min-w-0">
-                      <span className="text-[11px] font-semibold leading-snug break-words min-w-0" style={{ color: active ? '#0C447C' : 'var(--foreground)' }}>
+                      <span className="text-[11px] font-semibold leading-snug break-words min-w-0" style={{ color: active ? '#930F16' : 'var(--foreground)' }}>
                         {label}
                       </span>
                       <button
@@ -484,7 +484,7 @@ const [isActive, setIsActive]     = useState(true);
                         className="opacity-0 group-hover:opacity-60 hover:!opacity-100 flex-shrink-0 mt-0.5 transition-opacity"
                         title="Renomear"
                       >
-                        <svg className="w-2.5 h-2.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: active ? '#185FA5' : 'var(--muted-foreground)' }}>
+                        <svg className="w-2.5 h-2.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: active ? '#BE1520' : 'var(--muted-foreground)' }}>
                           <path d="M8.5 1.5l2 2L4 10H2V8L8.5 1.5z" />
                         </svg>
                       </button>
@@ -534,7 +534,7 @@ const [isActive, setIsActive]     = useState(true);
               <div className="flex items-start justify-between gap-3">
                 <h2 className="text-sm font-semibold text-foreground">2. Ajuste as alavancas estratégicas</h2>
                 <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
-                  style={totalPct === 100 ? { backgroundColor: '#EAF3DE', color: '#3B6D11' } : { backgroundColor: '#FCEBEB', color: '#A32D2D' }}>
+                  style={totalPct === 100 ? { backgroundColor: '#F5F5F4', color: '#44403C' } : { backgroundColor: '#FDF2F2', color: '#BE1520' }}>
                   {totalPct}%
                 </span>
               </div>
@@ -647,7 +647,7 @@ const [isActive, setIsActive]     = useState(true);
                   );
                 })}
               </div>
-              <button onClick={() => setShowCriteria(v => !v)} className="flex items-center gap-1 text-xs transition-colors" style={{ color: '#185FA5' }}>
+              <button onClick={() => setShowCriteria(v => !v)} className="flex items-center gap-1 text-xs transition-colors text-muted-foreground hover:text-foreground">
                 {showCriteria ? <ChevronUp className="w-3 h-3" strokeWidth={1.5} /> : <ChevronDown className="w-3 h-3" strokeWidth={1.5} />}
                 Ver critérios utilizados em cada grupo
               </button>
@@ -667,9 +667,9 @@ const [isActive, setIsActive]     = useState(true);
             <section className="space-y-3">
               <h2 className="text-sm font-semibold text-foreground">3. Impacto previsto com esta configuração</h2>
               <div className="bg-card border border-border rounded-xl p-4 space-y-2.5">
-                <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ backgroundColor: '#EAF3DE' }}>
-                  <TrendingUp className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#3B6D11' }} strokeWidth={1.5} />
-                  <span className="text-[11px] font-medium" style={{ color: '#3B6D11' }}>A IA irá priorizar clientes com este perfil:</span>
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary">
+                  <TrendingUp className="w-3.5 h-3.5 flex-shrink-0 text-muted-foreground" strokeWidth={1.5} />
+                  <span className="text-[11px] font-medium text-foreground">A IA irá priorizar clientes com este perfil:</span>
                 </div>
                 <div className="divide-y divide-border">
                   {impact.map((item, i) => (
@@ -681,13 +681,13 @@ const [isActive, setIsActive]     = useState(true);
                         <div className="text-xs font-medium text-foreground leading-snug">{item.label}</div>
                         <div className="text-[10px] text-muted-foreground mt-0.5">{item.description}</div>
                       </div>
-                      <span className="text-xs font-semibold flex-shrink-0 tabular-nums" style={{ color: item.positive ? '#3B6D11' : '#A32D2D' }}>
+                      <span className="text-xs font-semibold flex-shrink-0 tabular-nums" style={{ color: item.positive ? '#BE1520' : '#78716C' }}>
                         {item.positive ? '+' : '-'}{item.pct}%
                       </span>
                     </div>
                   ))}
                 </div>
-                <button onClick={() => setShowSim(true)} className="flex items-center gap-1 text-xs transition-colors pt-0.5 hover:opacity-70" style={{ color: '#185FA5' }}>
+                <button onClick={() => setShowSim(true)} className="flex items-center gap-1 text-xs transition-colors pt-0.5 hover:opacity-70 text-muted-foreground hover:text-foreground">
                   Ver detalhes da simulação <ArrowRight className="w-3 h-3" strokeWidth={1.5} />
                 </button>
               </div>
@@ -727,13 +727,13 @@ const [isActive, setIsActive]     = useState(true);
                 </div>
                 <div className="px-3 py-2"><ClientList clients={beforeClients} /></div>
               </div>
-              <div className="bg-card border rounded-xl overflow-hidden" style={{ borderColor: '#185FA5' + '40' }}>
-                <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: '#185FA5' + '30', backgroundColor: '#E6F1FB' + '60' }}>
+              <div className="bg-card border rounded-xl overflow-hidden" style={{ borderColor: '#BE152040' }}>
+                <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: '#BE152030', backgroundColor: '#FDF2F260' }}>
                   <div>
-                    <div className="text-xs font-semibold" style={{ color: '#0C447C' }}>Com direcionamento — {currentMode?.label}</div>
-                    <div className="text-[11px] mt-0.5" style={{ color: '#185FA5' }}>Reordenado pela estratégia selecionada</div>
+                    <div className="text-xs font-semibold" style={{ color: '#930F16' }}>Com direcionamento — {currentMode?.label}</div>
+                    <div className="text-[11px] mt-0.5 text-muted-foreground">Reordenado pela estratégia selecionada</div>
                   </div>
-                  <div className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#185FA5' }}>
+                  <div className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0 bg-primary">
                     <TrendingUp className="w-3 h-3 text-white" strokeWidth={2} />
                   </div>
                 </div>
@@ -869,9 +869,9 @@ const [isActive, setIsActive]     = useState(true);
                   <thead className="bg-secondary border-b border-border">
                     <tr>
                       <th className="px-3 py-2 text-left font-medium text-muted-foreground">Semana</th>
-                      <th className="px-3 py-2 text-right font-medium" style={{ color: '#3B6D11' }}>Alto pot.</th>
-                      <th className="px-3 py-2 text-right font-medium" style={{ color: '#A32D2D' }}>Churn</th>
-                      <th className="px-3 py-2 text-right font-medium" style={{ color: '#185FA5' }}>Coleção</th>
+                      <th className="px-3 py-2 text-right font-medium text-muted-foreground">Alto pot.</th>
+                      <th className="px-3 py-2 text-right font-medium text-muted-foreground">Churn</th>
+                      <th className="px-3 py-2 text-right font-medium text-muted-foreground">Coleção</th>
                       <th className="px-3 py-2 text-right font-medium text-muted-foreground">Outros</th>
                       <th className="px-3 py-2 text-right font-medium text-muted-foreground">Total</th>
                     </tr>
@@ -882,9 +882,9 @@ const [isActive, setIsActive]     = useState(true);
                       return (
                         <tr key={row.week} className="hover:bg-secondary/40 transition-colors">
                           <td className="px-3 py-2.5 font-medium text-foreground">{row.week}</td>
-                          <td className="px-3 py-2.5 text-right tabular-nums" style={{ color: '#3B6D11' }}>{row.alto}</td>
-                          <td className="px-3 py-2.5 text-right tabular-nums" style={{ color: '#A32D2D' }}>{row.churn}</td>
-                          <td className="px-3 py-2.5 text-right tabular-nums" style={{ color: '#185FA5' }}>{row.colecao}</td>
+                          <td className="px-3 py-2.5 text-right tabular-nums text-foreground">{row.alto}</td>
+                          <td className="px-3 py-2.5 text-right tabular-nums text-foreground">{row.churn}</td>
+                          <td className="px-3 py-2.5 text-right tabular-nums text-foreground">{row.colecao}</td>
                           <td className="px-3 py-2.5 text-right tabular-nums text-muted-foreground">{row.outros}</td>
                           <td className="px-3 py-2.5 text-right tabular-nums font-semibold text-foreground">{total}</td>
                         </tr>
@@ -936,7 +936,7 @@ const [isActive, setIsActive]     = useState(true);
                         <td className="px-3 py-2.5 text-foreground">{row.metric}</td>
                         <td className="px-3 py-2.5 text-right tabular-nums text-muted-foreground">{row.before}</td>
                         <td className="px-3 py-2.5 text-right tabular-nums font-medium text-foreground">{row.after}</td>
-                        <td className="px-3 py-2.5 text-right tabular-nums font-semibold" style={{ color: row.positive ? '#3B6D11' : '#A32D2D' }}>{row.delta}</td>
+                        <td className="px-3 py-2.5 text-right tabular-nums font-semibold" style={{ color: row.positive ? '#BE1520' : '#78716C' }}>{row.delta}</td>
                       </tr>
                     ))}
                   </tbody>
