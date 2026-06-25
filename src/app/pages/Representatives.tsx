@@ -200,8 +200,7 @@ export function Representatives() {
 
 function ScoreBadge({ score }: { score: number }) {
   const getColor = (score: number) => {
-    if (score >= 90) return 'bg-success-light text-success-foreground';
-    if (score >= 80) return 'bg-warning-light text-warning-foreground';
+    if (score >= 80) return 'bg-secondary text-foreground';
     return 'bg-danger-light text-danger-foreground';
   };
 
@@ -219,22 +218,22 @@ function ScoreBadge({ score }: { score: number }) {
 function AppStatusBadge({ status }: { status: 'active' | 'attention' | 'inactive' | 'never' }) {
   const config = {
     active: {
-      bg: 'bg-success-light',
-      text: 'text-success-foreground',
+      bg: 'bg-secondary',
+      text: 'text-foreground',
       label: 'Ativo',
-      dot: 'bg-success',
+      dot: 'bg-primary',
     },
     attention: {
-      bg: 'bg-warning-light',
-      text: 'text-warning-foreground',
+      bg: 'bg-secondary',
+      text: 'text-muted-foreground',
       label: 'Atenção',
-      dot: 'bg-warning',
+      dot: 'bg-muted-foreground',
     },
     inactive: {
-      bg: 'bg-danger-light',
-      text: 'text-danger-foreground',
+      bg: 'bg-secondary',
+      text: 'text-muted-foreground',
       label: 'Sem uso',
-      dot: 'bg-danger',
+      dot: 'bg-muted',
     },
     never: {
       bg: 'bg-secondary',

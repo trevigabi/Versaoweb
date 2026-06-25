@@ -86,7 +86,7 @@ export function CommercialSteering() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-success-light text-success-foreground">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-muted-foreground">
                         {mod.badge}
                       </span>
                     </td>

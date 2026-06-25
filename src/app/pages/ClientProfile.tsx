@@ -90,7 +90,7 @@ export function ClientProfile() {
                 </div>
                 <h2 className="text-lg font-semibold text-foreground mb-1">Supermercado Estrela</h2>
                 <div className="text-sm text-muted-foreground mb-3">Premium • São Paulo - Capital</div>
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-success-light text-success-foreground">
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-secondary text-muted-foreground">
                   Cliente desde jan 2023
                 </span>
               </div>
@@ -139,7 +139,7 @@ export function ClientProfile() {
         <div className="bg-card border border-border rounded-lg p-5">
           <div className="text-sm text-muted-foreground mb-1">Receita Mensal</div>
           <div className="text-2xl font-semibold text-foreground">R$ 45.2K</div>
-          <div className="text-xs text-success mt-1">+8.5% vs mês anterior</div>
+          <div className="text-xs text-primary mt-1">+8.5% vs mês anterior</div>
         </div>
         <div className="bg-card border border-border rounded-lg p-5">
           <div className="text-sm text-muted-foreground mb-1">Frequência de Visita</div>
@@ -148,7 +148,7 @@ export function ClientProfile() {
         </div>
         <div className="bg-card border border-border rounded-lg p-5">
           <div className="text-sm text-muted-foreground mb-1">Score de Saúde</div>
-          <div className="text-2xl font-semibold text-success">Excelente</div>
+          <div className="text-2xl font-semibold text-foreground">Excelente</div>
           <div className="text-xs text-muted-foreground mt-1">95/100</div>
         </div>
         <div className="bg-card border border-border rounded-lg p-5">
@@ -158,8 +158,8 @@ export function ClientProfile() {
         </div>
         <div className="bg-card border border-border rounded-lg p-5">
           <div className="text-sm text-muted-foreground mb-1">Risco de Perda</div>
-          <div className="text-2xl font-semibold text-success">12%</div>
-          <div className="text-xs text-success mt-1 flex items-center gap-1">
+          <div className="text-2xl font-semibold text-foreground">12%</div>
+          <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
             <ArrowDown className="w-3 h-3" strokeWidth={2} />
             -3pp vs mês anterior
           </div>
@@ -176,14 +176,14 @@ export function ClientProfile() {
           </div>
           <div>
             <div className="text-sm text-muted-foreground mb-2">Disponível</div>
-            <div className="text-3xl font-semibold text-success">R$ 104.800</div>
+            <div className="text-3xl font-semibold text-foreground">R$ 104.800</div>
             <div className="mt-4">
               <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
                 <span>Utilizado</span>
                 <span>70%</span>
               </div>
               <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                <div className="h-full bg-success rounded-full" style={{ width: '70%' }}></div>
+                <div className="h-full bg-primary rounded-full" style={{ width: '70%' }}></div>
               </div>
             </div>
           </div>

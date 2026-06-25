@@ -142,7 +142,7 @@ export function Administration() {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-1.5">
-                      <Zap className="w-4 h-4 text-ai-accent flex-shrink-0" strokeWidth={1.5} />
+                      <Zap className="w-4 h-4 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
                       <span className="font-medium text-foreground">{item.trigger}</span>
                     </div>
                     <div className="text-sm text-muted-foreground ml-7">Ação: {item.action}</div>
@@ -167,7 +167,7 @@ export function Administration() {
             <h3 className="font-semibold text-foreground">Uso do App</h3>
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
               <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-success" />
+                <span className="w-2 h-2 rounded-full bg-primary" />
                 {appUsage.filter(u => u.status === 'Ativo').length} ativos
               </span>
               <span className="flex items-center gap-1.5">
@@ -213,7 +213,7 @@ export function Administration() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <span className={`text-sm font-semibold tabular-nums ${
-                        user.sessions >= 30 ? 'text-success' : user.sessions >= 10 ? 'text-foreground' : 'text-muted-foreground'
+                        user.sessions >= 10 ? 'text-foreground' : 'text-muted-foreground'
                       }`}>
                         {user.sessions}
                       </span>
@@ -232,10 +232,10 @@ export function Administration() {
 function RoleBadge({ role }: { role: string }) {
   const colors: Record<string, string> = {
     Admin:      'bg-danger-light text-danger-foreground',
-    Gestor:     'bg-primary/10 text-primary',
-    Regional:   'bg-ai-accent-light text-ai-accent',
-    Supervisor: 'bg-success-light text-success-foreground',
-    Analista:   'bg-warning-light text-warning-foreground',
+    Gestor:     'bg-secondary text-foreground',
+    Regional:   'bg-secondary text-foreground',
+    Supervisor: 'bg-secondary text-foreground',
+    Analista:   'bg-secondary text-muted-foreground',
   };
   return (
     <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium ${colors[role] || 'bg-secondary text-foreground'}`}>

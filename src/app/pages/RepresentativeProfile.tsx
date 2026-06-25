@@ -63,7 +63,7 @@ export function RepresentativeProfile() {
                 </div>
                 <h2 className="text-lg font-semibold text-foreground mb-1">Ana Souza</h2>
                 <div className="text-sm text-muted-foreground mb-3">Rep — Serra Gaúcha</div>
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-success-light text-success-foreground">
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
                   Ativo
                 </span>
               </div>
@@ -227,7 +227,7 @@ function KPICard({
   change: string;
   trend: 'up' | 'down';
 }) {
-  const trendColor = trend === 'up' ? 'text-success' : 'text-danger';
+  const trendColor = trend === 'up' ? 'text-primary' : 'text-muted-foreground';
   const Icon = ArrowUp;
 
   return (
@@ -259,7 +259,7 @@ function MetricItem({
       <div className="text-sm text-muted-foreground mb-2">{label}</div>
       <div
         className={`text-lg font-semibold ${
-          highlight ? 'text-success' : 'text-foreground'
+          highlight ? 'text-primary' : 'text-foreground'
         }`}
       >
         {value}
@@ -270,8 +270,8 @@ function MetricItem({
 
 function ClientStatusBadge({ status }: { status: string }) {
   const config = {
-    active: { bg: 'bg-success-light', text: 'text-success-foreground', label: 'Ativo' },
-    risk: { bg: 'bg-warning-light', text: 'text-warning-foreground', label: 'Risco' },
+    active: { bg: 'bg-secondary', text: 'text-foreground', label: 'Ativo' },
+    risk: { bg: 'bg-secondary', text: 'text-muted-foreground', label: 'Risco' },
     critical: { bg: 'bg-danger-light', text: 'text-danger-foreground', label: 'Crítico' },
   }[status] || { bg: 'bg-secondary', text: 'text-foreground', label: 'Normal' };
 

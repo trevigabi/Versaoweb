@@ -26,7 +26,7 @@ const initialMissions: Mission[] = [
     activated: 12,
     completed: 7,
     rate: 58,
-    color: 'bg-warning/15 text-warning',
+    color: 'bg-secondary text-muted-foreground',
   },
   {
     id: 2,
@@ -87,7 +87,7 @@ export function SteeringMissions() {
                   <span
                     className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
                       mission.enabled
-                        ? 'bg-success/15 text-success'
+                        ? 'bg-primary/10 text-primary'
                         : 'bg-secondary text-muted-foreground'
                     }`}
                   >

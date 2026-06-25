@@ -207,8 +207,8 @@ function CategoryBadge({ category }: { category: string }) {
 
 function StatusBadge({ status }: { status: string }) {
   const getColor = (status: string) => {
-    if (status === 'Ativo') return 'bg-success-light text-success-foreground';
-    if (status === 'Atenção') return 'bg-warning-light text-warning-foreground';
+    if (status === 'Ativo') return 'bg-secondary text-foreground';
+    if (status === 'Atenção') return 'bg-secondary text-muted-foreground';
     return 'bg-danger-light text-danger-foreground';
   };
 

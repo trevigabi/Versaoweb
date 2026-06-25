@@ -109,7 +109,7 @@ function MetricCard({
   change: string;
   trend: 'up' | 'down';
 }) {
-  const trendColor = trend === 'up' ? 'text-success' : 'text-danger';
+  const trendColor = trend === 'up' ? 'text-primary' : 'text-muted-foreground';
   const Icon = trend === 'up' ? ArrowUp : ArrowDown;
 
   return (
@@ -134,9 +134,9 @@ function AlertItem({
   color: 'success' | 'warning' | 'danger';
 }) {
   const colorConfig = {
-    success: 'bg-success',
-    warning: 'bg-warning',
-    danger: 'bg-danger',
+    success: 'bg-primary',
+    warning: 'bg-muted-foreground',
+    danger: 'bg-primary',
   };
 
   return (
@@ -162,9 +162,9 @@ function RegionCard({
   status: 'excellent' | 'good' | 'warning';
 }) {
   const statusConfig = {
-    excellent: { color: 'bg-success', label: 'Excelente' },
-    good: { color: 'bg-primary', label: 'Bom' },
-    warning: { color: 'bg-warning', label: 'Atenção' },
+    excellent: { color: 'bg-primary', label: 'Excelente' },
+    good:      { color: 'bg-primary', label: 'Bom' },
+    warning:   { color: 'bg-muted-foreground', label: 'Atenção' },
   };
 
   const config = statusConfig[status];

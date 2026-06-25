@@ -41,8 +41,8 @@ export function TerritoryDetail() {
         </div>
         <div className="bg-card border border-border rounded-lg p-5">
           <div className="text-sm text-muted-foreground mb-1">Cobertura</div>
-          <div className="text-3xl font-semibold text-success">92%</div>
-          <div className="text-xs text-success mt-1">+5% vs mês anterior</div>
+          <div className="text-3xl font-semibold text-foreground">92%</div>
+          <div className="text-xs text-primary mt-1">+5% vs mês anterior</div>
         </div>
         <div className="bg-card border border-border rounded-lg p-5">
           <div className="text-sm text-muted-foreground mb-1">Faturamento</div>
@@ -51,7 +51,7 @@ export function TerritoryDetail() {
         </div>
         <div className="bg-card border border-border rounded-lg p-5">
           <div className="text-sm text-muted-foreground mb-1">Status</div>
-          <div className="text-3xl font-semibold text-success">Ótimo</div>
+          <div className="text-3xl font-semibold text-foreground">Ótimo</div>
           <div className="text-xs text-muted-foreground mt-1">Balanceado</div>
         </div>
       </div>
@@ -72,7 +72,7 @@ export function TerritoryDetail() {
               {/* Decorative */}
               <div className="absolute inset-0 opacity-20">
                 <div className="absolute top-1/3 left-1/3 w-64 h-64 border-2 border-primary rounded-full"></div>
-                <div className="absolute bottom-1/4 right-1/4 w-48 h-48 border-2 border-ai-accent rounded-full"></div>
+                <div className="absolute bottom-1/4 right-1/4 w-48 h-48 border-2 border-primary rounded-full"></div>
               </div>
             </div>
 

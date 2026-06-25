@@ -91,11 +91,11 @@ export function AIEngine() {
       />
 
       {/* Info Banner */}
-      <div className="bg-ai-accent-light border border-ai-accent/30 rounded-lg p-6">
+      <div className="bg-secondary border border-border rounded-lg p-6">
         <div className="flex gap-4">
           <div className="flex-shrink-0">
-            <div className="w-12 h-12 rounded-lg bg-ai-accent flex items-center justify-center">
-              <Sparkles className="w-6 h-6 text-ai-foreground" strokeWidth={1.5} />
+            <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center">
+              <Sparkles className="w-6 h-6 text-primary-foreground" strokeWidth={1.5} />
             </div>
           </div>
           <div>
@@ -136,7 +136,7 @@ export function AIEngine() {
                   <div className="text-sm text-muted-foreground mb-1">
                     {factor.description}
                   </div>
-                  <div className="text-xs text-success">{factor.businessImpact}</div>
+                  <div className="text-xs text-muted-foreground">{factor.businessImpact}</div>
                 </div>
                 <div className="ml-6 flex flex-col items-end gap-1">
                   <span className="text-3xl font-semibold text-foreground tabular-nums">

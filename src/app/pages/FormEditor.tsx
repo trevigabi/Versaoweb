@@ -94,8 +94,8 @@ const ADD_FIELD_OPTIONS: {
 ];
 
 const STATUS_STYLES: Record<FormStatus, React.CSSProperties> = {
-  Ativo:    { backgroundColor: '#EAF3DE', color: '#3B6D11' },
-  Rascunho: { backgroundColor: '#FAEEDA', color: '#854F0B' },
+  Ativo:    { backgroundColor: '#FDF2F2', color: '#BE1520' },
+  Rascunho: { backgroundColor: '#F5F5F4', color: '#44403C' },
 };
 
 const DEFAULT_SETTINGS = [
@@ -306,7 +306,7 @@ export function FormEditor() {
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="text-sm font-medium text-foreground">{field.label}</span>
                             {field.required ? (
-                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium" style={{ backgroundColor: '#FCEBEB', color: '#A32D2D' }}>
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-primary/10 text-primary">
                                 Obrigatório
                               </span>
                             ) : (
@@ -330,7 +330,7 @@ export function FormEditor() {
                           <button
                             title="Excluir campo"
                             onClick={() => removeField(field.id)}
-                            className="w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover:bg-[#FCEBEB] hover:text-[#A32D2D] transition-colors"
+                            className="w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
                           >
                             <Trash2 className="w-3.5 h-3.5" strokeWidth={1.5} />
                           </button>

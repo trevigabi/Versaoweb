@@ -61,8 +61,8 @@ const INITIAL_FORMS: FormItem[] = [
 ];
 
 const STATUS_STYLES: Record<FormStatus, React.CSSProperties> = {
-  Ativo:    { backgroundColor: '#EAF3DE', color: '#3B6D11' },
-  Rascunho: { backgroundColor: '#FAEEDA', color: '#854F0B' },
+  Ativo:    { backgroundColor: '#FDF2F2', color: '#BE1520' },
+  Rascunho: { backgroundColor: '#F5F5F4', color: '#44403C' },
   Inativo:  { border: '1px solid var(--border)', color: 'var(--muted-foreground)' },
 };
 

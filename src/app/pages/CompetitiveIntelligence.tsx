@@ -62,21 +62,21 @@ export function CompetitiveIntelligence() {
             <TrendingUp className="w-5 h-5 text-primary" strokeWidth={1.5} />
           </div>
           <div className="text-3xl font-semibold text-foreground">343</div>
-          <div className="text-xs text-success mt-1">+8% vs mês anterior</div>
+          <div className="text-xs text-primary mt-1">+8% vs mês anterior</div>
         </div>
         <div className="bg-card border border-border rounded-lg p-5">
           <div className="flex items-center justify-between mb-3">
             <div className="text-sm text-muted-foreground">Objeções Mapeadas</div>
-            <AlertTriangle className="w-5 h-5 text-warning" strokeWidth={1.5} />
+            <AlertTriangle className="w-5 h-5 text-muted-foreground" strokeWidth={1.5} />
           </div>
           <div className="text-3xl font-semibold text-foreground">102</div>
         </div>
         <div className="bg-card border border-border rounded-lg p-5">
           <div className="flex items-center justify-between mb-3">
             <div className="text-sm text-muted-foreground">Taxa de Vitória</div>
-            <Award className="w-5 h-5 text-success" strokeWidth={1.5} />
+            <Award className="w-5 h-5 text-muted-foreground" strokeWidth={1.5} />
           </div>
-          <div className="text-3xl font-semibold text-success">87%</div>
+          <div className="text-3xl font-semibold text-foreground">87%</div>
         </div>
       </div>
 
@@ -103,9 +103,9 @@ export function CompetitiveIntelligence() {
                   <span
                     className={`text-sm font-medium ${
                       competitor.trend === 'up'
-                        ? 'text-danger'
+                        ? 'text-primary'
                         : competitor.trend === 'down'
-                        ? 'text-success'
+                        ? 'text-muted-foreground'
                         : 'text-muted-foreground'
                     }`}
                   >
@@ -138,7 +138,7 @@ export function CompetitiveIntelligence() {
                 <div className="flex items-center gap-2">
                   <div className="flex-1 bg-secondary rounded-full h-2 overflow-hidden">
                     <div
-                      className="h-full bg-warning"
+                      className="h-full bg-primary"
                       style={{ width: `${(objection.frequency / 34) * 100}%` }}
                     ></div>
                   </div>
@@ -159,7 +159,7 @@ export function CompetitiveIntelligence() {
           {insights.map((insight, index) => (
             <div
               key={index}
-              className="bg-ai-accent-light border border-ai-accent/30 rounded-lg p-5"
+              className="bg-secondary border border-border rounded-lg p-5"
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
@@ -208,15 +208,15 @@ export function CompetitiveIntelligence() {
 function TrendIcon({ trend }: { trend: string }) {
   if (trend === 'up') {
     return (
-      <div className="w-6 h-6 rounded-full bg-danger-light flex items-center justify-center">
-        <TrendingUp className="w-4 h-4 text-danger" strokeWidth={2} />
+      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+        <TrendingUp className="w-4 h-4 text-primary" strokeWidth={2} />
       </div>
     );
   }
   if (trend === 'down') {
     return (
-      <div className="w-6 h-6 rounded-full bg-success-light flex items-center justify-center">
-        <TrendingUp className="w-4 h-4 text-success rotate-180" strokeWidth={2} />
+      <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center">
+        <TrendingUp className="w-4 h-4 text-muted-foreground rotate-180" strokeWidth={2} />
       </div>
     );
   }
@@ -229,9 +229,9 @@ function TrendIcon({ trend }: { trend: string }) {
 
 function ImpactBadge({ impact }: { impact: string }) {
   const colors = {
-    Alto: 'bg-danger-light text-danger-foreground',
-    Médio: 'bg-warning-light text-warning-foreground',
-    Baixo: 'bg-success-light text-success-foreground',
+    Alto: 'bg-primary/10 text-primary',
+    Médio: 'bg-secondary text-foreground',
+    Baixo: 'bg-secondary text-muted-foreground',
   };
 
   return (
@@ -266,7 +266,7 @@ function OpportunityCard({
     <div className="bg-secondary rounded-lg p-5 hover:bg-accent transition-colors cursor-pointer">
       <div className="font-medium text-foreground mb-2">{title}</div>
       <div className="text-sm text-muted-foreground mb-3">{description}</div>
-      <div className="text-lg font-semibold text-success">{potential}</div>
+      <div className="text-lg font-semibold text-foreground">{potential}</div>
     </div>
   );
 }

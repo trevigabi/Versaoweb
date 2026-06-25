@@ -82,7 +82,7 @@ export function Territories() {
           {/* Decorative map elements */}
           <div className="absolute inset-0 opacity-10">
             <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-primary rounded-full blur-3xl"></div>
-            <div className="absolute bottom-1/4 right-1/4 w-40 h-40 bg-ai-accent rounded-full blur-3xl"></div>
+            <div className="absolute bottom-1/4 right-1/4 w-40 h-40 bg-primary rounded-full blur-3xl"></div>
           </div>
         </div>
       </div>
@@ -159,16 +159,7 @@ export function Territories() {
                         {territory.coverage}%
                       </span>
                       <div className="w-16 bg-secondary rounded-full h-1.5 overflow-hidden">
-                        <div
-                          className={`h-full ${
-                            territory.coverage >= 90
-                              ? 'bg-success'
-                              : territory.coverage >= 80
-                              ? 'bg-primary'
-                              : 'bg-warning'
-                          }`}
-                          style={{ width: `${territory.coverage}%` }}
-                        ></div>
+                        <div className="h-full bg-primary" style={{ width: `${territory.coverage}%` }}></div>
                       </div>
                     </div>
                   </td>
@@ -218,13 +209,9 @@ export function Territories() {
 
 function StatusBadge({ status }: { status: string }) {
   const config = {
-    balanced: { bg: 'bg-success-light', text: 'text-success-foreground', label: 'Balanceado' },
-    overloaded: { bg: 'bg-danger-light', text: 'text-danger-foreground', label: 'Sobrecarregado' },
-    underutilized: {
-      bg: 'bg-warning-light',
-      text: 'text-warning-foreground',
-      label: 'Subutilizado',
-    },
+    balanced:     { bg: 'bg-secondary', text: 'text-foreground',       label: 'Balanceado' },
+    overloaded:   { bg: 'bg-danger-light', text: 'text-danger-foreground', label: 'Sobrecarregado' },
+    underutilized:{ bg: 'bg-secondary', text: 'text-muted-foreground', label: 'Subutilizado' },
   }[status] || { bg: 'bg-secondary', text: 'text-foreground', label: 'Normal' };
 
   return (
