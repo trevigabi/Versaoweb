@@ -427,8 +427,8 @@ const [isActive, setIsActive]     = useState(true);
             </PopoverContent>
           </Popover>
 
-          <button onClick={() => navigate('/direcionamento')} className="px-3 py-2 text-xs border border-border rounded-lg hover:bg-secondary transition-colors text-foreground">Cancelar</button>
-          <button onClick={() => navigate('/direcionamento')} className="px-3 py-2 text-xs font-medium text-white rounded-lg transition-colors bg-primary hover:bg-primary-hover">Salvar estratégia</button>
+          <button onClick={() => navigate('/direcionamento')} className="px-4 py-2 text-sm border border-border rounded-lg hover:bg-secondary transition-colors text-foreground">Cancelar</button>
+          <button onClick={() => navigate('/direcionamento')} className="px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors bg-primary hover:bg-primary-hover">Salvar estratégia</button>
         </div>
       </div>
 
