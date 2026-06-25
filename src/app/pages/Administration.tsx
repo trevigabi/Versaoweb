@@ -71,6 +71,19 @@ export function Administration() {
       <PageHeader
         title="Configurações"
         description="Gestão de usuários, notificações e preferências do sistema"
+        actions={
+          activeTab === 'usuarios' ? (
+            <button className="px-3 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors flex items-center gap-2">
+              <Plus className="w-4 h-4" strokeWidth={1.5} />
+              Novo Usuário
+            </button>
+          ) : activeTab === 'notificacoes' ? (
+            <button className="px-3 py-2 border border-border rounded-lg text-sm font-medium hover:bg-secondary transition-colors flex items-center gap-2">
+              <Plus className="w-4 h-4" strokeWidth={1.5} />
+              Nova notificação
+            </button>
+          ) : undefined
+        }
       />
 
       {/* Tabs */}
@@ -107,21 +120,15 @@ export function Administration() {
       {/* Tab: Usuários */}
       {activeTab === 'usuarios' && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between gap-4">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input
-                type="text"
-                value={userSearch}
-                onChange={(e) => setUserSearch(e.target.value)}
-                placeholder="Buscar usuário..."
-                className="w-full pl-10 pr-4 py-2 bg-card border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-            </div>
-            <button className="px-3 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors flex items-center gap-2">
-              <Plus className="w-4 h-4" strokeWidth={1.5} />
-              Novo Usuário
-            </button>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              type="text"
+              value={userSearch}
+              onChange={(e) => setUserSearch(e.target.value)}
+              placeholder="Buscar usuário..."
+              className="w-full pl-10 pr-4 py-2 bg-card border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            />
           </div>
           <div className="bg-card border border-border rounded-lg overflow-x-auto">
             <table className="w-full min-w-[640px]">
@@ -236,13 +243,7 @@ export function Administration() {
 
           {/* Active notifications */}
           <div>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-foreground">Notificações ativas</h3>
-              <button className="px-3 py-2 border border-border rounded-lg text-sm font-medium hover:bg-secondary transition-colors flex items-center gap-2">
-                <Plus className="w-4 h-4" strokeWidth={1.5} />
-                Nova
-              </button>
-            </div>
+            <h3 className="font-semibold text-foreground mb-3">Notificações ativas</h3>
             <div className="bg-card border border-border rounded-lg divide-y divide-border">
               {notifications.map((item, i) => (
                 <div key={i} className="p-5 hover:bg-secondary/30 transition-colors">
@@ -272,27 +273,25 @@ export function Administration() {
       {/* Tab: Uso do App */}
       {activeTab === 'uso' && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between gap-4">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input
-                type="text"
-                value={usageSearch}
-                onChange={(e) => setUsageSearch(e.target.value)}
-                placeholder="Buscar usuário..."
-                className="w-full pl-10 pr-4 py-2 bg-card border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-            </div>
-            <div className="flex items-center gap-4 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-primary" />
-                {appUsage.filter(u => u.status === 'Ativo').length} ativos
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-border" />
-                {appUsage.filter(u => u.status === 'Inativo').length} inativos
-              </span>
-            </div>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              type="text"
+              value={usageSearch}
+              onChange={(e) => setUsageSearch(e.target.value)}
+              placeholder="Buscar usuário..."
+              className="w-full pl-10 pr-4 py-2 bg-card border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            />
+          </div>
+          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-primary" />
+              {appUsage.filter(u => u.status === 'Ativo').length} ativos
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-border" />
+              {appUsage.filter(u => u.status === 'Inativo').length} inativos
+            </span>
           </div>
           <div className="bg-card border border-border rounded-lg overflow-x-auto">
             <table className="w-full min-w-[640px]">

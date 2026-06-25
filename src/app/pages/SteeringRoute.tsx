@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 import { PageHeader } from '../components/PageHeader';
 import {
   Plus, TrendingUp, RefreshCw, DollarSign,
-  Tag, Map, Settings2, Calendar, MoreVertical, AlignLeft,
+  Tag, Map, Settings2, Calendar, MoreVertical, AlignLeft, Search,
 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
 
@@ -117,7 +117,7 @@ const STATUS_STYLES: Record<RuleStatus, React.CSSProperties> = {
 };
 
 const BRIEFING_STYLE: Record<BriefingStatus, string> = {
-  'Configurado': 'bg-success-light text-success-foreground',
+  'Configurado': 'bg-secondary text-foreground',
   'Rascunho':    'bg-secondary text-muted-foreground',
   '—':           'text-muted-foreground',
 };
@@ -131,13 +131,18 @@ export function SteeringRoute() {
   const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState<Filter>('Todas');
   const [strategies, setStrategies] = useState(INITIAL_STRATEGIES);
+  const [search, setSearch] = useState('');
 
   const filtered = strategies.filter((r) => {
-    if (activeFilter === 'Todas') return true;
-    if (activeFilter === 'Ativas') return r.status === 'Ativa';
-    if (activeFilter === 'Futuras') return r.status === 'Futura';
-    if (activeFilter === 'Expiradas') return r.status === 'Expirada';
-    return true;
+    const matchesTab =
+      activeFilter === 'Todas' ? true :
+      activeFilter === 'Ativas' ? r.status === 'Ativa' :
+      activeFilter === 'Futuras' ? r.status === 'Futura' :
+      r.status === 'Expirada';
+    const matchesSearch =
+      r.name.toLowerCase().includes(search.toLowerCase()) ||
+      r.scopeLabel.toLowerCase().includes(search.toLowerCase());
+    return matchesTab && matchesSearch;
   });
 
   const handleDelete = (id: string) => setStrategies((prev) => prev.filter((r) => r.id !== id));
@@ -183,6 +188,18 @@ export function SteeringRoute() {
             );
           })}
         </nav>
+      </div>
+
+      {/* Search */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Buscar estratégia ou alvo..."
+          className="w-full pl-10 pr-4 py-2 bg-card border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+        />
       </div>
 
       {/* Table */}
