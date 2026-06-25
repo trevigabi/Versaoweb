@@ -116,13 +116,7 @@ export function Coverage() {
                     </div>
                     <div className="w-full bg-secondary rounded-full h-2.5 overflow-hidden">
                       <div
-                        className={`h-full ${
-                          item.coverage >= 80
-                            ? 'bg-success'
-                            : item.coverage >= 70
-                            ? 'bg-primary'
-                            : 'bg-warning'
-                        }`}
+                        className="h-full bg-primary"
                         style={{ width: `${item.coverage}%` }}
                       ></div>
                     </div>
