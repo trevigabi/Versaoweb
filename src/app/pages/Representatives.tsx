@@ -1,6 +1,7 @@
 import { Link } from 'react-router';
 import { PageHeader } from '../components/PageHeader';
-import { Search, Filter, Download } from 'lucide-react';
+import { Search, Download } from 'lucide-react';
+import { useState } from 'react';
 
 const representatives = [
   {
@@ -84,6 +85,12 @@ const representatives = [
 ];
 
 export function Representatives() {
+  const [search, setSearch] = useState('');
+  const filtered = representatives.filter((r) =>
+    r.name.toLowerCase().includes(search.toLowerCase()) ||
+    r.region.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <div className="p-8 space-y-6">
       <PageHeader
@@ -99,22 +106,16 @@ export function Representatives() {
         }
       />
 
-      {/* Filters */}
-      <div className="bg-card border border-border rounded-lg p-4">
-        <div className="flex gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Buscar representante..."
-              className="w-full pl-10 pr-4 py-2 bg-secondary border-0 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-          </div>
-          <button className="px-4 py-2 border border-border rounded-lg hover:bg-secondary transition-colors flex items-center gap-2">
-            <Filter className="w-4 h-4" strokeWidth={1.5} />
-            <span className="text-sm">Filtros</span>
-          </button>
-        </div>
+      {/* Search */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Buscar representante..."
+          className="w-full pl-10 pr-4 py-2 bg-card border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+        />
       </div>
 
       {/* Table */}
@@ -153,7 +154,7 @@ export function Representatives() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {representatives.map((rep) => (
+              {filtered.map((rep) => (
                 <tr
                   key={rep.id}
                   className="hover:bg-secondary/50 transition-colors"
