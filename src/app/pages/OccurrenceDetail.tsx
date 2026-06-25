@@ -495,19 +495,28 @@ export function OccurrenceDetail() {
                     </div>
                   </div>
                   <div className="text-xs font-semibold text-muted-foreground mb-4 uppercase tracking-wider">Sinais detectados</div>
-                  <div className="space-y-3">
-                    {occurrence.signals?.map((signal: any, index: number) => (
-                      <div key={index} className="flex items-start gap-3 p-4 bg-secondary rounded-xl">
-                        <div className={`flex-shrink-0 w-6 h-6 rounded flex items-center justify-center ${signal.status === 'check' ? 'bg-success-light text-success' : 'bg-danger-light text-danger'}`}>
-                          {signal.status === 'check' ? <Check className="w-4 h-4" strokeWidth={2} /> : <X className="w-4 h-4" strokeWidth={2} />}
-                        </div>
-                        <div>
-                          <div className="text-sm font-medium text-foreground">{signal.text}</div>
-                          <div className="text-xs text-muted-foreground mt-0.5">{signal.time ? `${signal.time} — ${signal.detail}` : signal.detail}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border">
+                        <th className="text-left text-xs font-semibold text-muted-foreground pb-2 pr-4">Status</th>
+                        <th className="text-left text-xs font-semibold text-muted-foreground pb-2 pr-4">Sinal</th>
+                        <th className="text-left text-xs font-semibold text-muted-foreground pb-2">Detalhe</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {occurrence.signals?.map((signal: any, index: number) => (
+                        <tr key={index}>
+                          <td className="py-3 pr-4">
+                            <span className={`inline-flex items-center justify-center w-6 h-6 rounded ${signal.status === 'check' ? 'bg-success-light text-success' : 'bg-danger-light text-danger'}`}>
+                              {signal.status === 'check' ? <Check className="w-3.5 h-3.5" strokeWidth={2.5} /> : <X className="w-3.5 h-3.5" strokeWidth={2.5} />}
+                            </span>
+                          </td>
+                          <td className="py-3 pr-4 font-medium text-foreground">{signal.text}</td>
+                          <td className="py-3 text-muted-foreground text-xs">{signal.time ? `${signal.time} — ${signal.detail}` : signal.detail}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
                 <div className="bg-card border border-border rounded-xl p-6">
                   <h3 className="text-xs font-semibold text-muted-foreground mb-6 uppercase tracking-wider">Contexto — Padrão ou caso isolado?</h3>
@@ -610,18 +619,30 @@ export function OccurrenceDetail() {
                     ))}
                   </div>
                   <div className="text-xs font-semibold text-muted-foreground mb-4 uppercase tracking-wider">Clientes prioritários sem cobertura</div>
-                  <div className="space-y-3">
-                    {occurrence.priorityClients?.map((client: any, index: number) => (
-                      <div key={index} className="flex items-center justify-between p-4 bg-secondary rounded-xl">
-                        <span className="text-sm font-medium text-foreground">{client.name}</span>
-                        <div className="flex items-center gap-4 text-sm">
-                          <span className="text-muted-foreground">{client.days}d sem visita</span>
-                          <span className="font-semibold text-foreground">Score {client.score}</span>
-                          <span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${client.status === 'Crítico' ? 'bg-danger-light text-danger-foreground' : 'bg-warning-light text-warning-foreground'}`}>{client.status}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border">
+                        <th className="text-left text-xs font-semibold text-muted-foreground pb-2 pr-4">Cliente</th>
+                        <th className="text-left text-xs font-semibold text-muted-foreground pb-2 pr-4">Sem visita</th>
+                        <th className="text-left text-xs font-semibold text-muted-foreground pb-2 pr-4">Score</th>
+                        <th className="text-left text-xs font-semibold text-muted-foreground pb-2">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {occurrence.priorityClients?.map((client: any, index: number) => (
+                        <tr key={index}>
+                          <td className="py-3 pr-4 font-medium text-foreground">{client.name}</td>
+                          <td className="py-3 pr-4 text-muted-foreground">{client.days}d</td>
+                          <td className="py-3 pr-4 font-semibold text-foreground">{client.score}</td>
+                          <td className="py-3">
+                            <span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${client.status === 'Crítico' ? 'bg-danger-light text-danger-foreground' : 'bg-warning-light text-warning-foreground'}`}>
+                              {client.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </>
             )}
