@@ -191,11 +191,11 @@ function ResolutionPanel() {
         </form>
       ) : (
         <div className="p-5 space-y-4">
-          <div className="p-4 bg-success-light border border-success/20 rounded-xl">
-            <p className="font-semibold flex items-center gap-1.5 text-success mb-1">
+          <div className="p-4 bg-secondary border border-border rounded-xl">
+            <p className="font-semibold flex items-center gap-1.5 text-foreground mb-1">
               <Check className="w-4 h-4" strokeWidth={2.5} /> Auditoria Concluída
             </p>
-            <p className="text-sm text-success-foreground leading-relaxed">
+            <p className="text-sm text-muted-foreground leading-relaxed">
               A ocorrência foi atualizada com sucesso. Todos os envolvidos foram notificados.
             </p>
           </div>
@@ -243,10 +243,10 @@ function RouteTimeline({ occurrence }: { occurrence: any }) {
             </div>
             <div className="flex gap-4 text-xs text-muted-foreground flex-shrink-0">
               <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-success inline-block"></span> Executada
+                <span className="w-2.5 h-2.5 rounded-full bg-primary inline-block"></span> Executada
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-danger inline-block"></span> Não Executada
+                <span className="w-2.5 h-2.5 rounded-full bg-border inline-block"></span> Não Executada
               </span>
             </div>
           </div>
@@ -257,7 +257,7 @@ function RouteTimeline({ occurrence }: { occurrence: any }) {
               {/* connector line */}
               <div className="absolute top-5 left-5 right-5 h-px bg-border z-0"></div>
               {/* progress line (2 of 8) */}
-              <div className="absolute top-5 left-5 h-px bg-success z-0" style={{ width: 'calc(14%)' }}></div>
+              <div className="absolute top-5 left-5 h-px bg-primary z-0" style={{ width: 'calc(14%)' }}></div>
 
               <div className="relative z-10 flex justify-between gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: 'thin' }}>
                 {stopsData.map((s) => {
@@ -271,7 +271,7 @@ function RouteTimeline({ occurrence }: { occurrence: any }) {
                     >
                       <div
                         className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white transition-all ${
-                          isVisited ? 'bg-success' : 'bg-danger'
+                          isVisited ? 'bg-primary' : 'bg-foreground/40'
                         } ${isSelected ? 'ring-2 ring-offset-2 ring-foreground scale-110' : ''}`}
                       >
                         {s.id}
@@ -295,7 +295,7 @@ function RouteTimeline({ occurrence }: { occurrence: any }) {
                 </div>
                 <span className={`flex-shrink-0 text-xs px-2.5 py-1 rounded-full font-semibold flex items-center gap-1.5 ${
                   stop.status === 'visited'
-                    ? 'bg-success-light text-success-foreground border border-success/20'
+                    ? 'bg-secondary text-foreground border border-border'
                     : 'bg-danger-light text-danger-foreground border border-danger/20'
                 }`}>
                   {stop.status === 'visited'
@@ -351,13 +351,13 @@ function RouteTimeline({ occurrence }: { occurrence: any }) {
           <div className="grid grid-cols-3 gap-5 mb-6">
             <div className="bg-secondary rounded-xl p-4">
               <span className="text-xs font-semibold text-muted-foreground block uppercase tracking-wider mb-1">Desvios Recentes</span>
-              <span className="text-lg font-bold text-warning block">3 Rotas</span>
-              <span className="text-xs text-warning mt-2 block">Frequência moderada (60d)</span>
+              <span className="text-lg font-bold text-foreground block">3 Rotas</span>
+              <span className="text-xs text-muted-foreground mt-2 block">Frequência moderada (60d)</span>
             </div>
             <div className="bg-secondary rounded-xl p-4">
               <span className="text-xs font-semibold text-muted-foreground block uppercase tracking-wider mb-1">Taxa de Execução</span>
-              <span className="text-lg font-bold text-danger block">71% Mês</span>
-              <span className="text-xs text-danger mt-2 block">Abaixo da média (85%)</span>
+              <span className="text-lg font-bold text-primary block">71% Mês</span>
+              <span className="text-xs text-muted-foreground mt-2 block">Abaixo da média (85%)</span>
             </div>
             <div className="bg-secondary rounded-xl p-4">
               <span className="text-xs font-semibold text-muted-foreground block uppercase tracking-wider mb-1">Região</span>
@@ -372,8 +372,8 @@ function RouteTimeline({ occurrence }: { occurrence: any }) {
               <div className="flex flex-wrap gap-2">
                 {historyData.map((day) => {
                   const colorClass =
-                    day.status === 'complete' ? 'bg-success' :
-                    day.status === 'incomplete' ? 'bg-warning' :
+                    day.status === 'complete' ? 'bg-primary' :
+                    day.status === 'incomplete' ? 'bg-muted-foreground' :
                     'bg-border';
                   const label =
                     day.status === 'complete' ? 'Execução 100%' :
@@ -394,17 +394,17 @@ function RouteTimeline({ occurrence }: { occurrence: any }) {
               <div className="flex flex-wrap gap-4 mt-4 pt-3 border-t border-border text-xs text-muted-foreground justify-between items-center">
                 <span>30 dias analisados</span>
                 <div className="flex gap-3">
-                  <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-success inline-block"></span> Completa</span>
-                  <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-warning inline-block"></span> Incompleta</span>
+                  <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-primary inline-block"></span> Completa</span>
+                  <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-muted-foreground inline-block"></span> Incompleta</span>
                   <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-border inline-block"></span> Sem Rota</span>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="p-4 bg-warning-light/40 border border-warning/30 rounded-xl flex items-start gap-3">
-            <AlertCircle className="w-4 h-4 text-warning flex-shrink-0 mt-0.5" strokeWidth={1.5} />
-            <p className="text-sm text-warning-foreground leading-relaxed">
+          <div className="p-4 bg-secondary border border-border rounded-xl flex items-start gap-3">
+            <AlertCircle className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+            <p className="text-sm text-foreground leading-relaxed">
               <strong>Insight:</strong> João Oliveira está abaixo da média de execução desde abril de 2026. Outros representantes da mesma região operam acima de 90%. O sistema sugere que este não é um problema operacional — é um desvio individual.
             </p>
           </div>
@@ -507,7 +507,7 @@ export function OccurrenceDetail() {
                       {occurrence.signals?.map((signal: any, index: number) => (
                         <tr key={index}>
                           <td className="py-3 pr-4">
-                            <span className={`inline-flex items-center justify-center w-6 h-6 rounded ${signal.status === 'check' ? 'bg-success-light text-success' : 'bg-danger-light text-danger'}`}>
+                            <span className={`inline-flex items-center justify-center w-6 h-6 rounded ${signal.status === 'check' ? 'bg-primary/10 text-primary' : 'bg-secondary text-muted-foreground'}`}>
                               {signal.status === 'check' ? <Check className="w-3.5 h-3.5" strokeWidth={2.5} /> : <X className="w-3.5 h-3.5" strokeWidth={2.5} />}
                             </span>
                           </td>
@@ -521,13 +521,13 @@ export function OccurrenceDetail() {
                 <div className="bg-card border border-border rounded-xl p-6">
                   <h3 className="text-xs font-semibold text-muted-foreground mb-6 uppercase tracking-wider">Contexto — Padrão ou caso isolado?</h3>
                   <div className="grid grid-cols-3 gap-5 mb-6">
-                    <div className="text-center"><div className="text-3xl font-bold text-danger mb-1">{occurrence.pattern.shortVisits}</div><div className="text-sm text-muted-foreground mb-1">Visitas muito curtas</div><div className="text-xs text-danger font-medium">Frequência alta</div></div>
-                    <div className="text-center"><div className="text-3xl font-bold text-danger mb-1">{occurrence.pattern.avgShortDuration}</div><div className="text-sm text-muted-foreground mb-1">Duração média</div><div className="text-xs text-danger font-medium">Mínimo histórico</div></div>
+                    <div className="text-center"><div className="text-3xl font-bold text-primary mb-1">{occurrence.pattern.shortVisits}</div><div className="text-sm text-muted-foreground mb-1">Visitas muito curtas</div><div className="text-xs text-muted-foreground font-medium">Frequência alta</div></div>
+                    <div className="text-center"><div className="text-3xl font-bold text-primary mb-1">{occurrence.pattern.avgShortDuration}</div><div className="text-sm text-muted-foreground mb-1">Duração média</div><div className="text-xs text-muted-foreground font-medium">Mínimo histórico</div></div>
                     <div className="text-center"><div className="text-3xl font-bold text-foreground mb-1">{occurrence.pattern.teamAvg}</div><div className="text-sm text-muted-foreground mb-1">Média geral</div><div className="text-xs text-muted-foreground font-medium">Referência</div></div>
                   </div>
-                  <div className="p-4 bg-danger-light/40 border border-danger/30 rounded-xl flex items-start gap-3">
-                    <AlertCircle className="w-4 h-4 text-danger flex-shrink-0 mt-0.5" strokeWidth={1.5} />
-                    <p className="text-sm text-danger-foreground leading-relaxed">Maria apresenta frequência crescente de visitas com pouquíssimos sinais registrados. O padrão sugere presença confirmada sem visita completa de fato.</p>
+                  <div className="p-4 bg-secondary border border-border rounded-xl flex items-start gap-3">
+                    <AlertCircle className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+                    <p className="text-sm text-foreground leading-relaxed">Maria apresenta frequência crescente de visitas com pouquíssimos sinais registrados. O padrão sugere presença confirmada sem visita completa de fato.</p>
                   </div>
                 </div>
               </>
@@ -539,21 +539,21 @@ export function OccurrenceDetail() {
                 <div className="bg-card border border-border rounded-xl p-6">
                   <h3 className="text-xs font-semibold text-muted-foreground mb-6 uppercase tracking-wider">O que aconteceu — Calendário de atividade</h3>
                   <div className="grid grid-cols-3 gap-5">
-                    <div className="text-center"><div className="text-3xl font-bold text-danger mb-1">{occurrence.visits}</div><div className="text-sm text-muted-foreground">Visitas esta semana</div></div>
+                    <div className="text-center"><div className="text-3xl font-bold text-primary mb-1">{occurrence.visits}</div><div className="text-sm text-muted-foreground">Visitas esta semana</div></div>
                     <div className="text-center"><div className="text-3xl font-bold text-foreground mb-1">{occurrence.avgVisits}</div><div className="text-sm text-muted-foreground">Média histórica/semana</div></div>
-                    <div className="text-center"><div className="text-3xl font-bold text-danger mb-1">-63%</div><div className="text-sm text-muted-foreground">Vs. média pessoal</div></div>
+                    <div className="text-center"><div className="text-3xl font-bold text-primary mb-1">-63%</div><div className="text-sm text-muted-foreground">Vs. média pessoal</div></div>
                   </div>
                 </div>
                 <div className="bg-card border border-border rounded-xl p-6">
                   <h3 className="text-xs font-semibold text-muted-foreground mb-6 uppercase tracking-wider">Contexto — Padrão ou caso isolado?</h3>
                   <div className="grid grid-cols-3 gap-5 mb-6">
-                    <div className="text-center"><div className="text-3xl font-bold text-danger mb-1">{occurrence.pattern.consecutiveWeeks}</div><div className="text-sm text-muted-foreground mb-1">Semana consecutiva</div><div className="text-xs text-danger font-medium">Tendência preocupante</div></div>
-                    <div className="text-center"><div className="text-3xl font-bold text-warning mb-1">{occurrence.pattern.clientsNoContact}</div><div className="text-sm text-muted-foreground mb-1">Clientes sem contato</div><div className="text-xs text-warning font-medium">Carteira em risco</div></div>
+                    <div className="text-center"><div className="text-3xl font-bold text-primary mb-1">{occurrence.pattern.consecutiveWeeks}</div><div className="text-sm text-muted-foreground mb-1">Semana consecutiva</div><div className="text-xs text-muted-foreground font-medium">Tendência preocupante</div></div>
+                    <div className="text-center"><div className="text-3xl font-bold text-foreground mb-1">{occurrence.pattern.clientsNoContact}</div><div className="text-sm text-muted-foreground mb-1">Clientes sem contato</div><div className="text-xs text-muted-foreground font-medium">Carteira em risco</div></div>
                     <div className="text-center"><div className="text-3xl font-bold text-foreground mb-1">{occurrence.pattern.regionalReps}</div><div className="text-sm text-muted-foreground mb-1">Outros reps com queda</div><div className="text-xs text-muted-foreground font-medium">Não é regional</div></div>
                   </div>
-                  <div className="p-4 bg-warning-light/40 border border-warning/30 rounded-xl flex items-start gap-3">
-                    <AlertCircle className="w-4 h-4 text-warning flex-shrink-0 mt-0.5" strokeWidth={1.5} />
-                    <p className="text-sm text-warning-foreground leading-relaxed">Queda progressiva nas últimas 3 semanas sem justificativa. Outros representantes da região estão com atividade normal.</p>
+                  <div className="p-4 bg-secondary border border-border rounded-xl flex items-start gap-3">
+                    <AlertCircle className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+                    <p className="text-sm text-foreground leading-relaxed">Queda progressiva nas últimas 3 semanas sem justificativa. Outros representantes da região estão com atividade normal.</p>
                   </div>
                 </div>
               </>
@@ -565,9 +565,9 @@ export function OccurrenceDetail() {
                 <div className="bg-card border border-border rounded-xl p-6">
                   <h3 className="text-xs font-semibold text-muted-foreground mb-6 uppercase tracking-wider">O que aconteceu — Histórico do cliente</h3>
                   <div className="grid grid-cols-3 gap-5 mb-8">
-                    <div className="bg-danger-light rounded-xl p-5 text-center"><div className="text-2xl font-bold text-danger mb-1">{occurrence.daysWithoutVisit}d</div><div className="text-sm text-muted-foreground">Sem interação</div></div>
+                    <div className="bg-primary/10 rounded-xl p-5 text-center"><div className="text-2xl font-bold text-primary mb-1">{occurrence.daysWithoutVisit}d</div><div className="text-sm text-muted-foreground">Sem interação</div></div>
                     <div className="bg-secondary rounded-xl p-5 text-center"><div className="text-2xl font-bold text-foreground mb-1">{occurrence.historicalFreq}d</div><div className="text-sm text-muted-foreground">Frequência histórica</div></div>
-                    <div className="bg-danger-light rounded-xl p-5 text-center"><div className="text-2xl font-bold text-danger mb-1">{occurrence.aiScore}</div><div className="text-sm text-muted-foreground">Score IA</div></div>
+                    <div className="bg-secondary rounded-xl p-5 text-center"><div className="text-2xl font-bold text-foreground mb-1">{occurrence.aiScore}</div><div className="text-sm text-muted-foreground">Score IA</div></div>
                   </div>
                   <div className="text-xs font-semibold text-muted-foreground mb-4 uppercase tracking-wider">Últimas interações</div>
                   <table className="w-full text-sm">
@@ -582,7 +582,7 @@ export function OccurrenceDetail() {
                       {occurrence.interactions?.map((interaction: any, index: number) => (
                         <tr key={index}>
                           <td className="py-3 pr-4">
-                            <span className={`inline-flex items-center justify-center w-6 h-6 rounded ${interaction.status === 'check' ? 'bg-success-light text-success' : 'bg-danger-light text-danger'}`}>
+                            <span className={`inline-flex items-center justify-center w-6 h-6 rounded ${interaction.status === 'check' ? 'bg-primary/10 text-primary' : 'bg-secondary text-muted-foreground'}`}>
                               {interaction.status === 'check' ? <Check className="w-3.5 h-3.5" strokeWidth={2.5} /> : <X className="w-3.5 h-3.5" strokeWidth={2.5} />}
                             </span>
                           </td>
@@ -603,9 +603,9 @@ export function OccurrenceDetail() {
                   <h3 className="text-xs font-semibold text-muted-foreground mb-6 uppercase tracking-wider">O que aconteceu — Distribuição de cobertura</h3>
                   <div className="space-y-5 mb-8">
                     {[
-                      { label: 'Com contato recente (até 30 dias)', ...occurrence.coverage.recent, color: 'bg-success' },
-                      { label: 'Sem contato há 31–60 dias', ...occurrence.coverage.medium, color: 'bg-warning' },
-                      { label: 'Sem contato há mais de 60 dias', ...occurrence.coverage.old, color: 'bg-danger' },
+                      { label: 'Com contato recente (até 30 dias)', ...occurrence.coverage.recent, color: 'bg-primary' },
+                      { label: 'Sem contato há 31–60 dias', ...occurrence.coverage.medium, color: 'bg-muted-foreground' },
+                      { label: 'Sem contato há mais de 60 dias', ...occurrence.coverage.old, color: 'bg-border' },
                     ].map((item, i) => (
                       <div key={i}>
                         <div className="flex items-center justify-between mb-2 text-sm">
@@ -635,7 +635,7 @@ export function OccurrenceDetail() {
                           <td className="py-3 pr-4 text-muted-foreground">{client.days}d</td>
                           <td className="py-3 pr-4 font-semibold text-foreground">{client.score}</td>
                           <td className="py-3">
-                            <span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${client.status === 'Crítico' ? 'bg-danger-light text-danger-foreground' : 'bg-warning-light text-warning-foreground'}`}>
+                            <span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${client.status === 'Crítico' ? 'bg-danger-light text-danger-foreground' : 'bg-secondary text-muted-foreground'}`}>
                               {client.status}
                             </span>
                           </td>
