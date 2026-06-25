@@ -115,7 +115,7 @@ function MetricCard({
   return (
     <div className="bg-card border border-border rounded-lg p-6">
       <div className="text-sm text-muted-foreground mb-2">{label}</div>
-      <div className="text-4xl font-semibold text-foreground mb-2">{value}</div>
+      <div className="text-3xl font-semibold text-foreground mb-2">{value}</div>
       <div className={`text-sm flex items-center gap-1 ${trendColor}`}>
         <Icon className="w-3 h-3" strokeWidth={2} />
         {change}

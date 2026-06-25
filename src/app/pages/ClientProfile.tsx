@@ -64,7 +64,7 @@ export function ClientProfile() {
                 <Store className="w-6 h-6 text-primary" strokeWidth={1.5} />
               </div>
               <div className="text-left">
-                <h1 className="text-3xl font-semibold text-foreground">Supermercado Estrela</h1>
+                <h1 className="text-2xl font-semibold text-foreground">Supermercado Estrela</h1>
                 <p className="text-sm text-muted-foreground">Premium • São Paulo - Capital</p>
               </div>
             </button>
@@ -86,7 +86,7 @@ export function ClientProfile() {
 
               <div className="flex flex-col items-center text-center mb-6 pb-6 border-b border-border">
                 <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                  <span className="text-3xl font-semibold text-primary">SE</span>
+                  <span className="text-2xl font-semibold text-primary">SE</span>
                 </div>
                 <h2 className="text-lg font-semibold text-foreground mb-1">Supermercado Estrela</h2>
                 <div className="text-sm text-muted-foreground mb-3">Premium • São Paulo - Capital</div>
@@ -172,11 +172,11 @@ export function ClientProfile() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <div className="text-sm text-muted-foreground mb-2">Limite Total</div>
-            <div className="text-3xl font-semibold text-foreground">R$ 150.000</div>
+            <div className="text-2xl font-semibold text-foreground">R$ 150.000</div>
           </div>
           <div>
             <div className="text-sm text-muted-foreground mb-2">Disponível</div>
-            <div className="text-3xl font-semibold text-foreground">R$ 104.800</div>
+            <div className="text-2xl font-semibold text-foreground">R$ 104.800</div>
             <div className="mt-4">
               <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
                 <span>Utilizado</span>

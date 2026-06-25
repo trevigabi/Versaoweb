@@ -54,7 +54,7 @@ export function Campaigns() {
             </div>
             <div className="text-sm text-muted-foreground">Campanhas Ativas</div>
           </div>
-          <div className="text-3xl font-semibold text-foreground">2</div>
+          <div className="text-2xl font-semibold text-foreground">2</div>
         </div>
         <div className="bg-card border border-border rounded-lg p-6">
           <div className="flex items-center gap-3 mb-3">
@@ -63,7 +63,7 @@ export function Campaigns() {
             </div>
             <div className="text-sm text-muted-foreground">Agendadas</div>
           </div>
-          <div className="text-3xl font-semibold text-foreground">1</div>
+          <div className="text-2xl font-semibold text-foreground">1</div>
         </div>
         <div className="bg-card border border-border rounded-lg p-6">
           <div className="flex items-center gap-3 mb-3">
@@ -72,7 +72,7 @@ export function Campaigns() {
             </div>
             <div className="text-sm text-muted-foreground">Performance Média</div>
           </div>
-          <div className="text-3xl font-semibold text-foreground">56%</div>
+          <div className="text-2xl font-semibold text-foreground">56%</div>
         </div>
       </div>
 

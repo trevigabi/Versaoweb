@@ -26,7 +26,7 @@ export function KPICard({ label, value, change, changeType = 'neutral', icon: Ic
         )}
       </div>
       <div className="space-y-1">
-        <div className="text-3xl font-semibold text-foreground">{value}</div>
+        <div className="text-2xl font-semibold text-foreground">{value}</div>
         {change && (
           <div className={`text-sm ${changeColors[changeType]}`}>{change}</div>
         )}

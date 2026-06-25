@@ -19,7 +19,7 @@ export function Coverage() {
             <Target className="w-10 h-10 text-muted-foreground" strokeWidth={1.5} />
             <div className="text-sm text-muted-foreground">Cobertura Total</div>
           </div>
-          <div className="text-4xl font-semibold text-foreground mb-1">87%</div>
+          <div className="text-3xl font-semibold text-foreground mb-1">87%</div>
           <div className="text-sm text-primary">+5% vs mês anterior</div>
         </div>
         <div className="bg-card border border-border rounded-lg p-6">
@@ -27,7 +27,7 @@ export function Coverage() {
             <TrendingUp className="w-10 h-10 text-muted-foreground" strokeWidth={1.5} />
             <div className="text-sm text-muted-foreground">Clientes Cobertos</div>
           </div>
-          <div className="text-4xl font-semibold text-foreground mb-1">1.623</div>
+          <div className="text-3xl font-semibold text-foreground mb-1">1.623</div>
           <div className="text-sm text-muted-foreground">de 1.847 total</div>
         </div>
         <div className="bg-card border border-border rounded-lg p-6">
@@ -35,7 +35,7 @@ export function Coverage() {
             <AlertCircle className="w-10 h-10 text-muted-foreground" strokeWidth={1.5} />
             <div className="text-sm text-muted-foreground">Sem Visita 30d+</div>
           </div>
-          <div className="text-4xl font-semibold text-foreground mb-1">224</div>
+          <div className="text-3xl font-semibold text-foreground mb-1">224</div>
           <div className="text-sm text-muted-foreground">Requer atenção</div>
         </div>
       </div>

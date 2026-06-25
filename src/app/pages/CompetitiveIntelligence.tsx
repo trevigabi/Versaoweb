@@ -54,14 +54,14 @@ export function CompetitiveIntelligence() {
             <div className="text-sm text-muted-foreground">Concorrentes Ativos</div>
             <Target className="w-5 h-5 text-primary" strokeWidth={1.5} />
           </div>
-          <div className="text-3xl font-semibold text-foreground">12</div>
+          <div className="text-2xl font-semibold text-foreground">12</div>
         </div>
         <div className="bg-card border border-border rounded-lg p-5">
           <div className="flex items-center justify-between mb-3">
             <div className="text-sm text-muted-foreground">Menções no Campo</div>
             <TrendingUp className="w-5 h-5 text-primary" strokeWidth={1.5} />
           </div>
-          <div className="text-3xl font-semibold text-foreground">343</div>
+          <div className="text-2xl font-semibold text-foreground">343</div>
           <div className="text-xs text-primary mt-1">+8% vs mês anterior</div>
         </div>
         <div className="bg-card border border-border rounded-lg p-5">
@@ -69,14 +69,14 @@ export function CompetitiveIntelligence() {
             <div className="text-sm text-muted-foreground">Objeções Mapeadas</div>
             <AlertTriangle className="w-5 h-5 text-muted-foreground" strokeWidth={1.5} />
           </div>
-          <div className="text-3xl font-semibold text-foreground">102</div>
+          <div className="text-2xl font-semibold text-foreground">102</div>
         </div>
         <div className="bg-card border border-border rounded-lg p-5">
           <div className="flex items-center justify-between mb-3">
             <div className="text-sm text-muted-foreground">Taxa de Vitória</div>
             <Award className="w-5 h-5 text-muted-foreground" strokeWidth={1.5} />
           </div>
-          <div className="text-3xl font-semibold text-foreground">87%</div>
+          <div className="text-2xl font-semibold text-foreground">87%</div>
         </div>
       </div>
 

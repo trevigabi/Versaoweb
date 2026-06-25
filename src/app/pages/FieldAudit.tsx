@@ -67,22 +67,22 @@ export function FieldAudit() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-card border border-border rounded-lg p-5">
           <div className="text-sm text-muted-foreground mb-2">Visitas Hoje</div>
-          <div className="text-3xl font-semibold text-foreground">127</div>
+          <div className="text-2xl font-semibold text-foreground">127</div>
           <div className="text-xs text-muted-foreground mt-1">+12% vs ontem</div>
         </div>
         <div className="bg-card border border-border rounded-lg p-5">
           <div className="text-sm text-muted-foreground mb-2">Execução Normal</div>
-          <div className="text-3xl font-semibold text-foreground">96%</div>
+          <div className="text-2xl font-semibold text-foreground">96%</div>
           <div className="text-xs text-muted-foreground mt-1">122 visitas</div>
         </div>
         <div className="bg-card border border-border rounded-lg p-5">
           <div className="text-sm text-muted-foreground mb-2">Para Revisão</div>
-          <div className="text-3xl font-semibold text-foreground">4</div>
+          <div className="text-2xl font-semibold text-foreground">4</div>
           <div className="text-xs text-muted-foreground mt-1">Atenção</div>
         </div>
         <div className="bg-card border border-border rounded-lg p-5">
           <div className="text-sm text-muted-foreground mb-2">Alta Severidade</div>
-          <div className="text-3xl font-semibold text-foreground">2</div>
+          <div className="text-2xl font-semibold text-foreground">2</div>
           <div className="text-xs text-muted-foreground mt-1">Investigar</div>
         </div>
       </div>

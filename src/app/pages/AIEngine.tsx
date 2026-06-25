@@ -139,7 +139,7 @@ export function AIEngine() {
                   <div className="text-xs text-muted-foreground">{factor.businessImpact}</div>
                 </div>
                 <div className="ml-6 flex flex-col items-end gap-1">
-                  <span className="text-3xl font-semibold text-foreground tabular-nums">
+                  <span className="text-2xl font-semibold text-foreground tabular-nums">
                     {priorities[factor.id]}
                   </span>
                   <span className="text-xs text-muted-foreground">prioridade</span>

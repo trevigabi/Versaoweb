@@ -36,22 +36,22 @@ export function TerritoryDetail() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-card border border-border rounded-lg p-5">
           <div className="text-sm text-muted-foreground mb-1">Clientes Total</div>
-          <div className="text-3xl font-semibold text-foreground">156</div>
+          <div className="text-2xl font-semibold text-foreground">156</div>
           <div className="text-xs text-muted-foreground mt-1">142 ativos</div>
         </div>
         <div className="bg-card border border-border rounded-lg p-5">
           <div className="text-sm text-muted-foreground mb-1">Cobertura</div>
-          <div className="text-3xl font-semibold text-foreground">92%</div>
+          <div className="text-2xl font-semibold text-foreground">92%</div>
           <div className="text-xs text-primary mt-1">+5% vs mês anterior</div>
         </div>
         <div className="bg-card border border-border rounded-lg p-5">
           <div className="text-sm text-muted-foreground mb-1">Faturamento</div>
-          <div className="text-3xl font-semibold text-foreground">R$ 1.2M</div>
+          <div className="text-2xl font-semibold text-foreground">R$ 1.2M</div>
           <div className="text-xs text-muted-foreground mt-1">Mensal</div>
         </div>
         <div className="bg-card border border-border rounded-lg p-5">
           <div className="text-sm text-muted-foreground mb-1">Status</div>
-          <div className="text-3xl font-semibold text-foreground">Ótimo</div>
+          <div className="text-2xl font-semibold text-foreground">Ótimo</div>
           <div className="text-xs text-muted-foreground mt-1">Balanceado</div>
         </div>
       </div>

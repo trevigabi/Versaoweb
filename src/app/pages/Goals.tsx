@@ -32,7 +32,7 @@ export function Goals() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-card border border-border rounded-lg p-6">
           <div className="text-sm text-muted-foreground mb-2">Meta Total Q2</div>
-          <div className="text-3xl font-semibold text-foreground mb-2">R$ 8.5M</div>
+          <div className="text-2xl font-semibold text-foreground mb-2">R$ 8.5M</div>
           <div className="flex items-center gap-2 text-sm">
             <div className="w-2 h-2 rounded-full bg-primary"></div>
             <span className="text-muted-foreground">No ritmo</span>
@@ -40,12 +40,12 @@ export function Goals() {
         </div>
         <div className="bg-card border border-border rounded-lg p-6">
           <div className="text-sm text-muted-foreground mb-2">Realizado</div>
-          <div className="text-3xl font-semibold text-foreground mb-2">R$ 5.8M</div>
+          <div className="text-2xl font-semibold text-foreground mb-2">R$ 5.8M</div>
           <div className="text-sm text-muted-foreground">68% do total</div>
         </div>
         <div className="bg-card border border-border rounded-lg p-6">
           <div className="text-sm text-muted-foreground mb-2">Projeção</div>
-          <div className="text-3xl font-semibold text-foreground mb-2">R$ 8.9M</div>
+          <div className="text-2xl font-semibold text-foreground mb-2">R$ 8.9M</div>
           <div className="text-sm text-primary">+5% acima da meta</div>
         </div>
       </div>

@@ -165,7 +165,7 @@ export function FormEditor() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
-          <h1 className="text-3xl font-semibold text-foreground truncate">{formData.name}</h1>
+          <h1 className="text-2xl font-semibold text-foreground truncate">{formData.name}</h1>
           <span
             className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium flex-shrink-0"
           style={STATUS_STYLES[formData.status]}
