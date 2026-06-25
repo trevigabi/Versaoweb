@@ -561,16 +561,28 @@ export function OccurrenceDetail() {
                     <div className="bg-danger-light rounded-xl p-5 text-center"><div className="text-2xl font-bold text-danger mb-1">{occurrence.aiScore}</div><div className="text-sm text-muted-foreground">Score IA</div></div>
                   </div>
                   <div className="text-xs font-semibold text-muted-foreground mb-4 uppercase tracking-wider">Últimas interações</div>
-                  <div className="space-y-3">
-                    {occurrence.interactions?.map((interaction: any, index: number) => (
-                      <div key={index} className="flex items-start gap-3 p-4 bg-secondary rounded-xl">
-                        <div className={`flex-shrink-0 w-6 h-6 rounded flex items-center justify-center ${interaction.status === 'check' ? 'bg-success-light text-success' : 'bg-danger-light text-danger'}`}>
-                          {interaction.status === 'check' ? <Check className="w-4 h-4" strokeWidth={2} /> : <X className="w-4 h-4" strokeWidth={2} />}
-                        </div>
-                        <div><div className="text-sm font-medium text-foreground">{interaction.text}</div><div className="text-xs text-muted-foreground mt-0.5">{interaction.detail}</div></div>
-                      </div>
-                    ))}
-                  </div>
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border">
+                        <th className="text-left text-xs font-semibold text-muted-foreground pb-2 pr-4">Status</th>
+                        <th className="text-left text-xs font-semibold text-muted-foreground pb-2 pr-4">Interação</th>
+                        <th className="text-left text-xs font-semibold text-muted-foreground pb-2">Detalhe</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {occurrence.interactions?.map((interaction: any, index: number) => (
+                        <tr key={index}>
+                          <td className="py-3 pr-4">
+                            <span className={`inline-flex items-center justify-center w-6 h-6 rounded ${interaction.status === 'check' ? 'bg-success-light text-success' : 'bg-danger-light text-danger'}`}>
+                              {interaction.status === 'check' ? <Check className="w-3.5 h-3.5" strokeWidth={2.5} /> : <X className="w-3.5 h-3.5" strokeWidth={2.5} />}
+                            </span>
+                          </td>
+                          <td className="py-3 pr-4 font-medium text-foreground">{interaction.text}</td>
+                          <td className="py-3 text-muted-foreground text-xs">{interaction.detail}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </>
             )}
