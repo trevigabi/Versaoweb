@@ -4,12 +4,12 @@
   --font-size: 16px;
 
   /* Premium Pace Route Colors */
-  --background: #F8FAFC;
-  --foreground: #0F172A;
+  --background: #FAFAF9;
+  --foreground: #1C1917;
   --card: #FFFFFF;
-  --card-foreground: #0F172A;
+  --card-foreground: #1C1917;
   --popover: #FFFFFF;
-  --popover-foreground: #0F172A;
+  --popover-foreground: #1C1917;
 
   /* Beira Rio Red - Primary */
   --primary: #BE1520;
@@ -35,33 +35,33 @@
   --danger-foreground: #930F16;
 
   /* Neutrals */
-  --secondary: #F1F3F5;
-  --secondary-foreground: #0F172A;
-  --muted: #E9ECEF;
-  --muted-foreground: #64748B;
-  --accent: #E8EBF0;
-  --accent-foreground: #334155;
+  --secondary: #F5F5F4;
+  --secondary-foreground: #1C1917;
+  --muted: #E7E5E4;
+  --muted-foreground: #78716C;
+  --accent: #E7E5E4;
+  --accent-foreground: #44403C;
 
-  --border: #E2E8F0;
+  --border: #E7E5E4;
   --input: transparent;
   --input-background: #FFFFFF;
   --switch-background: #CBD5E1;
 
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --ring: #94A3B8;
+  --ring: #A8A29E;
 
   --radius: 0.5rem;
 
   /* Sidebar */
   --sidebar: #FFFFFF;
-  --sidebar-foreground: #334155;
+  --sidebar-foreground: #44403C;
   --sidebar-primary: #BE1520;
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #F8FAFC;
+  --sidebar-accent: #FAFAF9;
   --sidebar-accent-foreground: #BE1520;
-  --sidebar-border: #E2E8F0;
-  --sidebar-ring: #94A3B8;
+  --sidebar-border: #E7E5E4;
+  --sidebar-ring: #A8A29E;
 }
 
 .dark {
