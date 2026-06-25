@@ -1,5 +1,4 @@
 import { PageHeader } from '../components/PageHeader';
-import { Target, TrendingUp, AlertCircle } from 'lucide-react';
 import { useState } from 'react';
 
 export function Coverage() {
@@ -15,26 +14,17 @@ export function Coverage() {
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-card border border-border rounded-lg p-6">
-          <div className="flex items-center gap-3 mb-3">
-            <Target className="w-10 h-10 text-muted-foreground" strokeWidth={1.5} />
-            <div className="text-sm text-muted-foreground">Cobertura Total</div>
-          </div>
+          <div className="text-sm text-muted-foreground mb-3">Cobertura Total</div>
           <div className="text-2xl font-semibold text-foreground mb-1">87%</div>
           <div className="text-sm text-primary">+5% vs mês anterior</div>
         </div>
         <div className="bg-card border border-border rounded-lg p-6">
-          <div className="flex items-center gap-3 mb-3">
-            <TrendingUp className="w-10 h-10 text-muted-foreground" strokeWidth={1.5} />
-            <div className="text-sm text-muted-foreground">Clientes Cobertos</div>
-          </div>
+          <div className="text-sm text-muted-foreground mb-3">Clientes Cobertos</div>
           <div className="text-2xl font-semibold text-foreground mb-1">1.623</div>
           <div className="text-sm text-muted-foreground">de 1.847 total</div>
         </div>
         <div className="bg-card border border-border rounded-lg p-6">
-          <div className="flex items-center gap-3 mb-3">
-            <AlertCircle className="w-10 h-10 text-muted-foreground" strokeWidth={1.5} />
-            <div className="text-sm text-muted-foreground">Sem Visita 30d+</div>
-          </div>
+          <div className="text-sm text-muted-foreground mb-3">Sem Visita 30d+</div>
           <div className="text-2xl font-semibold text-foreground mb-1">224</div>
           <div className="text-sm text-muted-foreground">Requer atenção</div>
         </div>
