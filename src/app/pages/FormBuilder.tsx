@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { PageHeader } from '../components/PageHeader';
 import {
-  Plus, MoreVertical, Calendar, Type, ListChecks, CheckSquare, Camera,
+  Plus, MoreVertical, Calendar, Type, ListChecks, CheckSquare, Camera, Search,
 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
 
@@ -82,8 +82,13 @@ export function FormBuilder() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>('Ativo');
   const [forms, setForms] = useState(INITIAL_FORMS);
+  const [search, setSearch] = useState('');
 
-  const filtered = forms.filter(f => f.status === tab);
+  const filtered = forms.filter(f =>
+    f.status === tab &&
+    (f.name.toLowerCase().includes(search.toLowerCase()) ||
+     f.description.toLowerCase().includes(search.toLowerCase()))
+  );
 
   const handleDelete = (id: string) => setForms(prev => prev.filter(f => f.id !== id));
   const handleDuplicate = (form: FormItem) => {
@@ -113,6 +118,18 @@ export function FormBuilder() {
           </button>
         }
       />
+
+      {/* Search */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Buscar formulário..."
+          className="w-full pl-10 pr-4 py-2 bg-card border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+        />
+      </div>
 
       {/* Tabs */}
       <div className="border-b border-border">

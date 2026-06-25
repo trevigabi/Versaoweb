@@ -46,6 +46,18 @@ export function Administration() {
   const [activeTab, setActiveTab] = useState<Tab>('usuarios');
   const [notifSearch, setNotifSearch] = useState('');
   const [addedSuggestions, setAddedSuggestions] = useState<string[]>([]);
+  const [userSearch, setUserSearch] = useState('');
+  const [usageSearch, setUsageSearch] = useState('');
+
+  const filteredUsers = users.filter(u =>
+    u.name.toLowerCase().includes(userSearch.toLowerCase()) ||
+    u.email.toLowerCase().includes(userSearch.toLowerCase()) ||
+    u.region.toLowerCase().includes(userSearch.toLowerCase())
+  );
+  const filteredUsage = appUsage.filter(u =>
+    u.name.toLowerCase().includes(usageSearch.toLowerCase()) ||
+    u.email.toLowerCase().includes(usageSearch.toLowerCase())
+  );
 
   const tabs: { id: Tab; label: string; icon: React.ComponentType<{ className?: string; strokeWidth?: number }>; soon?: boolean }[] = [
     { id: 'usuarios',     label: 'Usuários',     icon: Users },
@@ -95,8 +107,17 @@ export function Administration() {
       {/* Tab: Usuários */}
       {activeTab === 'usuarios' && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-foreground">Usuários e Permissões</h3>
+          <div className="flex items-center justify-between gap-4">
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input
+                type="text"
+                value={userSearch}
+                onChange={(e) => setUserSearch(e.target.value)}
+                placeholder="Buscar usuário..."
+                className="w-full pl-10 pr-4 py-2 bg-card border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
             <button className="px-3 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors flex items-center gap-2">
               <Plus className="w-4 h-4" strokeWidth={1.5} />
               Novo Usuário
@@ -115,7 +136,7 @@ export function Administration() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {users.map((user) => (
+                {filteredUsers.map((user) => (
                   <tr key={user.email} className="hover:bg-secondary/50 transition-colors">
                     <td className="px-6 py-4 font-medium text-foreground">{user.name}</td>
                     <td className="px-6 py-4 text-sm text-muted-foreground">{user.email}</td>
@@ -123,7 +144,7 @@ export function Administration() {
                     <td className="px-6 py-4 text-sm text-foreground">{user.region}</td>
                     <td className="px-6 py-4 text-center">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        user.status === 'Ativo' ? 'bg-success-light text-success-foreground' : 'bg-secondary text-muted-foreground'
+                        user.status === 'Ativo' ? 'bg-secondary text-foreground' : 'bg-secondary text-muted-foreground'
                       }`}>
                         {user.status}
                       </span>
@@ -234,7 +255,7 @@ export function Administration() {
                       <div className="text-sm text-muted-foreground ml-7">Ação: {item.action}</div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-success-light text-success-foreground">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-foreground">
                         {item.status}
                       </span>
                       <button className="text-sm text-primary hover:text-primary-hover font-medium">Editar</button>
@@ -251,8 +272,17 @@ export function Administration() {
       {/* Tab: Uso do App */}
       {activeTab === 'uso' && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-foreground">Uso do App</h3>
+          <div className="flex items-center justify-between gap-4">
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input
+                type="text"
+                value={usageSearch}
+                onChange={(e) => setUsageSearch(e.target.value)}
+                placeholder="Buscar usuário..."
+                className="w-full pl-10 pr-4 py-2 bg-card border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
               <span className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-primary" />
@@ -277,7 +307,7 @@ export function Administration() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {appUsage.map((user) => (
+                {filteredUsage.map((user) => (
                   <tr key={user.email} className={`transition-colors ${user.status === 'Inativo' ? 'opacity-60' : 'hover:bg-secondary/50'}`}>
                     <td className="px-6 py-4">
                       <div className="font-medium text-foreground">{user.name}</div>
@@ -286,9 +316,9 @@ export function Administration() {
                     <td className="px-6 py-4"><RoleBadge role={user.role} /></td>
                     <td className="px-6 py-4 text-center">
                       <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        user.status === 'Ativo' ? 'bg-success-light text-success-foreground' : 'bg-secondary text-muted-foreground'
+                        user.status === 'Ativo' ? 'bg-secondary text-foreground' : 'bg-secondary text-muted-foreground'
                       }`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${user.status === 'Ativo' ? 'bg-success' : 'bg-muted-foreground'}`} />
+                        <span className={`w-1.5 h-1.5 rounded-full ${user.status === 'Ativo' ? 'bg-primary' : 'bg-muted-foreground'}`} />
                         {user.status}
                       </span>
                     </td>
