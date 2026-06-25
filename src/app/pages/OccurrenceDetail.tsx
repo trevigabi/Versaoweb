@@ -388,6 +388,40 @@ function ResolutionPanel() {
   );
 }
 
+// ─── Config-driven pattern ────────────────────────────────────────────────────
+//
+// Cada tipo de ocorrência declara apenas:
+//   eventTitle   — título da seção "O que aconteceu"
+//   eventBody    — conteúdo específico do evento (JSX)
+//   contextTitle — título da seção de contexto
+//   contextStats — array de 3 métricas (StatGrid)
+//   insightText  — texto do InsightBanner
+//
+// O renderer OccurrenceBody cuida da estrutura (OccurrenceShell + 2 seções).
+// Para adicionar um novo tipo: apenas adicionar uma entrada em OCCURRENCE_CONFIG.
+
+interface OccurrenceConfig {
+  eventTitle: string;
+  eventBody: (occurrence: any) => React.ReactNode;
+  contextTitle: string;
+  contextStats: (occurrence: any) => Stat[];
+  insightText: (occurrence: any) => string;
+}
+
+function OccurrenceBody({ config, occurrence }: { config: OccurrenceConfig; occurrence: any }) {
+  return (
+    <OccurrenceShell>
+      <OccurrenceSection title={config.eventTitle}>
+        {config.eventBody(occurrence)}
+      </OccurrenceSection>
+      <OccurrenceSection title={config.contextTitle}>
+        <StatGrid stats={config.contextStats(occurrence)} />
+        <InsightBanner text={config.insightText(occurrence)} />
+      </OccurrenceSection>
+    </OccurrenceShell>
+  );
+}
+
 // ─── Occurrence type views ────────────────────────────────────────────────────
 
 function RotaNaoExecutada({ occurrence }: { occurrence: any }) {
@@ -544,141 +578,120 @@ function RotaNaoExecutada({ occurrence }: { occurrence: any }) {
   );
 }
 
-function VisitaMuitoCurta({ occurrence }: { occurrence: any }) {
-  return (
-    <OccurrenceShell>
-      <OccurrenceSection title="O que aconteceu — Sinais detectados na visita">
+// ─── Config por tipo ─────────────────────────────────────────────────────────
+
+type PriorityClient = { name: string; days: number; score: number; status: string };
+
+const priorityClientCols: TableCol<PriorityClient>[] = [
+  { header: 'Cliente',    render: r => <span className="font-medium text-foreground">{r.name}</span> },
+  { header: 'Sem visita', render: r => <span className="text-muted-foreground">{r.days}d</span> },
+  { header: 'Score',      render: r => <span className="font-semibold text-foreground">{r.score}</span> },
+  { header: 'Status',     render: r => (
+    <span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${r.status === 'Crítico' ? 'bg-danger-light text-danger-foreground' : 'bg-secondary text-muted-foreground'}`}>
+      {r.status}
+    </span>
+  )},
+];
+
+const OCCURRENCE_CONFIG: Record<string, OccurrenceConfig> = {
+  'Visita muito curta': {
+    eventTitle:   'O que aconteceu — Sinais detectados na visita',
+    eventBody:    (o) => (
+      <>
         <StatGrid cols={2} stats={[
-          { value: occurrence.duration,    label: 'Duração detectada',              highlight: true },
-          { value: occurrence.avgDuration, label: 'Média histórica neste cliente' },
+          { value: o.duration,    label: 'Duração detectada',            highlight: true },
+          { value: o.avgDuration, label: 'Média histórica neste cliente' },
         ]} />
         <div className="mt-6">
           <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">Sinais detectados</div>
-          <SignalTable colLabel="Sinal" rows={occurrence.signals} />
+          <SignalTable colLabel="Sinal" rows={o.signals} />
         </div>
-      </OccurrenceSection>
+      </>
+    ),
+    contextTitle: 'Contexto — Padrão ou caso isolado?',
+    contextStats: (o) => [
+      { value: o.pattern.shortVisits,      label: 'Visitas muito curtas', sub: 'Frequência alta',  highlight: true },
+      { value: o.pattern.avgShortDuration, label: 'Duração média',        sub: 'Mínimo histórico', highlight: true },
+      { value: o.pattern.teamAvg,          label: 'Média geral',          sub: 'Referência' },
+    ],
+    insightText: (o) => `${o.representative} apresenta frequência crescente de visitas com pouquíssimos sinais registrados. O padrão sugere presença confirmada sem visita completa de fato.`,
+  },
 
-      <OccurrenceSection title="Contexto — Padrão ou caso isolado?">
-        <StatGrid stats={[
-          { value: occurrence.pattern.shortVisits,      label: 'Visitas muito curtas', sub: 'Frequência alta',    highlight: true },
-          { value: occurrence.pattern.avgShortDuration, label: 'Duração média',        sub: 'Mínimo histórico',   highlight: true },
-          { value: occurrence.pattern.teamAvg,          label: 'Média geral',          sub: 'Referência' },
-        ]} />
-        <InsightBanner text={`${occurrence.representative} apresenta frequência crescente de visitas com pouquíssimos sinais registrados. O padrão sugere presença confirmada sem visita completa de fato.`} />
-      </OccurrenceSection>
-    </OccurrenceShell>
-  );
-}
+  'Baixa atividade': {
+    eventTitle:   'O que aconteceu — Calendário de atividade',
+    eventBody:    (o) => (
+      <StatGrid stats={[
+        { value: o.visits,    label: 'Visitas esta semana',   highlight: true },
+        { value: o.avgVisits, label: 'Média histórica/semana' },
+        { value: '-63%',      label: 'Vs. média pessoal',     highlight: true },
+      ]} />
+    ),
+    contextTitle: 'Contexto — Padrão ou caso isolado?',
+    contextStats: (o) => [
+      { value: o.pattern.consecutiveWeeks, label: 'Semana consecutiva',    sub: 'Tendência preocupante', highlight: true },
+      { value: o.pattern.clientsNoContact, label: 'Clientes sem contato',  sub: 'Carteira em risco' },
+      { value: o.pattern.regionalReps,     label: 'Outros reps com queda', sub: 'Não é regional' },
+    ],
+    insightText: () => 'Queda progressiva nas últimas 3 semanas sem justificativa. Outros representantes da região estão com atividade normal.',
+  },
 
-function BaixaAtividade({ occurrence }: { occurrence: any }) {
-  return (
-    <OccurrenceShell>
-      <OccurrenceSection title="O que aconteceu — Calendário de atividade">
+  'Cliente crítico sem visita': {
+    eventTitle:   'O que aconteceu — Histórico do cliente',
+    eventBody:    (o) => (
+      <>
         <StatGrid stats={[
-          { value: occurrence.visits,    label: 'Visitas esta semana',    highlight: true },
-          { value: occurrence.avgVisits, label: 'Média histórica/semana' },
-          { value: '-63%',               label: 'Vs. média pessoal',      highlight: true },
-        ]} />
-      </OccurrenceSection>
-
-      <OccurrenceSection title="Contexto — Padrão ou caso isolado?">
-        <StatGrid stats={[
-          { value: occurrence.pattern.consecutiveWeeks, label: 'Semana consecutiva',     sub: 'Tendência preocupante', highlight: true },
-          { value: occurrence.pattern.clientsNoContact, label: 'Clientes sem contato',   sub: 'Carteira em risco' },
-          { value: occurrence.pattern.regionalReps,     label: 'Outros reps com queda',  sub: 'Não é regional' },
-        ]} />
-        <InsightBanner text="Queda progressiva nas últimas 3 semanas sem justificativa. Outros representantes da região estão com atividade normal." />
-      </OccurrenceSection>
-    </OccurrenceShell>
-  );
-}
-
-function ClienteCriticoSemVisita({ occurrence }: { occurrence: any }) {
-  return (
-    <OccurrenceShell>
-      <OccurrenceSection title="O que aconteceu — Histórico do cliente">
-        <StatGrid stats={[
-          { value: `${occurrence.daysWithoutVisit}d`, label: 'Sem interação',       highlight: true },
-          { value: `${occurrence.historicalFreq}d`,   label: 'Frequência histórica' },
-          { value: occurrence.aiScore,                label: 'Score IA' },
+          { value: `${o.daysWithoutVisit}d`, label: 'Sem interação',       highlight: true },
+          { value: `${o.historicalFreq}d`,   label: 'Frequência histórica' },
+          { value: o.aiScore,                label: 'Score IA' },
         ]} />
         <div className="mt-6">
           <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">Últimas interações</div>
-          <SignalTable colLabel="Interação" rows={occurrence.interactions} />
+          <SignalTable colLabel="Interação" rows={o.interactions} />
         </div>
-      </OccurrenceSection>
+      </>
+    ),
+    contextTitle: 'Contexto — Risco de inativação',
+    contextStats: (o) => [
+      { value: o.pattern.aiScore,                   label: 'Score de risco IA',      highlight: true },
+      { value: `${o.pattern.daysUntilInactive}d`,   label: 'Dias até inativação' },
+      { value: o.pattern.avgTicket,                 label: 'Ticket médio histórico' },
+    ],
+    insightText: (o) => `${o.client} está próximo do limiar de inativação. Histórico de compras indica alto valor para carteira — recomenda-se visita prioritária esta semana.`,
+  },
 
-      <OccurrenceSection title="Contexto — Risco de inativação">
-        <StatGrid stats={[
-          { value: occurrence.pattern.aiScore,          label: 'Score de risco IA',      highlight: true },
-          { value: `${occurrence.pattern.daysUntilInactive}d`, label: 'Dias até inativação' },
-          { value: occurrence.pattern.avgTicket,        label: 'Ticket médio histórico' },
-        ]} />
-        <InsightBanner text={`${occurrence.client} está próximo do limiar de inativação. Histórico de compras indica alto valor para carteira — recomenda-se visita prioritária esta semana.`} />
-      </OccurrenceSection>
-    </OccurrenceShell>
-  );
-}
-
-function CarteiraDescoberta({ occurrence }: { occurrence: any }) {
-  type PriorityClient = { name: string; days: number; score: number; status: string };
-
-  const clientCols: TableCol<PriorityClient>[] = [
-    { header: 'Cliente',     render: r => <span className="font-medium text-foreground">{r.name}</span> },
-    { header: 'Sem visita',  render: r => <span className="text-muted-foreground">{r.days}d</span> },
-    { header: 'Score',       render: r => <span className="font-semibold text-foreground">{r.score}</span> },
-    {
-      header: 'Status',
-      render: r => (
-        <span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${
-          r.status === 'Crítico' ? 'bg-danger-light text-danger-foreground' : 'bg-secondary text-muted-foreground'
-        }`}>
-          {r.status}
-        </span>
-      ),
-    },
-  ];
-
-  return (
-    <OccurrenceShell>
-      <OccurrenceSection title="O que aconteceu — Distribuição de cobertura">
+  'Carteira descoberta': {
+    eventTitle:   'O que aconteceu — Distribuição de cobertura',
+    eventBody:    (o) => (
+      <>
         <CoverageBarList bars={[
-          { label: 'Com contato recente (até 30 dias)', ...occurrence.coverage.recent },
-          { label: 'Sem contato há 31–60 dias',          ...occurrence.coverage.medium, muted: true },
-          { label: 'Sem contato há mais de 60 dias',     ...occurrence.coverage.old,    muted: true },
+          { label: 'Com contato recente (até 30 dias)', ...o.coverage.recent },
+          { label: 'Sem contato há 31–60 dias',          ...o.coverage.medium, muted: true },
+          { label: 'Sem contato há mais de 60 dias',     ...o.coverage.old,    muted: true },
         ]} />
         <div className="mt-8">
           <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">Clientes prioritários sem cobertura</div>
-          <DataTable<PriorityClient> cols={clientCols} rows={occurrence.priorityClients} />
+          <DataTable<PriorityClient> cols={priorityClientCols} rows={o.priorityClients} />
         </div>
-      </OccurrenceSection>
-
-      <OccurrenceSection title="Contexto — Padrão ou caso isolado?">
-        <StatGrid stats={[
-          { value: `${occurrence.pattern.uncoveredPercent}%`, label: 'Carteira descoberta',  highlight: true },
-          { value: occurrence.pattern.over60Days,             label: 'Clientes há +60 dias', highlight: true },
-          { value: `${occurrence.pattern.teamAvg}%`,          label: 'Média do time' },
-        ]} />
-        <InsightBanner text={`${occurrence.representative} está com ${occurrence.pattern.uncoveredPercent}% da carteira sem cobertura — acima do limite aceitável. A média do time é ${occurrence.pattern.teamAvg}%.`} />
-      </OccurrenceSection>
-    </OccurrenceShell>
-  );
-}
+      </>
+    ),
+    contextTitle: 'Contexto — Padrão ou caso isolado?',
+    contextStats: (o) => [
+      { value: `${o.pattern.uncoveredPercent}%`, label: 'Carteira descoberta',  highlight: true },
+      { value: o.pattern.over60Days,             label: 'Clientes há +60 dias', highlight: true },
+      { value: `${o.pattern.teamAvg}%`,          label: 'Média do time' },
+    ],
+    insightText: (o) => `${o.representative} está com ${o.pattern.uncoveredPercent}% da carteira sem cobertura — acima do limite aceitável. A média do time é ${o.pattern.teamAvg}%.`,
+  },
+};
 
 // ─── Main page ────────────────────────────────────────────────────────────────
-
-const OCCURRENCE_VIEWS: Record<string, React.ComponentType<{ occurrence: any }>> = {
-  'Rota não executada':      RotaNaoExecutada,
-  'Visita muito curta':      VisitaMuitoCurta,
-  'Baixa atividade':         BaixaAtividade,
-  'Cliente crítico sem visita': ClienteCriticoSemVisita,
-  'Carteira descoberta':     CarteiraDescoberta,
-};
 
 export function OccurrenceDetail() {
   const { id } = useParams();
   const occurrence = getOccurrenceData(id || '1');
-  const OccurrenceView = OCCURRENCE_VIEWS[occurrence.type];
+  // Tipos com estado interativo próprio usam componente; os demais usam OccurrenceBody via config
+  const OccurrenceView = occurrence.type === 'Rota não executada' ? RotaNaoExecutada : null;
+  const config = OCCURRENCE_CONFIG[occurrence.type];
 
   return (
     <div className="p-8 space-y-8">
@@ -722,7 +735,12 @@ export function OccurrenceDetail() {
       </div>
 
       {/* Content — driven by occurrence type */}
-      {OccurrenceView ? <OccurrenceView occurrence={occurrence} /> : null}
+      {OccurrenceView
+        ? <OccurrenceView occurrence={occurrence} />
+        : config
+        ? <OccurrenceBody config={config} occurrence={occurrence} />
+        : null
+      }
     </div>
   );
 }

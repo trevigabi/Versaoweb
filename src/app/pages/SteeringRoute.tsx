@@ -12,51 +12,85 @@ import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popove
 type RuleStatus = 'Ativa' | 'Futura' | 'Expirada';
 type ScopeType = 'region' | 'rep' | 'national';
 type ModeId = 'Recuperação' | 'Crescimento' | 'Rentabilidade' | 'Coleção' | 'Cobertura' | 'Personalizado';
-type BriefingStatus = 'Configurado' | 'Rascunho' | '—';
+type BriefingStatus = 'Configurado' | '—';
 
 interface Strategy {
   id: string;
-  name: string;
+  name: string;             // nome dado pelo gestor
+  templateName: string;     // estratégia base da IA
+  context: string;          // insight que gerou a estratégia
   scopeType: ScopeType;
   scopeLabel: string;
   mode: ModeId;
+  topDimension: string;     // alavanca com maior peso
+  topDimensionPct: number;
+  targeting: string;        // regiões ou marcas alvo
   status: RuleStatus;
   startDate: string;
   endDate: string;
   vigenciaLabel: string;
   briefingStatus: BriefingStatus;
+  briefingPreview: string;
 }
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 
 const INITIAL_STRATEGIES: Strategy[] = [
   {
-    id: '1', name: 'Sul — Recuperação',
-    scopeType: 'region', scopeLabel: 'Região Sul • 2 exceções',
-    mode: 'Recuperação', status: 'Ativa',
+    id: '1',
+    name: 'Reativação Sul — Jun/26',
+    templateName: 'Reativação 90 dias',
+    context: '14 clientes inativos há mais de 60 dias',
+    scopeType: 'region', scopeLabel: 'Região Sul',
+    mode: 'Recuperação',
+    topDimension: 'Retenção de carteira', topDimensionPct: 40,
+    targeting: 'Sul, Curitiba, Porto Alegre',
+    status: 'Ativa',
     startDate: '01/06/2026', endDate: '30/06/2026', vigenciaLabel: '18 dias restantes',
     briefingStatus: 'Configurado',
+    briefingPreview: 'Focar nos clientes em risco de inativação com proposta de reativação e condições facilitadas.',
   },
   {
-    id: '2', name: 'Rep João Silva',
-    scopeType: 'rep', scopeLabel: '1 representante • 3 clientes',
-    mode: 'Crescimento', status: 'Ativa',
+    id: '2',
+    name: 'Crescimento João Silva',
+    templateName: 'Crescimento ticket médio',
+    context: '22 clientes abaixo do ticket potencial estimado',
+    scopeType: 'rep', scopeLabel: 'João Silva — 38 clientes',
+    mode: 'Crescimento',
+    topDimension: 'Performance comercial', topDimensionPct: 35,
+    targeting: 'Todos os clientes do rep',
+    status: 'Ativa',
     startDate: '15/06/2026', endDate: '31/07/2026', vigenciaLabel: 'Começa em 3 dias',
-    briefingStatus: 'Rascunho',
+    briefingStatus: '—',
+    briefingPreview: 'Priorizar clientes com maior potencial de compra. Ampliar ticket médio e mix de produtos.',
   },
   {
-    id: '3', name: 'Nordeste — Coleção Verão',
+    id: '3',
+    name: 'Coleção Verão Nordeste',
+    templateName: 'Moleca — penetração Norte',
+    context: '18 clientes sem apresentação da linha Moleca',
     scopeType: 'region', scopeLabel: 'Região Nordeste',
-    mode: 'Coleção', status: 'Futura',
+    mode: 'Coleção',
+    topDimension: 'Marca', topDimensionPct: 35,
+    targeting: 'Moleca · Vizzano · Beira Rio',
+    status: 'Futura',
     startDate: '01/07/2026', endDate: '31/08/2026', vigenciaLabel: 'Começa em 19 dias',
     briefingStatus: '—',
+    briefingPreview: '',
   },
   {
-    id: '4', name: 'Nacional — Q1 2026',
+    id: '4',
+    name: 'Rentabilidade Nacional Q1',
+    templateName: 'Inadimplência crítica',
+    context: '7 clientes com risco financeiro elevado',
     scopeType: 'national', scopeLabel: 'Todos os representantes',
-    mode: 'Rentabilidade', status: 'Expirada',
+    mode: 'Rentabilidade',
+    topDimension: 'Performance comercial', topDimensionPct: 35,
+    targeting: 'Nacional',
+    status: 'Expirada',
     startDate: '01/01/2026', endDate: '31/03/2026', vigenciaLabel: 'Encerrou há 73 dias',
     briefingStatus: 'Configurado',
+    briefingPreview: 'Priorizar clientes de alta margem. Evitar descontos desnecessários e focar no ticket médio.',
   },
 ];
 
@@ -84,7 +118,7 @@ const STATUS_STYLES: Record<RuleStatus, React.CSSProperties> = {
 
 const BRIEFING_STYLE: Record<BriefingStatus, string> = {
   'Configurado': 'bg-success-light text-success-foreground',
-  'Rascunho':    'bg-warning-light text-warning-foreground',
+  'Rascunho':    'bg-secondary text-muted-foreground',
   '—':           'text-muted-foreground',
 };
 
@@ -153,11 +187,12 @@ export function SteeringRoute() {
 
       {/* Table */}
       <div className="bg-card border border-border rounded-lg overflow-x-auto">
-        <table className="w-full min-w-[700px]">
+        <table className="w-full min-w-[900px]">
           <thead className="bg-secondary border-b border-border">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Estratégia</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Modo</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Foco principal</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Alvo</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Briefing</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Vigência</th>
@@ -167,7 +202,7 @@ export function SteeringRoute() {
           <tbody className="divide-y divide-border">
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-6 py-14 text-center text-sm text-muted-foreground">
+                <td colSpan={7} className="px-6 py-14 text-center text-sm text-muted-foreground">
                   Nenhuma estratégia encontrada.
                 </td>
               </tr>
@@ -182,28 +217,41 @@ export function SteeringRoute() {
                     className="hover:bg-secondary/50 transition-colors cursor-pointer"
                   >
                     {/* Estratégia */}
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 max-w-[220px]">
                       <div className="text-sm font-medium text-foreground">{strategy.name}</div>
-                      <div className="text-xs text-muted-foreground mt-0.5">{strategy.scopeLabel}</div>
+                      <div className="text-[11px] text-muted-foreground mt-0.5">{strategy.templateName}</div>
+                      <div className="text-[11px] mt-1 font-medium" style={{ color: '#BE1520' }}>{strategy.context}</div>
                     </td>
 
-                    {/* Modo */}
+                    {/* Foco principal — modo + alavanca dominante */}
                     <td className="px-6 py-4">
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: modeStyle.bg, color: modeStyle.text }}>
-                        <ModeIcon className="w-3 h-3" strokeWidth={1.5} />
-                        {strategy.mode}
-                      </span>
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium" style={{ backgroundColor: modeStyle.bg, color: modeStyle.text }}>
+                          <ModeIcon className="w-3 h-3" strokeWidth={1.5} />
+                          {strategy.mode}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                        <span className="truncate max-w-[140px]">{strategy.topDimension}</span>
+                        <span className="font-semibold tabular-nums flex-shrink-0" style={{ color: '#BE1520' }}>{strategy.topDimensionPct}%</span>
+                      </div>
                     </td>
 
-                    {/* Status direcionamento */}
+                    {/* Alvo — escopo e marcas/regiões */}
+                    <td className="px-6 py-4">
+                      <div className="text-xs text-foreground">{strategy.scopeLabel}</div>
+                      <div className="text-[11px] text-muted-foreground mt-0.5 max-w-[140px] truncate">{strategy.targeting}</div>
+                    </td>
+
+                    {/* Status */}
                     <td className="px-6 py-4">
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" style={STATUS_STYLES[strategy.status]}>
                         {strategy.status}
                       </span>
                     </td>
 
-                    {/* Briefing status */}
-                    <td className="px-6 py-4">
+                    {/* Briefing */}
+                    <td className="px-6 py-4 max-w-[180px]">
                       {strategy.briefingStatus === '—' ? (
                         <button
                           onClick={(e) => { e.stopPropagation(); navigate(`/direcionamento/${strategy.id}?tab=briefing`); }}
@@ -213,10 +261,15 @@ export function SteeringRoute() {
                           Adicionar briefing
                         </button>
                       ) : (
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${BRIEFING_STYLE[strategy.briefingStatus]}`}>
-                          <AlignLeft className="w-3 h-3" strokeWidth={1.5} />
-                          {strategy.briefingStatus}
-                        </span>
+                        <div>
+                          <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium ${BRIEFING_STYLE[strategy.briefingStatus]}`}>
+                            <AlignLeft className="w-3 h-3" strokeWidth={1.5} />
+                            {strategy.briefingStatus}
+                          </span>
+                          {strategy.briefingPreview && (
+                            <p className="text-[11px] text-muted-foreground mt-1 leading-snug line-clamp-2">{strategy.briefingPreview}</p>
+                          )}
+                        </div>
                       )}
                     </td>
 

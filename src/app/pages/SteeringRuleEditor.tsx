@@ -5,6 +5,7 @@ import {
   Users2, CreditCard, BarChart2, Gem,
   ChevronDown, ChevronUp, ArrowRight, ArrowLeft, Calendar,
   ChevronLeft, ChevronRight, X, Sparkles, Eye, AlignLeft,
+  Search, LayoutList,
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetTitle } from '../components/ui/sheet';
 import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
@@ -28,13 +29,35 @@ interface PrevComparison { metric: string; before: string; after: string; delta:
 // ── Static data ───────────────────────────────────────────────────────────────
 
 const MODES: { id: string; label: string; description: string; icon: LucideIcon }[] = [
-  { id: 'Crescimento',   label: 'Crescimento',   description: 'Aumentar vendas e explorar oportunidades', icon: TrendingUp },
-  { id: 'Recuperação',   label: 'Recuperação',   description: 'Recuperar clientes e reativar carteira',   icon: RefreshCw },
+  { id: 'Crescimento',   label: 'Crescimento',   description: 'Aumentar vendas e explorar oportunidades',  icon: TrendingUp },
+  { id: 'Recuperação',   label: 'Recuperação',   description: 'Recuperar clientes e reativar carteira',    icon: RefreshCw },
   { id: 'Coleção',       label: 'Marca',         description: 'Impulsionar marcas específicas na carteira', icon: Gem },
-  { id: 'Rentabilidade', label: 'Rentabilidade', description: 'Aumentar ticket e melhorar margem',        icon: DollarSign },
-  { id: 'Cobertura',     label: 'Cobertura',     description: 'Aumentar presença territorial',            icon: Map },
-  { id: 'Personalizado', label: '',               description: 'Crie sua própria estratégia do zero',     icon: Settings2 },
+  { id: 'Rentabilidade', label: 'Rentabilidade', description: 'Aumentar ticket e melhorar margem',         icon: DollarSign },
+  { id: 'Cobertura',     label: 'Cobertura',     description: 'Aumentar presença territorial',             icon: Map },
+  { id: 'Personalizado', label: '',               description: 'Crie sua própria estratégia do zero',      icon: Settings2 },
 ];
+
+// ── AI Strategy templates ─────────────────────────────────────────────────────
+
+interface StrategyTemplate {
+  id: string; label: string; description: string; context: string;
+  category: string; baseMode: string; icon: LucideIcon;
+}
+
+const AI_STRATEGIES: StrategyTemplate[] = [
+  { id: 's1',  label: 'Nova coleção verão',       description: 'Apresentar linha SS26 para clientes com perfil compatível',       context: '38 clientes de perfil compatível detectados',    category: 'Marca',         baseMode: 'Coleção',       icon: Gem },
+  { id: 's2',  label: 'Reativação 90 dias',        description: 'Recuperar clientes inativos com histórico positivo',              context: '14 clientes inativos há mais de 60 dias',        category: 'Recuperação',   baseMode: 'Recuperação',   icon: RefreshCw },
+  { id: 's3',  label: 'Alerta de churn',           description: 'Agir antes da janela de inativação para clientes em risco',       context: 'Sinal de perda de frequência em 9 clientes',     category: 'Recuperação',   baseMode: 'Recuperação',   icon: TrendingUp },
+  { id: 's4',  label: 'Expansão regional Sul',     description: 'Ampliar cobertura em regiões com baixa presença detectada',       context: 'Baixa cobertura detectada na região Sul',        category: 'Cobertura',     baseMode: 'Cobertura',     icon: Map },
+  { id: 's5',  label: 'Crescimento ticket médio',  description: 'Focar em clientes com maior potencial de volume e margem',        context: '22 clientes abaixo do ticket potencial estimado',category: 'Crescimento',   baseMode: 'Crescimento',   icon: TrendingUp },
+  { id: 's6',  label: 'Moleca — penetração Norte', description: 'Ampliar presença da marca Moleca na Região Norte',               context: '18 clientes sem apresentação da linha Moleca',   category: 'Marca',         baseMode: 'Coleção',       icon: Gem },
+  { id: 's7',  label: 'Inadimplência crítica',     description: 'Gestão de clientes com risco de crédito e pagamentos atrasados',  context: '7 clientes com risco financeiro elevado',        category: 'Rentabilidade', baseMode: 'Rentabilidade', icon: DollarSign },
+  { id: 's8',  label: 'Cobertura Nordeste',        description: 'Visitar clientes não atendidos no ciclo anterior',                context: '31% da carteira Nordeste sem visita no mês',     category: 'Cobertura',     baseMode: 'Cobertura',     icon: Map },
+  { id: 's9',  label: 'Mix Beira Rio + Vizzano',   description: 'Aumentar cross-sell entre as linhas Beira Rio e Vizzano',         context: '27 clientes com gap de cross-sell identificado', category: 'Marca',         baseMode: 'Coleção',       icon: Gem },
+  { id: 's10', label: 'Recuperação pós-coleção',   description: 'Reativar clientes que não compraram a última coleção lançada',    context: '11 clientes sem pedido na coleção atual',        category: 'Recuperação',   baseMode: 'Recuperação',   icon: RefreshCw },
+];
+
+const STRATEGY_CATEGORIES = ['Todas', 'Crescimento', 'Recuperação', 'Marca', 'Rentabilidade', 'Cobertura'];
 
 const MODE_STYLE: Record<string, { bg: string; text: string }> = {
   Crescimento:   { bg: '#F5F5F4', text: '#44403C' },
@@ -266,6 +289,10 @@ const [isActive, setIsActive]     = useState(true);
   // Tab state
   const [activeTab, setActiveTab]   = useState<EditorTab>('direcionamento');
   const [editingCardId, setEditingCardId] = useState<string | null>(null);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>('s1');
+  const [strategySearch, setStrategySearch] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('Todas');
+  const [showAllStrategies, setShowAllStrategies] = useState(false);
   // Nomes editáveis — pré-populados pelo sistema com base no período; customizáveis pela organização
   const [modeLabels, setModeLabels] = useState<Record<string, string>>(() =>
     Object.fromEntries(MODES.map(m => [m.id, m.label]))
@@ -299,6 +326,21 @@ const [isActive, setIsActive]     = useState(true);
     setWeights({ ...MODE_WEIGHTS[modeId] ?? DEFAULT_WEIGHTS });
     setBriefingText(BRIEFING_DEFAULTS[modeId] ?? '');
   };
+
+  const handleTemplateSelect = (t: StrategyTemplate) => {
+    setSelectedTemplateId(t.id);
+    setModeLabels(prev => ({ ...prev, [t.baseMode]: t.label }));
+    handleModeSelect(t.baseMode);
+    setShowAllStrategies(false);
+  };
+
+  const filteredTemplates = AI_STRATEGIES.filter(t => {
+    const matchCat = categoryFilter === 'Todas' || t.category === categoryFilter;
+    const matchSearch = !strategySearch || t.label.toLowerCase().includes(strategySearch.toLowerCase()) || t.description.toLowerCase().includes(strategySearch.toLowerCase());
+    return matchCat && matchSearch;
+  });
+  const visibleTemplates = filteredTemplates.slice(0, 4);
+
   const handleSlider = (dimId: string, newPct: number) => {
     setWeights((prev) => redistributePcts(prev, dimId, newPct));
     setMode('Personalizado');
@@ -390,118 +432,182 @@ const [isActive, setIsActive]     = useState(true);
         </div>
       </div>
 
-      {/* ── 1. Mode cards ──────────────────────────────────────────────────── */}
+      {/* ── 1. Estratégia base ─────────────────────────────────────────────── */}
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-foreground">1. Qual o foco principal desta estratégia?</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
-          {MODES.map((m) => {
-            const Icon = m.icon;
-            const active = mode === m.id;
-            const isEditingLabel = editingCardId === m.id;
-            const label = modeLabels[m.id] ?? m.label;
-            const isCustom = m.id === 'Personalizado';
 
-            // ── Card "+" para estratégia personalizada ──
-            if (isCustom) {
+        {/* Search + Ver todas */}
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" strokeWidth={1.5} />
+            <input
+              type="text"
+              value={strategySearch}
+              onChange={e => setStrategySearch(e.target.value)}
+              placeholder="Buscar estratégia sugerida..."
+              className="w-full pl-9 pr-3 py-2 text-xs border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+          </div>
+          <button
+            onClick={() => setShowAllStrategies(true)}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium border border-border rounded-lg hover:bg-secondary transition-colors text-foreground flex-shrink-0"
+          >
+            <LayoutList className="w-3.5 h-3.5" strokeWidth={1.5} />
+            Ver todas
+          </button>
+        </div>
+
+        {/* Category filters */}
+        <div className="flex flex-wrap gap-1.5">
+          {STRATEGY_CATEGORIES.map(cat => (
+            <button key={cat} onClick={() => setCategoryFilter(cat)}
+              className="px-2.5 py-1 text-[11px] font-medium rounded-full border transition-all"
+              style={categoryFilter === cat
+                ? { backgroundColor: '#BE1520', color: '#fff', borderColor: '#BE1520' }
+                : { backgroundColor: 'var(--card)', color: 'var(--muted-foreground)', borderColor: 'var(--border)' }
+              }
+            >{cat}</button>
+          ))}
+        </div>
+
+        {/* AI suggestions header */}
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex flex-col gap-0.5 min-w-0">
+            <div className="flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+              <Sparkles className="w-3 h-3 flex-shrink-0" strokeWidth={1.5} />
+              Sugeridas pela IA para o contexto atual
+            </div>
+            <span className="text-[11px] text-muted-foreground">Exibindo {visibleTemplates.length} de {filteredTemplates.length} estratégias detectadas</span>
+          </div>
+          <button
+            onClick={() => { handleModeSelect('Personalizado'); setSelectedTemplateId(null); setEditingCardId('Personalizado'); }}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-dashed border-border rounded-lg hover:border-primary hover:text-primary transition-colors text-muted-foreground flex-shrink-0"
+          >
+            <span className="text-sm leading-none">+</span>
+            Criar do zero
+          </button>
+        </div>
+
+        {/* 4 cards */}
+        {visibleTemplates.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+            {visibleTemplates.map(t => {
+              const Icon = t.icon;
+              const selected = selectedTemplateId === t.id;
+              const isEditingLabel = editingCardId === t.id;
+              const displayLabel = selected ? (modeLabels[t.baseMode] ?? t.label) : t.label;
               return (
-                <div key={m.id} className="relative group">
+                <div key={t.id} className="relative group">
                   <div
-                    onClick={() => { handleModeSelect(m.id); setEditingCardId('Personalizado'); }}
-                    className="w-full flex flex-col gap-2 p-3 rounded-xl border text-left transition-all cursor-pointer"
-                    style={active
-                      ? { borderColor: '#BE1520', backgroundColor: '#FDF2F2' }
-                      : { borderColor: 'var(--border)', borderStyle: 'dashed', backgroundColor: 'var(--card)' }
-                    }
+                    onClick={() => handleTemplateSelect(t)}
+                    className="w-full flex flex-col gap-2 p-3.5 rounded-xl border text-left transition-all cursor-pointer h-full"
+                    style={selected ? { borderColor: '#BE1520', backgroundColor: '#FDF2F2' } : { borderColor: 'var(--border)', backgroundColor: 'var(--card)' }}
                   >
-                    <div
-                      className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0"
-                      style={{ backgroundColor: active ? '#BE1520' : 'var(--secondary)' }}
-                    >
-                      {active
-                        ? <Icon className="w-3.5 h-3.5" strokeWidth={1.5} style={{ color: '#fff' }} />
-                        : <span className="text-base font-light leading-none" style={{ color: 'var(--muted-foreground)' }}>+</span>
-                      }
+                    <div className="flex items-start justify-between">
+                      <div className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0" style={{ backgroundColor: selected ? '#BE1520' : 'var(--secondary)' }}>
+                        <Icon className="w-3.5 h-3.5" strokeWidth={1.5} style={{ color: selected ? '#fff' : 'var(--muted-foreground)' }} />
+                      </div>
+                      {selected && <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0 mt-1" />}
                     </div>
-                    {active ? (
-                      <input
-                        type="text"
-                        value={label}
-                        autoFocus={isEditingLabel}
-                        placeholder="Nome da estratégia..."
-                        onChange={e => setModeLabels(prev => ({ ...prev, Personalizado: e.target.value }))}
+                    {selected && isEditingLabel ? (
+                      <input type="text" value={displayLabel} autoFocus
+                        onChange={e => setModeLabels(prev => ({ ...prev, [t.baseMode]: e.target.value }))}
                         onBlur={() => setEditingCardId(null)}
                         onKeyDown={e => e.key === 'Enter' && setEditingCardId(null)}
                         onClick={e => e.stopPropagation()}
-                        className="w-full text-[11px] font-semibold bg-transparent border-0 border-b focus:outline-none pb-0.5 leading-snug"
+                        className="w-full text-[11px] font-semibold bg-transparent border-0 border-b focus:outline-none pb-0.5"
                         style={{ borderColor: '#BE152080', color: '#930F16' }}
                       />
                     ) : (
-                      <span className="text-[11px] font-medium leading-snug text-muted-foreground">
-                        Nova estratégia
-                      </span>
+                      <div className="flex items-start justify-between gap-0.5 min-w-0">
+                        <span className="text-[11px] font-semibold leading-snug break-words min-w-0" style={{ color: selected ? '#930F16' : 'var(--foreground)' }}>
+                          {displayLabel}
+                        </span>
+                        {selected && (
+                          <button onClick={e => { e.stopPropagation(); setEditingCardId(t.id); }}
+                            className="opacity-0 group-hover:opacity-60 hover:!opacity-100 flex-shrink-0 mt-0.5 transition-opacity" title="Renomear">
+                            <svg className="w-2.5 h-2.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: '#BE1520' }}>
+                              <path d="M8.5 1.5l2 2L4 10H2V8L8.5 1.5z" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
                     )}
+                    <p className="text-[10px] text-muted-foreground leading-snug">{t.context}</p>
                   </div>
-                  {!active && (
-                    <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
-                      <div className="bg-foreground text-background text-[11px] leading-relaxed rounded-lg px-3 py-2 shadow-lg max-w-[180px] text-center" style={{ whiteSpace: 'normal' }}>{m.description}</div>
-                      <div className="w-2 h-2 bg-foreground rotate-45 mx-auto -mt-1" />
-                    </div>
-                  )}
                 </div>
               );
-            }
+            })}
 
-            // ── Cards normais ──
-            return (
-              <div key={m.id} className="relative group">
-                <div
-                  onClick={() => { handleModeSelect(m.id); if (!isEditingLabel) setEditingCardId(null); }}
-                  className="w-full flex flex-col gap-2 p-3 rounded-xl border text-left transition-all hover:border-border cursor-pointer"
-                  style={active ? { borderColor: '#BE1520', backgroundColor: '#FDF2F2' } : { borderColor: 'var(--border)', backgroundColor: 'var(--card)' }}
-                >
-                  <div className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0" style={{ backgroundColor: active ? '#BE1520' : 'var(--secondary)' }}>
-                    <Icon className="w-3.5 h-3.5" strokeWidth={1.5} style={{ color: active ? '#fff' : 'var(--muted-foreground)' }} />
-                  </div>
-                  {isEditingLabel ? (
-                    <input
-                      type="text"
-                      value={label}
-                      autoFocus
-                      onChange={e => setModeLabels(prev => ({ ...prev, [m.id]: e.target.value }))}
-                      onBlur={() => setEditingCardId(null)}
-                      onKeyDown={e => e.key === 'Enter' && setEditingCardId(null)}
-                      onClick={e => e.stopPropagation()}
-                      className="w-full text-[11px] font-semibold bg-transparent border-0 border-b focus:outline-none pb-0.5 leading-snug"
-                      style={{ borderColor: active ? '#BE152080' : 'var(--border)', color: active ? '#930F16' : 'var(--foreground)' }}
-                    />
-                  ) : (
-                    <div className="flex items-start justify-between gap-0.5 min-w-0">
-                      <span className="text-[11px] font-semibold leading-snug break-words min-w-0" style={{ color: active ? '#930F16' : 'var(--foreground)' }}>
-                        {label}
-                      </span>
-                      <button
-                        onClick={e => { e.stopPropagation(); handleModeSelect(m.id); setEditingCardId(m.id); }}
-                        className="opacity-0 group-hover:opacity-60 hover:!opacity-100 flex-shrink-0 mt-0.5 transition-opacity"
-                        title="Renomear"
-                      >
-                        <svg className="w-2.5 h-2.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: active ? '#BE1520' : 'var(--muted-foreground)' }}>
-                          <path d="M8.5 1.5l2 2L4 10H2V8L8.5 1.5z" />
-                        </svg>
-                      </button>
-                    </div>
-                  )}
-                </div>
-                {!isEditingLabel && (
-                  <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
-                    <div className="bg-foreground text-background text-[11px] leading-relaxed rounded-lg px-3 py-2 shadow-lg max-w-[180px] text-center" style={{ whiteSpace: 'normal' }}>{m.description}</div>
-                    <div className="w-2 h-2 bg-foreground rotate-45 mx-auto -mt-1" />
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+          </div>
+        ) : (
+          <div className="py-8 text-center text-xs text-muted-foreground border border-dashed border-border rounded-xl">
+            Nenhuma estratégia encontrada para este filtro.
+          </div>
+        )}
       </section>
+
+      {/* ── Drawer: Ver todas ──────────────────────────────────────────────── */}
+      <Sheet open={showAllStrategies} onOpenChange={setShowAllStrategies}>
+        <SheetContent side="right" className="w-full sm:max-w-[480px] overflow-y-auto p-0">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-border sticky top-0 bg-card z-10">
+            <div>
+              <SheetTitle className="text-sm font-semibold text-foreground">Todas as estratégias</SheetTitle>
+              <p className="text-xs text-muted-foreground mt-0.5">{AI_STRATEGIES.length} estratégias disponíveis</p>
+            </div>
+            <button onClick={() => setShowAllStrategies(false)} className="w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover:bg-secondary transition-colors">
+              <X className="w-4 h-4" strokeWidth={1.5} />
+            </button>
+          </div>
+          <div className="px-6 py-4 space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" strokeWidth={1.5} />
+              <input type="text" value={strategySearch} onChange={e => setStrategySearch(e.target.value)}
+                placeholder="Buscar estratégia..."
+                className="w-full pl-9 pr-3 py-2 text-xs border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {STRATEGY_CATEGORIES.map(cat => (
+                <button key={cat} onClick={() => setCategoryFilter(cat)}
+                  className="px-2.5 py-1 text-[11px] font-medium rounded-full border transition-all"
+                  style={categoryFilter === cat
+                    ? { backgroundColor: '#BE1520', color: '#fff', borderColor: '#BE1520' }
+                    : { backgroundColor: 'var(--card)', color: 'var(--muted-foreground)', borderColor: 'var(--border)' }
+                  }
+                >{cat}</button>
+              ))}
+            </div>
+            <div className="divide-y divide-border">
+              {filteredTemplates.map(t => {
+                const Icon = t.icon;
+                const selected = selectedTemplateId === t.id;
+                return (
+                  <button key={t.id} onClick={() => handleTemplateSelect(t)}
+                    className="w-full flex items-start gap-3 py-3.5 text-left hover:bg-secondary/50 -mx-1 px-1 rounded-lg transition-colors"
+                  >
+                    <div className="w-8 h-8 rounded-md flex items-center justify-center flex-shrink-0 mt-0.5" style={{ backgroundColor: selected ? '#BE1520' : 'var(--secondary)' }}>
+                      <Icon className="w-4 h-4" strokeWidth={1.5} style={{ color: selected ? '#fff' : 'var(--muted-foreground)' }} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold text-foreground">{t.label}</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium bg-secondary text-muted-foreground">{t.category}</span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">{t.description}</p>
+                      <p className="text-[11px] mt-1 font-medium" style={{ color: '#BE1520' }}>{t.context}</p>
+                    </div>
+                    {selected && <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0 mt-2" />}
+                  </button>
+                );
+              })}
+              {filteredTemplates.length === 0 && (
+                <p className="text-xs text-muted-foreground text-center py-8">Nenhuma estratégia encontrada.</p>
+              )}
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
 
       {/* ── 2. Tabs ────────────────────────────────────────────────────────── */}
       <div className="border-b border-border">

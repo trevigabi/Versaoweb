@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { PageHeader } from '../components/PageHeader';
-import { Users, Bell, Smartphone, Trophy, Plus, Zap } from 'lucide-react';
+import { Users, Bell, Smartphone, Trophy, Plus, Zap, Sparkles, Search, CornerDownLeft } from 'lucide-react';
 
 const users = [
   { name: 'Ana Costa',      email: 'ana.costa@paceroute.com',      role: 'Admin',      region: 'Nacional',      status: 'Ativo' },
@@ -29,10 +29,23 @@ const notifications = [
   { trigger: 'Cliente premium sem visita há 15 dias', action: 'Alerta crítico',         status: 'Ativo' },
 ];
 
+const AI_NOTIFICATION_SUGGESTIONS = [
+  { id: 'n1', name: 'Recuperação de inativos',        description: 'Foco em clientes sem compra nos últimos 90 dias',          action: 'Alerta de recuperação ao representante', match: 98, icon: 'refresh' },
+  { id: 'n2', name: 'Alerta de churn',                description: 'Clientes com sinal de perda de frequência de pedidos',      action: 'Priorização na rota + aviso ao gestor',   match: 74, icon: 'warning' },
+  { id: 'n3', name: 'Retenção de carteira',           description: 'Proteger clientes ativos com menor margem de queda',        action: 'Inserir como prioridade máxima na rota',  match: 61, icon: 'users' },
+  { id: 'n4', name: 'Visita muito curta detectada',   description: 'Duração de visita abaixo de 5 minutos sem justificativa',   action: 'Sinalizar para revisão de qualidade',     match: 55, icon: 'clock' },
+  { id: 'n5', name: 'Cobertura territorial baixa',    description: 'Carteira com cobertura abaixo de 60% no ciclo atual',       action: 'Notificação ao representante e gestor',   match: 48, icon: 'map' },
+  { id: 'n6', name: 'Marca sem pedido recente',       description: 'Linha de produto sem pedido há mais de 60 dias na carteira', action: 'Incluir no briefing da próxima visita',  match: 42, icon: 'tag' },
+  { id: 'n7', name: 'Rota não executada',             description: 'Desvio de rota detectado sem justificativa registrada',      action: 'Solicitar justificativa via app',         match: 38, icon: 'warning' },
+  { id: 'n8', name: 'Score de saúde crítico',         description: 'Cliente com indicadores combinados de risco elevado',        action: 'Alerta crítico ao gestor imediato',       match: 35, icon: 'users' },
+];
+
 type Tab = 'usuarios' | 'notificacoes' | 'uso' | 'gamificacao';
 
 export function Administration() {
   const [activeTab, setActiveTab] = useState<Tab>('usuarios');
+  const [notifSearch, setNotifSearch] = useState('');
+  const [addedSuggestions, setAddedSuggestions] = useState<string[]>([]);
 
   const tabs: { id: Tab; label: string; icon: React.ComponentType<{ className?: string; strokeWidth?: number }>; soon?: boolean }[] = [
     { id: 'usuarios',     label: 'Usuários',     icon: Users },
@@ -128,35 +141,110 @@ export function Administration() {
 
       {/* Tab: Notificações */}
       {activeTab === 'notificacoes' && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-foreground">Notificações</h3>
-            <button className="px-4 py-2 border border-border rounded-lg text-sm font-medium hover:bg-secondary transition-colors flex items-center gap-2">
-              <Plus className="w-4 h-4" strokeWidth={1.5} />
-              Nova Notificação
-            </button>
-          </div>
-          <div className="bg-card border border-border rounded-lg divide-y divide-border">
-            {notifications.map((item, i) => (
-              <div key={i} className="p-5 hover:bg-secondary/30 transition-colors">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-1.5">
-                      <Zap className="w-4 h-4 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
-                      <span className="font-medium text-foreground">{item.trigger}</span>
-                    </div>
-                    <div className="text-sm text-muted-foreground ml-7">Ação: {item.action}</div>
+        <div className="space-y-5">
+
+          {/* Search — IA ranqueia sugestões */}
+          <div className="bg-card border border-border rounded-xl overflow-hidden">
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
+              <Search className="w-4 h-4 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
+              <input
+                type="text"
+                value={notifSearch}
+                onChange={e => setNotifSearch(e.target.value)}
+                placeholder="Descreva o que deseja notificar... ex: recuperar clientes inativos"
+                className="flex-1 text-sm bg-transparent border-0 focus:outline-none text-foreground placeholder:text-muted-foreground"
+              />
+              <div className="flex items-center gap-1 px-2 py-1 rounded border border-border text-[11px] text-muted-foreground flex-shrink-0">
+                <CornerDownLeft className="w-3 h-3" strokeWidth={1.5} />
+              </div>
+            </div>
+
+            {/* Results */}
+            {(() => {
+              const results = AI_NOTIFICATION_SUGGESTIONS
+                .filter(s => !addedSuggestions.includes(s.id))
+                .filter(s => !notifSearch || s.name.toLowerCase().includes(notifSearch.toLowerCase()) || s.description.toLowerCase().includes(notifSearch.toLowerCase()))
+                .sort((a, b) => b.match - a.match);
+
+              if (results.length === 0 && notifSearch) {
+                return (
+                  <div className="px-4 py-6 text-center text-xs text-muted-foreground">
+                    Nenhuma sugestão encontrada. Tente outros termos ou crie uma notificação manual.
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-success-light text-success-foreground">
-                      {item.status}
-                    </span>
-                    <button className="text-sm text-primary hover:text-primary-hover font-medium">Editar</button>
+                );
+              }
+
+              return (
+                <>
+                  <div className="divide-y divide-border">
+                    {(notifSearch ? results : results.slice(0, 4)).map(s => {
+                      const matchColor = s.match >= 80 ? '#059669' : s.match >= 60 ? '#B45309' : 'var(--muted-foreground)';
+                      const matchBg = s.match >= 80 ? '#D1FAE5' : s.match >= 60 ? '#FEF3C7' : 'var(--secondary)';
+                      return (
+                        <div key={s.id} className="flex items-center gap-4 px-4 py-3.5 hover:bg-secondary/40 transition-colors group">
+                          <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
+                            <Zap className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-medium text-foreground">{s.name}</div>
+                            <div className="text-xs text-muted-foreground mt-0.5">{s.description}</div>
+                          </div>
+                          <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0" style={{ backgroundColor: matchBg, color: matchColor }}>
+                            {s.match}% match
+                          </span>
+                          <button
+                            onClick={() => setAddedSuggestions(prev => [...prev, s.id])}
+                            className="opacity-0 group-hover:opacity-100 flex items-center gap-1 px-2.5 py-1 text-xs font-medium border border-border rounded-lg hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all flex-shrink-0"
+                          >
+                            <Plus className="w-3 h-3" strokeWidth={2} />
+                            Usar
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="px-4 py-2.5 border-t border-border bg-secondary/30">
+                    <p className="text-[11px] text-muted-foreground">
+                      A IA ranqueou <span className="font-semibold text-foreground">{AI_NOTIFICATION_SUGGESTIONS.length} notificações</span> pela relevância para o contexto atual da carteira
+                    </p>
+                  </div>
+                </>
+              );
+            })()}
+          </div>
+
+          {/* Active notifications */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-foreground">Notificações ativas</h3>
+              <button className="px-3 py-2 border border-border rounded-lg text-sm font-medium hover:bg-secondary transition-colors flex items-center gap-2">
+                <Plus className="w-4 h-4" strokeWidth={1.5} />
+                Nova
+              </button>
+            </div>
+            <div className="bg-card border border-border rounded-lg divide-y divide-border">
+              {notifications.map((item, i) => (
+                <div key={i} className="p-5 hover:bg-secondary/30 transition-colors">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-1.5">
+                        <Zap className="w-4 h-4 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
+                        <span className="font-medium text-foreground">{item.trigger}</span>
+                      </div>
+                      <div className="text-sm text-muted-foreground ml-7">Ação: {item.action}</div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-success-light text-success-foreground">
+                        {item.status}
+                      </span>
+                      <button className="text-sm text-primary hover:text-primary-hover font-medium">Editar</button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
+
         </div>
       )}
 
