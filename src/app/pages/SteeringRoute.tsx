@@ -68,17 +68,17 @@ const MODE_ICONS: Record<ModeId, React.ComponentType<{ className?: string; strok
 };
 
 const MODE_STYLE: Record<ModeId, { bg: string; text: string }> = {
-  Crescimento:   { bg: '#E6F1FB', text: '#185FA5' },
-  Recuperação:   { bg: '#EAF3DE', text: '#3B6D11' },
-  Rentabilidade: { bg: '#FAEEDA', text: '#854F0B' },
-  Coleção:       { bg: '#F3EEFF', text: '#7C3AED' },
-  Cobertura:     { bg: '#E0F7FA', text: '#0E7490' },
-  Personalizado: { bg: '#F3F4F6', text: '#6B7280' },
+  Crescimento:   { bg: '#F5F5F4', text: '#44403C' },
+  Recuperação:   { bg: '#F5F5F4', text: '#44403C' },
+  Rentabilidade: { bg: '#F5F5F4', text: '#44403C' },
+  Coleção:       { bg: '#F5F5F4', text: '#44403C' },
+  Cobertura:     { bg: '#F5F5F4', text: '#44403C' },
+  Personalizado: { bg: '#F5F5F4', text: '#78716C' },
 };
 
 const STATUS_STYLES: Record<RuleStatus, React.CSSProperties> = {
-  Ativa:    { backgroundColor: '#EAF3DE', color: '#3B6D11' },
-  Futura:   { backgroundColor: '#E6F1FB', color: '#185FA5' },
+  Ativa:    { backgroundColor: '#FDF2F2', color: '#BE1520' },
+  Futura:   { backgroundColor: '#F5F5F4', color: '#44403C' },
   Expirada: { border: '1px solid var(--border)', color: 'var(--muted-foreground)' },
 };
 
