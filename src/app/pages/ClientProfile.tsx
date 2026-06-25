@@ -224,32 +224,32 @@ export function ClientProfile() {
       </div>
 
       {/* Last 5 Interactions */}
-      <div className="bg-card border border-border rounded-lg p-6">
-        <h3 className="font-semibold text-foreground mb-6">Últimas 5 Interações</h3>
-        <div className="space-y-4">
-          {interactions.map((interaction, index) => (
-            <div
-              key={index}
-              className="flex gap-4 pb-4 border-b border-border last:border-0"
-            >
-              <div className="flex-shrink-0">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Calendar className="w-5 h-5 text-primary" strokeWidth={1.5} />
-                </div>
-              </div>
-              <div className="flex-1">
-                <div className="flex items-start justify-between mb-1">
-                  <div className="font-medium text-foreground">{interaction.type}</div>
-                  <div className="text-sm text-muted-foreground">{interaction.date}</div>
-                </div>
-                <div className="text-sm text-muted-foreground mb-2">
-                  {interaction.representative} • {interaction.duration}
-                </div>
-                <div className="text-sm text-foreground">{interaction.notes}</div>
-              </div>
-            </div>
-          ))}
+      <div className="bg-card border border-border rounded-lg overflow-hidden">
+        <div className="px-6 py-4 border-b border-border">
+          <h3 className="font-semibold text-foreground">Últimas 5 Interações</h3>
         </div>
+        <table className="w-full">
+          <thead className="bg-secondary border-b border-border">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Data</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Tipo</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Representante</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Duração</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Observações</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {interactions.map((interaction, index) => (
+              <tr key={index} className="hover:bg-secondary/50 transition-colors">
+                <td className="px-6 py-3 text-sm text-muted-foreground whitespace-nowrap">{interaction.date}</td>
+                <td className="px-6 py-3 text-sm font-medium text-foreground whitespace-nowrap">{interaction.type}</td>
+                <td className="px-6 py-3 text-sm text-foreground whitespace-nowrap">{interaction.representative}</td>
+                <td className="px-6 py-3 text-sm text-muted-foreground whitespace-nowrap">{interaction.duration}</td>
+                <td className="px-6 py-3 text-sm text-foreground">{interaction.notes}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
