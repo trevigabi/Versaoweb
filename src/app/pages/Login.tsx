@@ -8,8 +8,8 @@ import { Button } from '../components/ui/button';
 
 export function Login() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('admin@beirario.com.br');
+  const [password, setPassword] = useState('senha123');
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
