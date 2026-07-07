@@ -102,9 +102,6 @@ export function Layout() {
               <div className="text-xs text-muted-foreground">Gestor</div>
             </div>
           </div>
-          <p className="mt-2 px-3 text-[10px] text-muted-foreground/70 text-center">
-            Pace Route desenvolvido por Pace Tech
-          </p>
         </div>
       </aside>
 
