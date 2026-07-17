@@ -9,6 +9,7 @@ import {
   User,
   FileText,
   Compass,
+  MessageSquareOff,
 } from 'lucide-react';
 
 const navigationGroups = [
@@ -26,6 +27,7 @@ const navigationGroups = [
       { name: 'Configurações', href: '/administration', icon: Users },
       { name: 'Formulários', href: '/form-builder', icon: FileText },
       { name: 'Direcionamento', href: '/steering', icon: Compass },
+      { name: 'Motivos de Não Visita', href: '/visit-reasons', icon: MessageSquareOff },
     ],
   },
 ];

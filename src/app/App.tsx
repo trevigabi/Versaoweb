@@ -17,6 +17,7 @@ import { CompetitiveIntelligence } from './pages/CompetitiveIntelligence';
 import { Administration } from './pages/Administration';
 import { FormBuilder } from './pages/FormBuilder';
 import { FormEditor } from './pages/FormEditor';
+import { VisitReasons } from './pages/VisitReasons';
 import { Campaigns } from './pages/Campaigns';
 import { Settings } from './pages/Settings';
 import { CommercialSteering } from './pages/CommercialSteering';
@@ -50,6 +51,7 @@ export default function App() {
           <Route path="form-builder" element={<FormBuilder />} />
           <Route path="form-builder/novo" element={<FormEditor />} />
           <Route path="form-builder/:id" element={<FormEditor />} />
+          <Route path="visit-reasons" element={<VisitReasons />} />
           <Route path="campaigns" element={<Campaigns />} />
           <Route path="settings" element={<Settings />} />
           <Route path="steering" element={<Navigate to="/direcionamento" replace />} />
