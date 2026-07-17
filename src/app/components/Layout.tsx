@@ -4,14 +4,11 @@ import {
   LayoutDashboard,
   Users,
   Building2,
-  ClipboardCheck,
   Search,
   Bell,
   User,
-  Target,
   FileText,
   Compass,
-  Flag,
 } from 'lucide-react';
 
 const navigationGroups = [
@@ -19,16 +16,8 @@ const navigationGroups = [
     label: 'INDICADORES',
     items: [
       { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-      { name: 'Cobertura', href: '/coverage', icon: Target },
-      { name: 'Metas', href: '/goals', icon: Flag },
-    ],
-  },
-  {
-    label: 'OPERAÇÃO',
-    items: [
       { name: 'Representantes', href: '/representatives', icon: Users },
       { name: 'Clientes', href: '/clients', icon: Building2 },
-      { name: 'Radar de Atenção', href: '/field-audit', icon: ClipboardCheck },
     ],
   },
   {
